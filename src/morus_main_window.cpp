@@ -20,5 +20,11 @@ morus_main_window::~morus_main_window()
 
 void morus_main_window::on_start_local_node_button_clicked()
 {
-	new_node_handler->create_new_node("can0", 1);
+	
+	int res_node = new_node_handler->create_new_node("can0", 1);
+	
+	if (res_node == 0) {
+		generateDialog("Node started");
+	} 
 }
+

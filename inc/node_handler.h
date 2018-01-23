@@ -58,6 +58,6 @@ Node& getCanNode(std::string iface_name);
 /**
  * Generate an error message dialog.
  */
-void generateErrorDialog(std::string message);
+void generateDialog(std::string message);
 
 #endif //NODE_HANDLER_H

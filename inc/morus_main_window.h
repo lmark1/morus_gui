@@ -4,6 +4,11 @@
 #include <QMainWindow>
 #include "node_handler.h"
 
+/**
+ * Default can interface name. 
+ */
+extern const QString DEFAULT_IFACE_NAME;
+
 namespace Ui {
 class morus_main_window;
 }
