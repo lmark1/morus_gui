@@ -1,7 +1,10 @@
+<<<<<<< HEAD
 /build
 /dsdlc_generated
 /libuavcan/build
 
+=======
+>>>>>>> bc3a07f0ea0972972fe654f8b3f2a82ab0ad5c10
 # Prerequisites
 *.d
 
