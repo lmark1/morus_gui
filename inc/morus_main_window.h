@@ -5,9 +5,14 @@
 #include "node_handler.h"
 
 /**
- * Default can interface name. 
+ * Default CAN interface name. Set as initial value in GUI.
  */
 extern const QString DEFAULT_IFACE_NAME;
+
+/**
+ * Default CAN node ID. Set as initial value in GUI.
+ */
+extern const int DEFAULT_NODE_ID;
 
 namespace Ui {
 class morus_main_window;

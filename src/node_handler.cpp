@@ -21,6 +21,7 @@ int node_handler::create_new_node(std::string iface_name, int node_id) {
      */
 	cout << "Starting node initialization with iface_name: " <<
         iface_name << " and node_id: " << node_id << "\n"; 
+
     auto& node = getCanNode(iface_name);
 	node.setNodeID(node_id);
 	node.setName(DEFAULT_NODE_NAME);
@@ -49,7 +50,6 @@ int node_handler::create_new_node(std::string iface_name, int node_id) {
 
 Node& getCanNode(std::string iface_name)
 {
-    
     static Node node(getCanDriver(iface_name), getSystemClock());
     return node;
 }
