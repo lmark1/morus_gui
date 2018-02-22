@@ -1,8 +1,11 @@
 #ifndef MORUS_MAIN_WINDOW_H
 #define MORUS_MAIN_WINDOW_H
 
-#include <QMainWindow>
 #include "node_handler.h"
+
+#include <QMainWindow>
+
+#include <string>
 
 /**
  * Default CAN interface name. Set as initial value in GUI.
@@ -31,6 +34,7 @@ private slots:
 	void on_start_local_node_button_clicked();
 
 private:
+
     Ui::morus_main_window *ui;
 
     node_handler *new_node_handler;

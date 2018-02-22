@@ -1,3 +1,6 @@
+#ifndef PLATFORM_LINUX_H
+#define PLATFORM_LINUX_H
+
 #include <uavcan/uavcan.hpp>
 
 /*
@@ -11,3 +14,5 @@ uavcan::ISystemClock& getSystemClock();
  *  for Linux platrofm.
  */
 uavcan::ICanDriver& getCanDriver(std::string iface_name);
+
+#endif //PLATFORM_LINUX_H

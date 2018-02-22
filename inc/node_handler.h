@@ -7,6 +7,7 @@
 #include <QString>
 
 #include <iostream>
+
 using namespace std;
 
 /**
@@ -22,28 +23,47 @@ typedef uavcan::Node<NodeMemoryPoolSize> Node;
 extern const uavcan::NodeStatusProvider::NodeName DEFAULT_NODE_NAME; 
 
 /*
- * Class used for handling nodes. 
+ * This class is used for handling CAN nodes.
  */
 class node_handler {
-	
-	public:
+    
+    public:
 
-		/**
-		 * Initialize Node handler.
-		 */
-		node_handler();
+        /**
+         *  Initialize Node handler.
+         */
+        node_handler();
 
-		/**
-		 * Shuts down the node handler, shuts down all active nodes.
-		 */
-		~node_handler();
+        /**
+         *  Shuts down the node handler, shuts down all active nodes.
+         */
+        ~node_handler();
 
-		/** 
-		 * Creates and starts a new node with given node name and ID.
-		 * 
-		 * returns - 0 if node is successfully created, 1 otherwise.
-		 */
-		int create_new_node(std::string node_name, int node_id);
+        /** 
+         *  Creates and initializes a new node with given node name and ID.
+         * 
+         *  iface_name - CAN interface name
+         *  node_id    - new node ID
+         *
+         *  returns - 0 if node is successfully created 
+         *            1 otherwise.
+         */
+        int create_new_node(std::string iface_name, int node_id);
+
+        /**
+         *  Starts currently initialized node. Blocks current thread
+         *  while node is running. If timout or an error occurs while
+         *  node is method will return.
+         *
+         *  timout_ms - Node timout in milliseconds
+         *
+         *  returns - 1 if error occurs while node is running.
+         */
+        int start_current_node(int timeout_ms);
+
+    private:
+
+        bool node_created = false;
 };
 
 
@@ -51,7 +71,7 @@ class node_handler {
  * Returns a Node object.
  *
  * iface_name - Name of the currently available can interface.
- * 			  - e.g. "can0"
+ *            - e.g. "can0"
  */
 Node& getCanNode(std::string iface_name);
 

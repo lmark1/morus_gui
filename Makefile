@@ -21,9 +21,11 @@ QT_DEFINES = -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB
 # All .cpp sources relevant for GUI
 SOURCES_USER += $(SOURCES_DIR)/main.cpp \
 				$(SOURCES_DIR)/moc_morus_main_window.cpp \
+				$(SOURCES_DIR)/moc_node_worker.cpp \
 				$(SOURCES_DIR)/morus_main_window.cpp \
 				$(SOURCES_DIR)/node_handler.cpp \
-				$(SOURCES_DIR)/platform_linux.cpp
+				$(SOURCES_DIR)/platform_linux.cpp \
+				$(SOURCES_DIR)/node_worker.cpp
 
 
 # Include libuavcan .mk file - Initialize libuavcan sources / directories / includes
@@ -92,15 +94,15 @@ CPPFLAGS = -O0 -g -Wall -I. \
 OUT_EXEC = $(BUILD_DIR)/$(PROJECT_NAME)
 
 # Output executable recipe
-$(OUT_EXEC): $(OBJECTS_USER) $(OBJECTS_LIBUAVCAN)
+$(OUT_EXEC): $(OBJECTS_LIBUAVCAN) $(OBJECTS_USER)
 			 @$(LDPP) -o $@ $(OBJECTS_USER) $(OBJECTS_LIBUAVCAN) $(QT_LIBS)
-			 @$(BUILD_CMD) # TODO: Redundant (?)
+			 @$(BUILD_CMD)
 
 # Generic user object file recipes 
 # Initialize compiler command
 $(BUILD_DIR)/src/%.o: CMD = $(CPP) -c $(CPPFLAGS) $< -o $@
 # Compiles user - sources to object files
-$(BUILD_DIR)/src/%.o: src/%.c**
+$(BUILD_DIR)/src/%.o: $(SOURCES_DIR)/%.c**
 			@mkdir -p $(dir $@)
 			@$(BUILD_CMD)
 
@@ -121,6 +123,13 @@ clean:
 		@rm -rf build dsdlc_generated can_test
 		@$(PRINT_OK)
 
+clean_moc:
+		@rm -rf $(SOURCES_DIR)/moc_*
+
+# Generate moc files
+moc_files: $(SOURCES_DIR)/moc_morus_main_window.cpp $(SOURCES_DIR)/moc_node_worker.cpp
+$(SOURCES_DIR)/moc_%.cpp: $(INCLUDE_DIR)/%.h
+		moc $(UAVCANDEFS) $(INCLUDES) $< -o $@
 
 # Build can_test
 can_test: /build/src/node.o /build/src/platform_linux.o $(OBJECTS_LIBUAVCAN)

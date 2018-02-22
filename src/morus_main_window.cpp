@@ -32,16 +32,23 @@ void morus_main_window::on_start_local_node_button_clicked()
     int node_id = ui->local_node_id_spinBox->value();
     std::string iface_name = ui->can_iface_name_plainTextEdit->toPlainText().toStdString();
 
-    // Try generating a new can node.
+    // Try making a new can node.
     try {
         int res_node = new_node_handler->create_new_node(iface_name, node_id);
         if (res_node != 0) {
-                generateDialog("Unable to create new CAN node.");
+                generateDialog(
+                    "Unable to create new CAN node."
+                    );
                 return;
         }
-    } catch (const runtime_error & error) {
-        generateDialog("Error occured while creating a new node - check CAN interface name.");
-        std::cerr << error.what() << std::endl;
+
+    } catch (const runtime_error &error) {
+        std::string error_message(error.what());
+
+        generateDialog(
+            "Error occured while creating a new node.\n" +
+            error_message
+            );
         return;
     }
     

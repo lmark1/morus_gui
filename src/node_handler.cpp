@@ -19,7 +19,8 @@ int node_handler::create_new_node(std::string iface_name, int node_id) {
      * Node ID and name are required; otherwise, the node will refuse to start.
      * Version info is optional.
      */
-	cout << "Starting node initialization with iface_name: " <<
+	cout << 
+        "Starting node initialization with iface_name: " <<
         iface_name << " and node_id: " << node_id << "\n"; 
 
     auto& node = getCanNode(iface_name);
@@ -33,7 +34,8 @@ int node_handler::create_new_node(std::string iface_name, int node_id) {
     const int node_start_res = node.start();
     if (node_start_res < 0)
     {
-        generateDialog("Unable to start CAN node with error: " + 
+        generateDialog(
+            "Unable to start CAN node with error: " + 
             std::to_string(node_start_res));
         return 1;
     }
@@ -43,8 +45,18 @@ int node_handler::create_new_node(std::string iface_name, int node_id) {
      * Default mode is INITIALIZING.
      */
     node.setModeOperational();
+    node_created = true;
 
+    cout <<
+        "Node initialization successful.\n";
     return 0;
+}
+
+int node_handler::start_current_node(int timeout_ms) {
+
+    while (true) {
+
+    }
 }
 
 

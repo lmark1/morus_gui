@@ -14,7 +14,7 @@ uavcan::ICanDriver& getCanDriver(std::string iface_name)
     {
         if (driver.addIface(iface_name) < 0)
         {
-            throw std::runtime_error("Failed to add iface");
+            throw std::runtime_error("Unable to find CAN interface. Name: " + iface_name);
         }
     }
     return driver;
