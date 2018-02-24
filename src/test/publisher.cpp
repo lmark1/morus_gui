@@ -12,12 +12,12 @@
 #include <uavcan/protocol/debug/KeyValue.hpp> // uavcan.protocol.debug.KeyValue
 
 constexpr unsigned NodeMemoryPoolSize = 16384;
-typedef uavcan::Node<NodeMemoryPoolSize> Node;
+typedef uavcan::Node<NodeMemoryPoolSize> can_node;
 
 
-static Node& getNode()
+static can_node& getNode()
 {
-    static Node node(getCanDriver(), getSystemClock());
+    static can_node node(getCanDriver(), getSystemClock());
     return node;
 }
 

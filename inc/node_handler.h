@@ -64,6 +64,7 @@ class node_handler {
     private:
 
         bool node_created = false;
+        Node *can_node;
 };
 
 

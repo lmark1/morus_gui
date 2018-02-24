@@ -46,7 +46,7 @@ void morus_main_window::on_start_local_node_button_clicked()
         std::string error_message(error.what());
 
         generateDialog(
-            "Error occured while creating a new node.\n" +
+            "Error occurred while creating a new node.\n" +
             error_message
             );
         return;
@@ -54,5 +54,7 @@ void morus_main_window::on_start_local_node_button_clicked()
     
     // Disable start button after generating a node
     ui->start_local_node_button->setEnabled(false);
+
+    new_node_handler->start_current_node(1000);
 }   
 

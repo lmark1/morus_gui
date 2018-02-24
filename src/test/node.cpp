@@ -17,16 +17,16 @@ extern uavcan::ISystemClock& getSystemClock();
  */
 constexpr unsigned NodeMemoryPoolSize = 16384;
 
-typedef uavcan::Node<NodeMemoryPoolSize> Node;
+typedef uavcan::Node<NodeMemoryPoolSize> can_node;
 
 /**
  * Node object will be constructed at the time of the first access.
  * Note that most library objects are noncopyable (e.g. publishers, subscribers, servers, callers, timers, ...).
  * Attempt to copy a noncopyable object causes compilation failure.
  */
-static Node& getNode()
+static can_node& getNode()
 {
-    static Node node(getCanDriver(), getSystemClock());
+    static can_node node(getCanDriver(), getSystemClock());
     return node;
 }
 
