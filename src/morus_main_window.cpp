@@ -11,9 +11,6 @@ morus_main_window::morus_main_window(QWidget *parent) :
 {
     ui->setupUi(this);
     
-    // Initialize the node handler.
-    new_node_handler = new node_handler();
-
     // Set initial node-id and node interface values
     ui->local_node_id_spinBox->setValue(DEFAULT_NODE_ID);
     ui->can_iface_name_plainTextEdit->setPlainText(DEFAULT_IFACE_NAME);
@@ -22,7 +19,6 @@ morus_main_window::morus_main_window(QWidget *parent) :
 morus_main_window::~morus_main_window()
 {
     delete ui;
-    delete new_node_handler;
 }
 
 void morus_main_window::on_start_local_node_button_clicked()
@@ -30,31 +26,13 @@ void morus_main_window::on_start_local_node_button_clicked()
 
     // Get node id and interface name from GUI
     int node_id = ui->local_node_id_spinBox->value();
-    std::string iface_name = ui->can_iface_name_plainTextEdit->toPlainText().toStdString();
+    std::string iface_name = ui->
+    		can_iface_name_plainTextEdit->
+			toPlainText().toStdString();
 
-    // Try making a new can node.
-    try {
-        int res_node = new_node_handler->create_new_node(iface_name, node_id);
-        if (res_node != 0) {
-                generateDialog(
-                    "Unable to create new CAN node."
-                    );
-                return;
-        }
+    // TODO: Attach node_worker to QThread
 
-    } catch (const runtime_error &error) {
-        std::string error_message(error.what());
-
-        generateDialog(
-            "Error occurred while creating a new node.\n" +
-            error_message
-            );
-        return;
-    }
-    
     // Disable start button after generating a node
     ui->start_local_node_button->setEnabled(false);
-
-    new_node_handler->start_current_node(1000);
 }   
 

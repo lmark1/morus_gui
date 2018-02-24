@@ -23,15 +23,15 @@ int node_handler::create_new_node(std::string iface_name, int node_id) {
         "Starting node initialization with iface_name: " <<
         iface_name << " and node_id: " << node_id << "\n";
 
-	can_node = &getCanNode(iface_name);
-	can_node->setNodeID(node_id);
-	can_node->setName(DEFAULT_NODE_NAME);
+	pCan_node = &getCanNode(iface_name);
+	pCan_node->setNodeID(node_id);
+	pCan_node->setName(DEFAULT_NODE_NAME);
 
 	/*
      * Start the node.
      * All returnable error codes are listed in the header file uavcan/error.hpp.
      */
-    const int node_start_res = can_node->start();
+    const int node_start_res = pCan_node->start();
     if (node_start_res < 0)
     {
         generateDialog(
@@ -44,7 +44,7 @@ int node_handler::create_new_node(std::string iface_name, int node_id) {
      * Informing other nodes that we're ready to work.
      * Default mode is INITIALIZING.
      */
-    can_node->setModeOperational();
+    pCan_node->setModeOperational();
     node_created = true;
 
     cout <<
@@ -54,20 +54,18 @@ int node_handler::create_new_node(std::string iface_name, int node_id) {
 
 int node_handler::start_current_node(int timeout_ms) {
 
-    while (true) {
+	/*
+	 * If there's nothing to do, the thread blocks inside the driver's
+	 * method select() until the timeout expires or an error occurs (e.g. driver failure).
+	 * All error codes are listed in the header uavcan/error.hpp.
+	 */
+	const int res = pCan_node->spin(
+			uavcan::MonotonicDuration::fromMSec(timeout_ms));
+	if (res < 0)
+	{
+		std::cerr << "Transient failure: " << res << std::endl;
+	}
 
-    	/*
-		 * If there's nothing to do, the thread blocks inside the driver's
-		 * method select() until the timeout expires or an error occurs (e.g. driver failure).
-		 * All error codes are listed in the header uavcan/error.hpp.
-		 */
-		const int res = can_node->spin(
-				uavcan::MonotonicDuration::fromMSec(timeout_ms));
-		if (res < 0)
-		{
-			std::cerr << "Transient failure: " << res << std::endl;
-		}
-    }
 }
 
 

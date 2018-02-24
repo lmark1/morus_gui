@@ -63,8 +63,15 @@ class node_handler {
 
     private:
 
+        /**
+         * Flag indicating if node is created.
+         */
         bool node_created = false;
-        Node *can_node;
+
+        /**
+         * Pointer to CAN node.
+         */
+        Node *pCan_node = NULL;
 };
 
 
