@@ -4,6 +4,12 @@
 #include "node_handler.h"
 
 #include <QObject>
+#include <QEventLoop>
+
+/**
+ * Timeout in milliseconds. Used when spinning nodes.
+ */
+extern const int NODE_TIMEOUT;
 
 /**
  *	This class is used as a wrapper for node_handler. 

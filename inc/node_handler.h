@@ -52,14 +52,14 @@ class node_handler {
 
         /**
          *  Starts currently initialized node. Blocks current thread
-         *  while node is running. If timout or an error occurs while
+         *  while node is spinning. If timeout or an error occurs while
          *  node is method will return.
          *
-         *  timout_ms - Node timout in milliseconds
+         *  timout_ms - Node timeout in milliseconds
          *
          *  returns - 1 if error occurs while node is running.
          */
-        int start_current_node(int timeout_ms);
+        int spin_current_node(int timeout_ms);
 
     private:
 
@@ -82,10 +82,5 @@ class node_handler {
  *            - e.g. "can0"
  */
 Node& getCanNode(std::string iface_name);
-
-/**
- * Generate an error message dialog.
- */
-void generateDialog(std::string message);
 
 #endif //NODE_HANDLER_H

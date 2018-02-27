@@ -32,12 +32,8 @@ int node_handler::create_new_node(std::string iface_name, int node_id) {
      * All returnable error codes are listed in the header file uavcan/error.hpp.
      */
     const int node_start_res = pCan_node->start();
-    if (node_start_res < 0)
-    {
-        generateDialog(
-            "Unable to start CAN node with error: " +
-            std::to_string(node_start_res));
-        return 1;
+    if (node_start_res < 0) {
+        return -1;
     }
 
     /*
@@ -52,7 +48,7 @@ int node_handler::create_new_node(std::string iface_name, int node_id) {
     return 0;
 }
 
-int node_handler::start_current_node(int timeout_ms) {
+int node_handler::spin_current_node(int timeout_ms) {
 
 	/*
 	 * If there's nothing to do, the thread blocks inside the driver's
@@ -61,11 +57,11 @@ int node_handler::start_current_node(int timeout_ms) {
 	 */
 	const int res = pCan_node->spin(
 			uavcan::MonotonicDuration::fromMSec(timeout_ms));
-	if (res < 0)
-	{
-		std::cerr << "Transient failure: " << res << std::endl;
+	if (res < 0) {
+		return -1;
 	}
 
+	return 0;
 }
 
 
@@ -75,12 +71,4 @@ Node& getCanNode(std::string iface_name)
     return node;
 }
 
-void generateDialog(std::string message) {
 
-    // Display message box
-    QMessageBox msgBox;
-    msgBox.setText(QString::fromStdString(message));
-    msgBox.setStandardButtons(QMessageBox::Ok);
-    msgBox.setDefaultButton(QMessageBox::Ok);
-    msgBox.exec();
-}

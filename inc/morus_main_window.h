@@ -5,6 +5,7 @@
 #include "node_worker.h"
 
 #include <QMainWindow>
+#include <QThread>
 
 #include <string>
 
@@ -30,9 +31,25 @@ class morus_main_window : public QMainWindow
 		explicit morus_main_window(QWidget *parent = 0);
 		~morus_main_window();
 
+
+		/**
+		 * Generate an error message dialog.
+		 */
+		void generateDialog(std::string message);
+
 	private slots:
 
+		/**
+		 * Start button click method.
+		 */
 		void on_start_local_node_button_clicked();
+
+	public slots:
+
+		/**
+		 * Error handling method.
+		 */
+		void errorString(QString error);
 
 	private:
 
