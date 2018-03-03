@@ -33,7 +33,7 @@ class morus_main_window : public QMainWindow
 
 
 		/**
-		 * Generate an error message dialog.
+		 * Generate a pop-up dialog message .
 		 */
 		void generateDialog(std::string message);
 
@@ -47,9 +47,14 @@ class morus_main_window : public QMainWindow
 	public slots:
 
 		/**
-		 * Error handling method.
+		 * Slot method used for displaying errors in the main thread.
 		 */
 		void errorString(QString error);
+
+		/**
+		 * Slot used for performing actions when CAN worker finishes.
+		 */
+		void workerFinished();
 
 	private:
 

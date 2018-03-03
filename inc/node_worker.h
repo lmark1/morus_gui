@@ -31,12 +31,36 @@ public:
 			int node_id,
 			QObject *parent = 0);
     ~node_worker();
- 
+
+    /**
+     * Initialize node_handler object. If it fails,
+     * exception will be thrown.
+     */
+    int initialize_node_handler();
+
+    /**
+     * Stops the node_worker.
+     */
+    void stop_worker();
+
 public slots:
+
+	/**
+	 * Whole workload is done in this method.
+	 * Creating CAN node, spinning CAN node etc.
+	 */
     void process();
  
 signals:
+
+	/**
+	 * Emit this signal when worker is done.
+	 */
     void finished();
+
+    /**
+     * Emit this signal when something goes wrong.
+     */
     void error(QString err);
  
 private:
@@ -54,7 +78,7 @@ private:
     /**
      *	Flag indicating worker started processing.
      */
-    bool worker_started = false;
+    bool working = false;
 
     /**
      * Flag indicating that node handler was initialized.

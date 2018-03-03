@@ -14,7 +14,7 @@ node_worker::node_worker(
 	// Object created here remain in the main thread and
 	// not in the QThread as needed.
 
-	worker_started = true;
+	working = true;
 }
  
 node_worker::~node_worker() {
@@ -23,30 +23,55 @@ node_worker::~node_worker() {
 
 void node_worker::process() {
 
-	// Initialize node_handler here
-	if (! node_handler_initialized) {
+	int node_init_res = initialize_node_handler();
 
-		pCan_node_handler = new node_handler();
-		const int res_id = pCan_node_handler->create_new_node(iface_name, node_id);
-
-		//If initialization failed stop processing
-		if (res_id < 0) {
-			worker_started = false;
-		}
-
-		node_handler_initialized = true;
+	// Stop worker if initialization failed
+	if (node_init_res < 0) {
+		stop_worker();
 	}
 
-	// Do work.. spin the nodes
-	while (worker_started) {
+	// Do the work... spin the nodes
+	while (working) {
 
 		const int res_id = pCan_node_handler->spin_current_node(NODE_TIMEOUT);
 
 		// If something went wrong stop doing work.
 		if (res_id < 0) {
-			worker_started = false;
+			working = false;
 		}
 	}
 
 	emit finished();
+}
+
+int node_worker::initialize_node_handler() {
+
+	pCan_node_handler = new node_handler();
+
+	try {
+
+		// Try creating new node.
+		const int res_id = pCan_node_handler->create_new_node(iface_name, node_id);
+		return res_id;
+
+	}  catch (const runtime_error &ex) {
+
+		// Emit error message
+		std::string error_message(ex.what());
+        emit error(
+            QString::fromStdString(
+           		 "Error occurred while creating a new node.\n" +
+				 error_message
+				 )
+            );
+
+        return -1;
+	}
+
+}
+
+void node_worker::stop_worker() {
+
+	//TODO: add mutex for outside stopping
+	working = false;
 }
