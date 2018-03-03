@@ -13,6 +13,7 @@ morus_main_window::morus_main_window(QWidget *parent) :
     
     // Set initial node-id and node interface values
     ui->local_node_id_spinBox->setValue(DEFAULT_NODE_ID);
+    ui->local_node_id_spinBox->setMaximum(DEFAULT_NODE_ID);
     ui->can_iface_name_plainTextEdit->setPlainText(DEFAULT_IFACE_NAME);
 }
 

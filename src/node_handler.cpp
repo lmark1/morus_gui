@@ -9,7 +9,7 @@ node_handler::node_handler() {
 }
 
 node_handler::~node_handler() {
-	// Destroy node handler...
+	delete pCan_node;
 }
 
 int node_handler::create_new_node(std::string iface_name, int node_id) {
@@ -49,10 +49,17 @@ int node_handler::spin_current_node(int timeout_ms) {
 	 * method select() until the timeout expires or an error occurs (e.g. driver failure).
 	 * All error codes are listed in the header uavcan/error.hpp.
 	 */
+
+
 	const int res = pCan_node->spin(
 			uavcan::MonotonicDuration::fromMSec(timeout_ms));
 
 	return res;
+}
+
+void node_handler::destroy_current_node() {
+	pCan_node = NULL;
+	node_created = false;
 }
 
 

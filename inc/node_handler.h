@@ -61,6 +61,11 @@ class node_handler {
          */
         int spin_current_node(int timeout_ms);
 
+        /**
+         * Destroy current Node object.
+         */
+        void destroy_current_node();
+
     private:
 
         /**

@@ -19,11 +19,12 @@ node_worker::node_worker(
  
 node_worker::~node_worker() {
 
+	delete pCan_node_handler;
 }
 
 void node_worker::process() {
 
-	int node_init_res = initialize_node_handler();
+	const int node_init_res = initialize_node_handler();
 
 	// Stop worker if initialization failed
 	if (node_init_res < 0) {
@@ -33,11 +34,12 @@ void node_worker::process() {
 	// Do the work... spin the nodes
 	while (working) {
 
-		const int res_id = pCan_node_handler->spin_current_node(NODE_TIMEOUT);
+		std::cout << "Processing";
+		const int res_id = run_node_handler();
 
 		// If something went wrong stop doing work.
 		if (res_id < 0) {
-			working = false;
+			stop_worker();
 		}
 	}
 
@@ -54,7 +56,7 @@ int node_worker::initialize_node_handler() {
 		const int res_id = pCan_node_handler->create_new_node(iface_name, node_id);
 		return res_id;
 
-	}  catch (const runtime_error &ex) {
+	}  catch (const std::exception &ex) {
 
 		// Emit error message
 		std::string error_message(ex.what());
@@ -70,8 +72,33 @@ int node_worker::initialize_node_handler() {
 
 }
 
+int node_worker::run_node_handler() {
+
+	try {
+
+		// Try spinning the current node
+		const int res_id = pCan_node_handler->spin_current_node(NODE_TIMEOUT);
+		return res_id;
+
+	} catch (const std::exception& ex) {
+
+		// Emit error message
+		std::string error_message(ex.what());
+		emit error(
+			QString::fromStdString(
+				 "Error occurred while spinning node.\n" +
+				 error_message
+				 )
+			);
+
+		return -1;
+	}
+
+}
+
 void node_worker::stop_worker() {
 
 	//TODO: add mutex for outside stopping
 	working = false;
+	pCan_node_handler->destroy_current_node();
 }

@@ -34,9 +34,15 @@ public:
 
     /**
      * Initialize node_handler object. If it fails,
-     * exception will be thrown.
+     * exception will be thrown and error message emitted.
      */
     int initialize_node_handler();
+
+    /**
+     * Start running the node handler. If unable to run,
+     * exception will be thrown and error message emitted.
+     */
+    int run_node_handler();
 
     /**
      * Stops the node_worker.
