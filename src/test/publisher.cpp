@@ -2,14 +2,9 @@
 #include <cstdlib>
 #include <unistd.h>
 #include <uavcan/uavcan.hpp>
-#include "platform_linux.h"
-
-/*
- * We're going to use messages of type uavcan.protocol.debug.KeyValue, so the appropriate header must be included.
- * Given a data type named X, the header file name would be:
- *      X.replace('.', '/') + ".hpp"
- */
 #include <uavcan/protocol/debug/KeyValue.hpp> // uavcan.protocol.debug.KeyValue
+
+#include "../../inc/PlatformLinux.h"
 
 constexpr unsigned NodeMemoryPoolSize = 16384;
 typedef uavcan::Node<NodeMemoryPoolSize> can_node;

@@ -1,16 +1,16 @@
 /****************************************************************************
-** Meta object code from reading C++ file 'morus_main_window.h'
+** Meta object code from reading C++ file 'MorusMainWindow.h'
 **
 ** Created by: The Qt Meta Object Compiler version 67 (Qt 5.5.1)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include "../inc/morus_main_window.h"
+#include "../inc/MorusMainWindow.h"
 #include <QtCore/qbytearray.h>
 #include <QtCore/qmetatype.h>
 #if !defined(Q_MOC_OUTPUT_REVISION)
-#error "The header file 'morus_main_window.h' doesn't include <QObject>."
+#error "The header file 'MorusMainWindow.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 67
 #error "This file was generated using the moc from 5.5.1. It"
 #error "cannot be used with the include files from this version of Qt."
@@ -18,31 +18,31 @@
 #endif
 
 QT_BEGIN_MOC_NAMESPACE
-struct qt_meta_stringdata_morus_main_window_t {
+struct qt_meta_stringdata_MorusMainWindow_t {
     QByteArrayData data[6];
-    char stringdata0[87];
+    char stringdata0[89];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
-    qptrdiff(offsetof(qt_meta_stringdata_morus_main_window_t, stringdata0) + ofs \
+    qptrdiff(offsetof(qt_meta_stringdata_MorusMainWindow_t, stringdata0) + ofs \
         - idx * sizeof(QByteArrayData)) \
     )
-static const qt_meta_stringdata_morus_main_window_t qt_meta_stringdata_morus_main_window = {
+static const qt_meta_stringdata_MorusMainWindow_t qt_meta_stringdata_MorusMainWindow = {
     {
-QT_MOC_LITERAL(0, 0, 17), // "morus_main_window"
-QT_MOC_LITERAL(1, 18, 34), // "on_start_local_node_button_cl..."
-QT_MOC_LITERAL(2, 53, 0), // ""
-QT_MOC_LITERAL(3, 54, 11), // "errorString"
-QT_MOC_LITERAL(4, 66, 5), // "error"
-QT_MOC_LITERAL(5, 72, 14) // "workerFinished"
+QT_MOC_LITERAL(0, 0, 15), // "MorusMainWindow"
+QT_MOC_LITERAL(1, 16, 31), // "on_startLocalNodeButton_clicked"
+QT_MOC_LITERAL(2, 48, 0), // ""
+QT_MOC_LITERAL(3, 49, 18), // "handleErrorMessage"
+QT_MOC_LITERAL(4, 68, 5), // "error"
+QT_MOC_LITERAL(5, 74, 14) // "workerFinished"
 
     },
-    "morus_main_window\0on_start_local_node_button_clicked\0"
-    "\0errorString\0error\0workerFinished"
+    "MorusMainWindow\0on_startLocalNodeButton_clicked\0"
+    "\0handleErrorMessage\0error\0workerFinished"
 };
 #undef QT_MOC_LITERAL
 
-static const uint qt_meta_data_morus_main_window[] = {
+static const uint qt_meta_data_MorusMainWindow[] = {
 
  // content:
        7,       // revision
@@ -68,40 +68,40 @@ static const uint qt_meta_data_morus_main_window[] = {
        0        // eod
 };
 
-void morus_main_window::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+void MorusMainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
-        morus_main_window *_t = static_cast<morus_main_window *>(_o);
+        MorusMainWindow *_t = static_cast<MorusMainWindow *>(_o);
         Q_UNUSED(_t)
         switch (_id) {
-        case 0: _t->on_start_local_node_button_clicked(); break;
-        case 1: _t->errorString((*reinterpret_cast< QString(*)>(_a[1]))); break;
+        case 0: _t->on_startLocalNodeButton_clicked(); break;
+        case 1: _t->handleErrorMessage((*reinterpret_cast< QString(*)>(_a[1]))); break;
         case 2: _t->workerFinished(); break;
         default: ;
         }
     }
 }
 
-const QMetaObject morus_main_window::staticMetaObject = {
-    { &QMainWindow::staticMetaObject, qt_meta_stringdata_morus_main_window.data,
-      qt_meta_data_morus_main_window,  qt_static_metacall, Q_NULLPTR, Q_NULLPTR}
+const QMetaObject MorusMainWindow::staticMetaObject = {
+    { &QMainWindow::staticMetaObject, qt_meta_stringdata_MorusMainWindow.data,
+      qt_meta_data_MorusMainWindow,  qt_static_metacall, Q_NULLPTR, Q_NULLPTR}
 };
 
 
-const QMetaObject *morus_main_window::metaObject() const
+const QMetaObject *MorusMainWindow::metaObject() const
 {
     return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
-void *morus_main_window::qt_metacast(const char *_clname)
+void *MorusMainWindow::qt_metacast(const char *_clname)
 {
     if (!_clname) return Q_NULLPTR;
-    if (!strcmp(_clname, qt_meta_stringdata_morus_main_window.stringdata0))
-        return static_cast<void*>(const_cast< morus_main_window*>(this));
+    if (!strcmp(_clname, qt_meta_stringdata_MorusMainWindow.stringdata0))
+        return static_cast<void*>(const_cast< MorusMainWindow*>(this));
     return QMainWindow::qt_metacast(_clname);
 }
 
-int morus_main_window::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+int MorusMainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = QMainWindow::qt_metacall(_c, _id, _a);
     if (_id < 0)

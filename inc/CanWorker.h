@@ -1,10 +1,10 @@
-#ifndef NODE_WORKER_H
-#define NODE_WORKER_H
-
-#include "node_handler.h"
+#ifndef CAN_WORKER_H
+#define CAN_WORKER_H
 
 #include <QObject>
 #include <QEventLoop>
+
+#include "NodeHandler.h"
 
 /**
  * Timeout in milliseconds. Used when spinning nodes.
@@ -15,7 +15,7 @@ extern const int NODE_TIMEOUT;
  *	This class is used as a wrapper for node_handler. 
  *	Implemented for use with QThreads.
  */
-class node_worker : public QObject {
+class CanWorker : public QObject {
     Q_OBJECT
  
 public:
@@ -26,28 +26,28 @@ public:
 	 * iface_name - CAN interface name
 	 * node_id - new CAN node I
 	 */
-    explicit node_worker(
-			std::string iface_name,
-			int node_id,
+    explicit CanWorker(
+			std::string ifaceName,
+			int nodeID,
 			QObject *parent = 0);
-    ~node_worker();
+    ~CanWorker();
 
     /**
      * Initialize node_handler object. If it fails,
      * exception will be thrown and error message emitted.
      */
-    int initialize_node_handler();
+    int inidializeNodeHandler();
 
     /**
      * Start running the node handler. If unable to run,
      * exception will be thrown and error message emitted.
      */
-    int run_node_handler();
+    int runNodeHandler();
 
     /**
      * Stops the node_worker.
      */
-    void stop_worker();
+    void stopWorker();
 
 public slots:
 
@@ -74,12 +74,12 @@ private:
     /**
      * CAN interface name.
      */
-    std::string iface_name;
+    std::string ifaceName;
 
     /**
      * New CAN node ID.
      */
-    int node_id;
+    int nodeID;
 
     /**
      *	Flag indicating worker started processing.
@@ -89,12 +89,12 @@ private:
     /**
      * Flag indicating that node handler was initialized.
      */
-    bool node_handler_initialized = false;
+    bool nodeHandlerInitialized = false;
 
     /**
      * Node handler used for CAN node operations.
      */
-    node_handler *pCan_node_handler = NULL;
+    NodeHandler *canNodeHandler = NULL;
 };
 
-#endif //NODE_WORKER_H
+#endif //CAN_WORKER_H

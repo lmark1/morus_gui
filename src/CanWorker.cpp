@@ -1,14 +1,14 @@
-#include <node_worker.h>
+#include "CanWorker.h"
 
 const int NODE_TIMEOUT = 1000;
 
-node_worker::node_worker(
+CanWorker::CanWorker(
 		std::string iface_name,
 		int node_id,
 		QObject *parent) : QObject(parent) {
 
-	this->node_id = node_id;
-	this->iface_name = iface_name;
+	this->nodeID = node_id;
+	this->ifaceName = iface_name;
 
 	// Avoid initializing anything in this constructor.
 	// Object created here remain in the main thread and
@@ -17,43 +17,45 @@ node_worker::node_worker(
 	working = true;
 }
  
-node_worker::~node_worker() {
+CanWorker::~CanWorker() {
 
-	delete pCan_node_handler;
+	delete canNodeHandler;
 }
 
-void node_worker::process() {
+void CanWorker::process() {
 
-	const int node_init_res = initialize_node_handler();
+	const int node_init_res = inidializeNodeHandler();
 
 	// Stop worker if initialization failed
 	if (node_init_res < 0) {
-		stop_worker();
+		stopWorker();
 	}
 
 	// Do the work... spin the nodes
 	while (working) {
 
 		std::cout << "Processing";
-		const int res_id = run_node_handler();
+		const int res_id = runNodeHandler();
 
 		// If something went wrong stop doing work.
 		if (res_id < 0) {
-			stop_worker();
+			stopWorker();
 		}
 	}
 
 	emit finished();
 }
 
-int node_worker::initialize_node_handler() {
+int CanWorker::inidializeNodeHandler() {
 
-	pCan_node_handler = new node_handler();
+	canNodeHandler = NULL;
+	canNodeHandler = new NodeHandler();
 
 	try {
 
 		// Try creating new node.
-		const int res_id = pCan_node_handler->create_new_node(iface_name, node_id);
+		const int res_id = canNodeHandler->
+				create_new_node(ifaceName, nodeID);
 		return res_id;
 
 	}  catch (const std::exception &ex) {
@@ -72,12 +74,12 @@ int node_worker::initialize_node_handler() {
 
 }
 
-int node_worker::run_node_handler() {
+int CanWorker::runNodeHandler() {
 
 	try {
 
 		// Try spinning the current node
-		const int res_id = pCan_node_handler->spin_current_node(NODE_TIMEOUT);
+		const int res_id = canNodeHandler->spin_current_node(NODE_TIMEOUT);
 		return res_id;
 
 	} catch (const std::exception& ex) {
@@ -96,9 +98,9 @@ int node_worker::run_node_handler() {
 
 }
 
-void node_worker::stop_worker() {
+void CanWorker::stopWorker() {
 
-	//TODO: add mutex for outside stopping
+	//TODO(lmark): add mutex for outside stopping
 	working = false;
-	pCan_node_handler->destroy_current_node();
+	canNodeHandler->destroy_current_node();
 }

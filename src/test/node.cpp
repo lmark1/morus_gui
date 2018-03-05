@@ -1,8 +1,8 @@
+#include <PlatformLinux.h>
 #include <iostream>
 #include <cstdlib>
 #include <unistd.h>
 #include <uavcan/uavcan.hpp>
-#include "platform_linux.h"
 
 /**
  * These functions are platform dependent, so they are not included in this example.

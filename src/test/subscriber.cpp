@@ -4,7 +4,8 @@
 #include <uavcan/uavcan.hpp>
 #include <uavcan/protocol/debug/KeyValue.hpp>
 #include <uavcan/protocol/debug/LogMessage.hpp>
-#include "platform_linux.h"
+
+#include "../../inc/PlatformLinux.h"
 
 /**
  * This class demonstrates how to use uavcan::MethodBinder with subscriber objects in C++03.

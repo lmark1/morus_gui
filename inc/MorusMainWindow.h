@@ -1,13 +1,13 @@
 #ifndef MORUS_MAIN_WINDOW_H
 #define MORUS_MAIN_WINDOW_H
 
-#include "node_handler.h"
-#include "node_worker.h"
-
 #include <QMainWindow>
 #include <QThread>
 
 #include <string>
+
+#include "CanWorker.h"
+#include "NodeHandler.h"
 
 /**
  * Default CAN interface name. Set as initial value in GUI.
@@ -20,36 +20,36 @@ extern const QString DEFAULT_IFACE_NAME;
 extern const int DEFAULT_NODE_ID;
 
 namespace Ui {
-class morus_main_window;
+class MorusMainWindow;
 }
 
-class morus_main_window : public QMainWindow
+class MorusMainWindow : public QMainWindow
 {
     Q_OBJECT
 
 	public:
-		explicit morus_main_window(QWidget *parent = 0);
-		~morus_main_window();
+		explicit MorusMainWindow(QWidget *parent = 0);
+		~MorusMainWindow();
 
 
 		/**
 		 * Generate a pop-up dialog message .
 		 */
-		void generateDialog(std::string message);
+		void generateMessageBox(std::string message);
 
 	private slots:
 
 		/**
 		 * Start button click method.
 		 */
-		void on_start_local_node_button_clicked();
+		void on_startLocalNodeButton_clicked();
 
 	public slots:
 
 		/**
 		 * Slot method used for displaying errors in the main thread.
 		 */
-		void errorString(QString error);
+		void handleErrorMessage(QString error);
 
 		/**
 		 * Slot used for performing actions when CAN worker finishes.
@@ -61,19 +61,19 @@ class morus_main_window : public QMainWindow
 		/**
 		 * Pointer to morus_main_window UI.
 		 */
-		Ui::morus_main_window *ui;
+		Ui::MorusMainWindow *ui;
 
 		/**
 		 * Pointer to the CAN node worker. It acts as a wrapper
 		 * object for node_handler. Used for safe QThread work.
 		 */
-		node_worker *pCan_node_worker = NULL;
+		CanWorker *canNodeWorker = NULL;
 
 		/**
 		 * Thread used by pCan_node_worker. Used for spinning CAN
 		 * node.
 		 */
-		QThread *pCan_thread = NULL;
+		QThread *canThread = NULL;
 };
 
 #endif // MORUS_MAIN_WINDOW_H

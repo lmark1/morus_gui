@@ -1,24 +1,28 @@
-#include "node_handler.h"
-#include "platform_linux.h"
 #include <cstddef>
+
+#include "NodeHandler.h"
+#include "PlatformLinux.h"
 
 const uavcan::NodeStatusProvider::NodeName DEFAULT_NODE_NAME = "morus.can.node";
 
-node_handler::node_handler() {
-	// Initialize node handler...
+NodeHandler::NodeHandler() {
+
+	pCan_node = NULL;
 }
 
-node_handler::~node_handler() {
+NodeHandler::~NodeHandler() {
+
 	delete pCan_node;
 }
 
-int node_handler::create_new_node(std::string iface_name, int node_id) {
+int NodeHandler::create_new_node(std::string iface_name, int node_id) {
 
 	/*
      * Node initialization.
      * Node ID and name are required; otherwise, the node will refuse to start.
      * Version info is optional.
      */
+	pCan_node = NULL;
 	pCan_node = &getCanNode(iface_name);
 	pCan_node->setNodeID(node_id);
 	pCan_node->setName(DEFAULT_NODE_NAME);
@@ -42,7 +46,7 @@ int node_handler::create_new_node(std::string iface_name, int node_id) {
     return node_start_res;
 }
 
-int node_handler::spin_current_node(int timeout_ms) {
+int NodeHandler::spin_current_node(int timeout_ms) {
 
 	/*
 	 * If there's nothing to do, the thread blocks inside the driver's
@@ -57,7 +61,7 @@ int node_handler::spin_current_node(int timeout_ms) {
 	return res;
 }
 
-void node_handler::destroy_current_node() {
+void NodeHandler::destroy_current_node() {
 	pCan_node = NULL;
 	node_created = false;
 }

@@ -1,18 +1,19 @@
 #ifndef NODE_HANDLER_H
 #define NODE_HANDLER_H
 
-#include "platform_linux.h"
-
 #include <QMessageBox>
 #include <QString>
 
 #include <iostream>
 
+#include "PlatformLinux.h"
+
 using namespace std;
 
 /**
- * Memory pool size largely depends on the number of CAN ifaces and on application's logic.
- * Please read the documentation for the class uavcan::Node to learn more.
+ * Memory pool size largely depends on the number of CAN ifaces and on
+ * application's logic. Please read the documentation for the class
+ * uavcan::Node to learn more.
  */
 constexpr unsigned NodeMemoryPoolSize = 16384;
 typedef uavcan::Node<NodeMemoryPoolSize> Node;
@@ -25,19 +26,19 @@ extern const uavcan::NodeStatusProvider::NodeName DEFAULT_NODE_NAME;
 /*
  * This class is used for handling CAN nodes.
  */
-class node_handler {
+class NodeHandler {
     
     public:
 
         /**
          *  Initialize Node handler.
          */
-        node_handler();
+        NodeHandler();
 
         /**
          *  Shuts down the node handler, shuts down all active nodes.
          */
-        ~node_handler();
+        ~NodeHandler();
 
         /** 
          *  Creates and initializes a new node with given node name and ID.
@@ -45,8 +46,7 @@ class node_handler {
          *  iface_name - CAN interface name
          *  node_id    - new node ID
          *
-         *  returns - 0 if node is successfully created 
-         *            1 otherwise.
+         *  returns - less than 0 if error occurs while creating node
          */
         int create_new_node(std::string iface_name, int node_id);
 
@@ -57,7 +57,7 @@ class node_handler {
          *
          *  timout_ms - Node timeout in milliseconds
          *
-         *  returns - 1 if error occurs while node is running.
+         *  returns - less than 0 if error occurs while node is running
          */
         int spin_current_node(int timeout_ms);
 

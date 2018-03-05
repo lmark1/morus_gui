@@ -1,10 +1,10 @@
-#include "morus_main_window.h"
+#include <MorusMainWindow.h>
 #include <QApplication>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    morus_main_window w;
+    MorusMainWindow w;
     w.show();
     
     return a.exec();
