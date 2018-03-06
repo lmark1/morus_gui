@@ -36,7 +36,7 @@ public:
      * Initialize node_handler object. If it fails,
      * exception will be thrown and error message emitted.
      */
-    int inidializeNodeHandler();
+    int initializeNodeHandler();
 
     /**
      * Start running the node handler. If unable to run,

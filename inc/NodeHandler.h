@@ -7,6 +7,8 @@
 #include <iostream>
 
 #include "PlatformLinux.h"
+#include "NodeInfoCollector.h"
+
 
 using namespace std;
 
@@ -16,7 +18,7 @@ using namespace std;
  * uavcan::Node to learn more.
  */
 constexpr unsigned NodeMemoryPoolSize = 16384;
-typedef uavcan::Node<NodeMemoryPoolSize> Node;
+typedef uavcan::Node<NodeMemoryPoolSize> CustomNode_t;
 
 /**
  * Default node name used by node handler.
@@ -48,7 +50,7 @@ class NodeHandler {
          *
          *  returns - less than 0 if error occurs while creating node
          */
-        int create_new_node(std::string iface_name, int node_id);
+        int createNewNode(std::string iface_name, int node_id);
 
         /**
          *  Starts currently initialized node. Blocks current thread
@@ -59,24 +61,30 @@ class NodeHandler {
          *
          *  returns - less than 0 if error occurs while node is running
          */
-        int spin_current_node(int timeout_ms);
+        int spinCurrentNode(int timeout_ms);
 
         /**
          * Destroy current Node object.
          */
-        void destroy_current_node();
+        void destroyCurrentNode();
+
+        /**
+		 * Node information collector attached to the canNode.
+		 * Exposed as public in order for worker to easily access it.
+		 */
+		NodeInfoCollector collector;
 
     private:
 
         /**
          * Flag indicating if node is created.
          */
-        bool node_created = false;
+        bool nodeCreated = false;
 
         /**
          * Pointer to CAN node.
          */
-        Node *pCan_node = NULL;
+        CustomNode_t *canNode = NULL;
 };
 
 
@@ -86,6 +94,6 @@ class NodeHandler {
  * iface_name - Name of the currently available can interface.
  *            - e.g. "can0"
  */
-Node& getCanNode(std::string iface_name);
+CustomNode_t& getCanNode(std::string iface_name);
 
 #endif //NODE_HANDLER_H

@@ -30,11 +30,15 @@ class NodeInfoCollector final : public uavcan::INodeInfoListener{
 		// Explanation found in uavcan/protocol/node_infor_retriever.hpp
 		void handleNodeInfoRetrieved(
 				NodeID node_id,
-				const protocol::GetNodeInfo::Response& node_info) override;
-		void handleNodeInfoUnavailable(
-				NodeID node_id) override;
+				const protocol::GetNodeInfo::Response& node_info
+				) override;
+		void handleNodeInfoUnavailable(NodeID node_id) override;
+		void handleNodeStatusChange(
+				const NodeStatusMonitor::NodeStatusChangeEvent& event
+				) override;
 		void handleNodeStatusMessage(
-				const ReceivedDataStructure<protocol::NodeStatus>& msg) override;
+				const ReceivedDataStructure<protocol::NodeStatus>& msg
+				) override;
 
 		/**
 		 * Return number of known nodes in the registry.

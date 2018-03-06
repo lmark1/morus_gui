@@ -24,7 +24,7 @@ CanWorker::~CanWorker() {
 
 void CanWorker::process() {
 
-	const int node_init_res = inidializeNodeHandler();
+	const int node_init_res = initializeNodeHandler();
 
 	// Stop worker if initialization failed
 	if (node_init_res < 0) {
@@ -46,16 +46,15 @@ void CanWorker::process() {
 	emit finished();
 }
 
-int CanWorker::inidializeNodeHandler() {
+int CanWorker::initializeNodeHandler() {
 
-	canNodeHandler = NULL;
 	canNodeHandler = new NodeHandler();
 
 	try {
 
 		// Try creating new node.
 		const int res_id = canNodeHandler->
-				create_new_node(ifaceName, nodeID);
+				createNewNode(ifaceName, nodeID);
 		return res_id;
 
 	}  catch (const std::exception &ex) {
@@ -79,7 +78,7 @@ int CanWorker::runNodeHandler() {
 	try {
 
 		// Try spinning the current node
-		const int res_id = canNodeHandler->spin_current_node(NODE_TIMEOUT);
+		const int res_id = canNodeHandler->spinCurrentNode(NODE_TIMEOUT);
 		return res_id;
 
 	} catch (const std::exception& ex) {
@@ -102,5 +101,5 @@ void CanWorker::stopWorker() {
 
 	//TODO(lmark): add mutex for outside stopping
 	working = false;
-	canNodeHandler->destroy_current_node();
+	canNodeHandler->destroyCurrentNode();
 }
