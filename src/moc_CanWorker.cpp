@@ -20,7 +20,7 @@
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_CanWorker_t {
     QByteArrayData data[9];
-    char stringdata0[80];
+    char stringdata0[99];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -35,14 +35,14 @@ QT_MOC_LITERAL(2, 19, 0), // ""
 QT_MOC_LITERAL(3, 20, 5), // "error"
 QT_MOC_LITERAL(4, 26, 3), // "err"
 QT_MOC_LITERAL(5, 30, 20), // "nodeInformationFound"
-QT_MOC_LITERAL(6, 51, 11), // "NodeInfo_t*"
-QT_MOC_LITERAL(7, 63, 8), // "nodeInfo"
-QT_MOC_LITERAL(8, 72, 7) // "process"
+QT_MOC_LITERAL(6, 51, 24), // "std::vector<NodeInfo_t>*"
+QT_MOC_LITERAL(7, 76, 14), // "activeNodeInfo"
+QT_MOC_LITERAL(8, 91, 7) // "process"
 
     },
     "CanWorker\0finished\0\0error\0err\0"
-    "nodeInformationFound\0NodeInfo_t*\0"
-    "nodeInfo\0process"
+    "nodeInformationFound\0std::vector<NodeInfo_t>*\0"
+    "activeNodeInfo\0process"
 };
 #undef QT_MOC_LITERAL
 
@@ -86,7 +86,7 @@ void CanWorker::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         switch (_id) {
         case 0: _t->finished(); break;
         case 1: _t->error((*reinterpret_cast< QString(*)>(_a[1]))); break;
-        case 2: _t->nodeInformationFound((*reinterpret_cast< NodeInfo_t*(*)>(_a[1]))); break;
+        case 2: _t->nodeInformationFound((*reinterpret_cast< std::vector<NodeInfo_t>*(*)>(_a[1]))); break;
         case 3: _t->process(); break;
         default: ;
         }
@@ -106,7 +106,7 @@ void CanWorker::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
             }
         }
         {
-            typedef void (CanWorker::*_t)(NodeInfo_t * );
+            typedef void (CanWorker::*_t)(std::vector<NodeInfo_t> * );
             if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&CanWorker::nodeInformationFound)) {
                 *result = 2;
             }
@@ -164,7 +164,7 @@ void CanWorker::error(QString _t1)
 }
 
 // SIGNAL 2
-void CanWorker::nodeInformationFound(NodeInfo_t * _t1)
+void CanWorker::nodeInformationFound(std::vector<NodeInfo_t> * _t1)
 {
     void *_a[] = { Q_NULLPTR, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
     QMetaObject::activate(this, &staticMetaObject, 2, _a);

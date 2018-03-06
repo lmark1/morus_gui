@@ -1,4 +1,5 @@
 #include "CanWorker.h"
+#include "NodeHandler.h"
 
 const int NODE_TIMEOUT = 1000;
 

@@ -1,14 +1,16 @@
 #include "MorusMainWindow.h"
-#include "NodeHandler.h"
 #include "UiMorusMainWindow.h"
+
+#include "CanWorker.h"
+#include "NodeHandler.h"
 
 const QString DEFAULT_IFACE_NAME = "can0";
 const int DEFAULT_NODE_ID = 127;
 
 MorusMainWindow::MorusMainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MorusMainWindow)
-{
+    ui(new Ui::MorusMainWindow) {
+
     ui->setupUi(this);
     
     // Set initial node-id and node interface values
@@ -17,16 +19,16 @@ MorusMainWindow::MorusMainWindow(QWidget *parent) :
     ui->canIfaceNamePlainTextEdit->setPlainText(DEFAULT_IFACE_NAME);
 }
 
-MorusMainWindow::~MorusMainWindow()
-{
+MorusMainWindow::~MorusMainWindow() {
+
 	//TODO(lmark): Stop worker and thread
     delete ui;
     delete canNodeWorker;
     delete canThread;
 }
 
-void MorusMainWindow::on_startLocalNodeButton_clicked()
-{   
+void MorusMainWindow::on_startLocalNodeButton_clicked() {
+
 	cout << "Hello from start button";
     // Get node id and interface name from GUI
     int node_id = ui->localNodeIDSpinBox->value();
@@ -61,8 +63,10 @@ void MorusMainWindow::on_startLocalNodeButton_clicked()
     connect(canThread, SIGNAL( finished() ),		// to deleteLater() - QObject SLOT that
     		canThread, SLOT( deleteLater() ));		// marks objects for deletion
 
-    connect(canNodeWorker, SIGNAL( nodeInformationFound(NodeInfo_t) ),
-    		this, SLOT( updateCanMonitor(NodeInfo_t) ));
+    connect(canNodeWorker, // Connect information found signal...
+    		SIGNAL( nodeInformationFound(std::vector<NodeInfo_t>) ),
+    		this, // ... to the update monitor slot.
+			SLOT( updateCanMonitor(std::vector<NodeInfo_t>) ));
 
     canThread->start();
 
@@ -82,8 +86,10 @@ void MorusMainWindow::handleErrorMessage(QString error) {
 	this->generateMessageBox(error.toStdString());
 }
 
-void MorusMainWindow::updateCanMonitor(NodeInfo_t *nodeInfo) {
-	// TODO(lmark): update canMonitor
+void MorusMainWindow::updateCanMonitor(
+		std::vector<NodeInfo_t> *activeNodesInfo) {
+
+	cout << activeNodesInfo->size();
 }
 
 void MorusMainWindow::generateMessageBox(std::string message) {

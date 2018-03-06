@@ -20,7 +20,7 @@
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_MorusMainWindow_t {
     QByteArrayData data[9];
-    char stringdata0[127];
+    char stringdata0[147];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -36,13 +36,14 @@ QT_MOC_LITERAL(3, 49, 18), // "handleErrorMessage"
 QT_MOC_LITERAL(4, 68, 5), // "error"
 QT_MOC_LITERAL(5, 74, 14), // "workerFinished"
 QT_MOC_LITERAL(6, 89, 16), // "updateCanMonitor"
-QT_MOC_LITERAL(7, 106, 11), // "NodeInfo_t*"
-QT_MOC_LITERAL(8, 118, 8) // "nodeInfo"
+QT_MOC_LITERAL(7, 106, 24), // "std::vector<NodeInfo_t>*"
+QT_MOC_LITERAL(8, 131, 15) // "activeNodesInfo"
 
     },
     "MorusMainWindow\0on_startLocalNodeButton_clicked\0"
     "\0handleErrorMessage\0error\0workerFinished\0"
-    "updateCanMonitor\0NodeInfo_t*\0nodeInfo"
+    "updateCanMonitor\0std::vector<NodeInfo_t>*\0"
+    "activeNodesInfo"
 };
 #undef QT_MOC_LITERAL
 
@@ -83,7 +84,7 @@ void MorusMainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int 
         case 0: _t->on_startLocalNodeButton_clicked(); break;
         case 1: _t->handleErrorMessage((*reinterpret_cast< QString(*)>(_a[1]))); break;
         case 2: _t->workerFinished(); break;
-        case 3: _t->updateCanMonitor((*reinterpret_cast< NodeInfo_t*(*)>(_a[1]))); break;
+        case 3: _t->updateCanMonitor((*reinterpret_cast< std::vector<NodeInfo_t>*(*)>(_a[1]))); break;
         default: ;
         }
     }

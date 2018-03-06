@@ -6,8 +6,13 @@
 
 #include <string>
 
-#include "CanWorker.h"
-#include "NodeHandler.h"
+#include "NodeInfo.h"
+
+// Forward declaration of CanWorker
+class CanWorker;
+
+// Forward declaration of NodeHandler
+class NodeHandler;
 
 /**
  * Default CAN interface name. Set as initial value in GUI.
@@ -59,7 +64,7 @@ class MorusMainWindow : public QMainWindow
 		/**
 		 * Update canMonitor widget with new information.
 		 */
-		void updateCanMonitor(NodeInfo_t *nodeInfo);
+		void updateCanMonitor(std::vector<NodeInfo_t> *activeNodesInfo);
 
 	private:
 

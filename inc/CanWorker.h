@@ -4,7 +4,10 @@
 #include <QObject>
 #include <QEventLoop>
 
-#include "NodeHandler.h"
+#include "NodeInfo.h"
+
+// Forward declaration of the NodeHandler class.
+class NodeHandler;
 
 /**
  * Timeout in milliseconds. Used when spinning nodes.
@@ -78,7 +81,7 @@ signals:
      * In current implementation this will be emitted from inside the
      * NodeHandler object where the NodeInfoCollector is found.
      */
-    void nodeInformationFound(NodeInfo_t *nodeInfo);
+    void nodeInformationFound(std::vector<NodeInfo_t> *activeNodeInfo);
 
 private:
 

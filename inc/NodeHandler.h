@@ -4,12 +4,18 @@
 #include <QMessageBox>
 #include <QString>
 
-#include <iostream>
+#include <uavcan/uavcan.hpp>
 
-#include "PlatformLinux.h"
-#include "NodeInfoCollector.h"
+#include "NodeInfo.h"
 
 using namespace std;
+
+// Forward declaration of NodeInfoCollector
+class NodeInfoCollector;
+
+// Forward declaration of CanWorker
+class CanWorker;
+
 
 /**
  * Memory pool size largely depends on the number of CAN ifaces and on
@@ -23,25 +29,6 @@ typedef uavcan::Node<NodeMemoryPoolSize> CustomNode_t;
  * Default node name used by node handler.
  */
 extern const uavcan::NodeStatusProvider::NodeName DEFAULT_NODE_NAME; 
-
-// Forward declaration for the CanWorker class.
-class CanWorker;
-
-/**
- * Structure defining node information.
- */
-typedef struct{
-	uint8_t id;
-	std::string nodeName;
-	uint8_t softwareVersionMajor;
-	uint8_t hardwareVersionMajor;
-	uint8_t softwareVersionMinor;
-	uint8_t hardwareVersionMinor;
-	uint32_t uptime;
-	uint8_t mode;
-	uint8_t health;
-	uint32_t vendorSpecificStatusCode;
-} NodeInfo_t;
 
 /*
  * This class is used for handling CAN nodes.
@@ -107,13 +94,18 @@ class NodeHandler {
         /**
 		 * Node information collector attached to the canNode.
 		 */
-		NodeInfoCollector collector;
+		NodeInfoCollector *collector = NULL;;
 
 		/**
-		 * Can worker object reference used for emiting signals to the
+		 * Can worker object reference used for emitting signals to the
 		 * UI thread.
 		 */
 		CanWorker *canWorker = NULL;
+
+		/**
+		 * Vector of active nodes found by the collector.
+		 */
+		std::vector<NodeInfo_t> activeNodesInfo;
 };
 
 
