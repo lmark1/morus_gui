@@ -19,8 +19,8 @@
 
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_CanWorker_t {
-    QByteArrayData data[6];
-    char stringdata0[38];
+    QByteArrayData data[9];
+    char stringdata0[80];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -34,10 +34,15 @@ QT_MOC_LITERAL(1, 10, 8), // "finished"
 QT_MOC_LITERAL(2, 19, 0), // ""
 QT_MOC_LITERAL(3, 20, 5), // "error"
 QT_MOC_LITERAL(4, 26, 3), // "err"
-QT_MOC_LITERAL(5, 30, 7) // "process"
+QT_MOC_LITERAL(5, 30, 20), // "nodeInformationFound"
+QT_MOC_LITERAL(6, 51, 11), // "NodeInfo_t*"
+QT_MOC_LITERAL(7, 63, 8), // "nodeInfo"
+QT_MOC_LITERAL(8, 72, 7) // "process"
 
     },
-    "CanWorker\0finished\0\0error\0err\0process"
+    "CanWorker\0finished\0\0error\0err\0"
+    "nodeInformationFound\0NodeInfo_t*\0"
+    "nodeInfo\0process"
 };
 #undef QT_MOC_LITERAL
 
@@ -47,23 +52,25 @@ static const uint qt_meta_data_CanWorker[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-       3,   14, // methods
+       4,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
        0,       // flags
-       2,       // signalCount
+       3,       // signalCount
 
  // signals: name, argc, parameters, tag, flags
-       1,    0,   29,    2, 0x06 /* Public */,
-       3,    1,   30,    2, 0x06 /* Public */,
+       1,    0,   34,    2, 0x06 /* Public */,
+       3,    1,   35,    2, 0x06 /* Public */,
+       5,    1,   38,    2, 0x06 /* Public */,
 
  // slots: name, argc, parameters, tag, flags
-       5,    0,   33,    2, 0x0a /* Public */,
+       8,    0,   41,    2, 0x0a /* Public */,
 
  // signals: parameters
     QMetaType::Void,
     QMetaType::Void, QMetaType::QString,    4,
+    QMetaType::Void, 0x80000000 | 6,    7,
 
  // slots: parameters
     QMetaType::Void,
@@ -79,7 +86,8 @@ void CanWorker::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         switch (_id) {
         case 0: _t->finished(); break;
         case 1: _t->error((*reinterpret_cast< QString(*)>(_a[1]))); break;
-        case 2: _t->process(); break;
+        case 2: _t->nodeInformationFound((*reinterpret_cast< NodeInfo_t*(*)>(_a[1]))); break;
+        case 3: _t->process(); break;
         default: ;
         }
     } else if (_c == QMetaObject::IndexOfMethod) {
@@ -95,6 +103,12 @@ void CanWorker::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
             typedef void (CanWorker::*_t)(QString );
             if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&CanWorker::error)) {
                 *result = 1;
+            }
+        }
+        {
+            typedef void (CanWorker::*_t)(NodeInfo_t * );
+            if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&CanWorker::nodeInformationFound)) {
+                *result = 2;
             }
         }
     }
@@ -125,13 +139,13 @@ int CanWorker::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 3)
+        if (_id < 4)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 3;
+        _id -= 4;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 3)
+        if (_id < 4)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 3;
+        _id -= 4;
     }
     return _id;
 }
@@ -147,5 +161,12 @@ void CanWorker::error(QString _t1)
 {
     void *_a[] = { Q_NULLPTR, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
     QMetaObject::activate(this, &staticMetaObject, 1, _a);
+}
+
+// SIGNAL 2
+void CanWorker::nodeInformationFound(NodeInfo_t * _t1)
+{
+    void *_a[] = { Q_NULLPTR, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
+    QMetaObject::activate(this, &staticMetaObject, 2, _a);
 }
 QT_END_MOC_NAMESPACE

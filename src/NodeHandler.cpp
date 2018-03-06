@@ -4,9 +4,9 @@
 
 const uavcan::NodeStatusProvider::NodeName DEFAULT_NODE_NAME = "morus.can.node";
 
-NodeHandler::NodeHandler() {
+NodeHandler::NodeHandler(CanWorker& worker) {
 
-	canNode = NULL;
+	this->canWorker = &worker;
 }
 
 NodeHandler::~NodeHandler() {
@@ -75,10 +75,17 @@ int NodeHandler::spinCurrentNode(int timeout_ms) {
 		return -1;
 	}
 
+	// Collect available node information
+	collectNodeInformation();
+
 	const int res = canNode->spin(
 			uavcan::MonotonicDuration::fromMSec(timeout_ms));
 
 	return res;
+}
+
+void NodeHandler::collectNodeInformation() {
+	// TODO Collect information here and emit worker signal...
 }
 
 void NodeHandler::destroyCurrentNode() {

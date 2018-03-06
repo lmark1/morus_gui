@@ -12,8 +12,12 @@
 extern const int NODE_TIMEOUT;
 
 /**
- *	This class is used as a wrapper for node_handler. 
+ *	This class is used as a wrapper for node_handler.
  *	Implemented for use with QThreads.
+ *
+ *	- 	Added node collecting functionality through the
+ *		node handler. It is implemented here in order to communicate
+ *		Node information to the main(UI) thread via signals.
  */
 class CanWorker : public QObject {
     Q_OBJECT
@@ -68,7 +72,14 @@ signals:
      * Emit this signal when something goes wrong.
      */
     void error(QString err);
- 
+
+    /**
+     * Emit this signal when new node information is found.
+     * In current implementation this will be emitted from inside the
+     * NodeHandler object where the NodeInfoCollector is found.
+     */
+    void nodeInformationFound(NodeInfo_t *nodeInfo);
+
 private:
 
     /**

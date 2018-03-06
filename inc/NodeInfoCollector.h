@@ -26,16 +26,40 @@ class NodeInfoCollector final : public uavcan::INodeInfoListener{
 		NodeInfoCollector();
 		~NodeInfoCollector();
 
-		// Declaring virtual methods concrete implementation
-		// Explanation found in uavcan/protocol/node_infor_retriever.hpp
+		/**
+		 * Called when a response to GetNodeInfo request is received.
+		 * This happens shortly after the node restarts or
+		 * becomes online for the first time.
+		 *
+		 * @param node_id   Node ID of the node
+		 * @param response  Node info struct
+		 */
 		void handleNodeInfoRetrieved(
 				NodeID node_id,
 				const protocol::GetNodeInfo::Response& node_info
 				) override;
+
+		/**
+		 * Called when the retriever decides that the node does not
+		 * support the GetNodeInfo service. This method will never be
+		 * called if the number of attempts is unlimited.
+		 */
 		void handleNodeInfoUnavailable(NodeID node_id) override;
+
+		/**
+		 * This call is routed directly from @ref NodeStatusMonitor.
+		 *
+		 * @param event     Node status change event
+		 */
 		void handleNodeStatusChange(
 				const NodeStatusMonitor::NodeStatusChangeEvent& event
 				) override;
+
+		/**
+		 * This call is routed directly from @ref NodeStatusMonitor.
+		 *
+		 * @param msg       Node status message
+		 */
 		void handleNodeStatusMessage(
 				const ReceivedDataStructure<protocol::NodeStatus>& msg
 				) override;

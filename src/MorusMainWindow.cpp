@@ -61,6 +61,9 @@ void MorusMainWindow::on_startLocalNodeButton_clicked()
     connect(canThread, SIGNAL( finished() ),		// to deleteLater() - QObject SLOT that
     		canThread, SLOT( deleteLater() ));		// marks objects for deletion
 
+    connect(canNodeWorker, SIGNAL( nodeInformationFound(NodeInfo_t) ),
+    		this, SLOT( updateCanMonitor(NodeInfo_t) ));
+
     canThread->start();
 
     // Disable start button after generating a node
@@ -77,6 +80,10 @@ void MorusMainWindow::handleErrorMessage(QString error) {
 
 	// Generate message box about the error
 	this->generateMessageBox(error.toStdString());
+}
+
+void MorusMainWindow::updateCanMonitor(NodeInfo_t *nodeInfo) {
+	// TODO(lmark): update canMonitor
 }
 
 void MorusMainWindow::generateMessageBox(std::string message) {

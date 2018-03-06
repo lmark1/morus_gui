@@ -48,7 +48,7 @@ void CanWorker::process() {
 
 int CanWorker::initializeNodeHandler() {
 
-	canNodeHandler = new NodeHandler();
+	canNodeHandler = new NodeHandler(*this);
 
 	try {
 

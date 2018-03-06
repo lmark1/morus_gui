@@ -56,6 +56,11 @@ class MorusMainWindow : public QMainWindow
 		 */
 		void workerFinished();
 
+		/**
+		 * Update canMonitor widget with new information.
+		 */
+		void updateCanMonitor(NodeInfo_t *nodeInfo);
+
 	private:
 
 		/**

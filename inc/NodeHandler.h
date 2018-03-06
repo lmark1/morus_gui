@@ -9,7 +9,6 @@
 #include "PlatformLinux.h"
 #include "NodeInfoCollector.h"
 
-
 using namespace std;
 
 /**
@@ -25,6 +24,25 @@ typedef uavcan::Node<NodeMemoryPoolSize> CustomNode_t;
  */
 extern const uavcan::NodeStatusProvider::NodeName DEFAULT_NODE_NAME; 
 
+// Forward declaration for the CanWorker class.
+class CanWorker;
+
+/**
+ * Structure defining node information.
+ */
+typedef struct{
+	uint8_t id;
+	std::string nodeName;
+	uint8_t softwareVersionMajor;
+	uint8_t hardwareVersionMajor;
+	uint8_t softwareVersionMinor;
+	uint8_t hardwareVersionMinor;
+	uint32_t uptime;
+	uint8_t mode;
+	uint8_t health;
+	uint32_t vendorSpecificStatusCode;
+} NodeInfo_t;
+
 /*
  * This class is used for handling CAN nodes.
  */
@@ -35,7 +53,7 @@ class NodeHandler {
         /**
          *  Initialize Node handler.
          */
-        NodeHandler();
+        NodeHandler(CanWorker& worker);
 
         /**
          *  Shuts down the node handler, shuts down all active nodes.
@@ -69,10 +87,10 @@ class NodeHandler {
         void destroyCurrentNode();
 
         /**
-		 * Node information collector attached to the canNode.
-		 * Exposed as public in order for worker to easily access it.
+		 * This method collects node information through the
+		 * and emits it using CanWorker signals to the main UI thread.
 		 */
-		NodeInfoCollector collector;
+		void collectNodeInformation();
 
     private:
 
@@ -85,6 +103,17 @@ class NodeHandler {
          * Pointer to CAN node.
          */
         CustomNode_t *canNode = NULL;
+
+        /**
+		 * Node information collector attached to the canNode.
+		 */
+		NodeInfoCollector collector;
+
+		/**
+		 * Can worker object reference used for emiting signals to the
+		 * UI thread.
+		 */
+		CanWorker *canWorker = NULL;
 };
 
 
