@@ -8,8 +8,8 @@ const int NODE_TIMEOUT = 1000;
 CanWorker::CanWorker(
 		std::string iface_name,
 		int node_id,
-		QObject *parent) : QObject(parent) {
-
+		QObject *parent) : QObject(parent)
+{
 	this->nodeID_ = node_id;
 	this->ifaceName_ = iface_name;
 
@@ -20,8 +20,8 @@ CanWorker::CanWorker(
 	working_ = true;
 }
  
-CanWorker::~CanWorker() {
-
+CanWorker::~CanWorker()
+{
 	qDebug() << "CanWorker::~CanWorker() "
 			"- destructor called!";
 	// Destroy CAN node handled by the node_handler
@@ -31,27 +31,30 @@ CanWorker::~CanWorker() {
 	delete canNodeHandler_;
 }
 
-void CanWorker::process() {
-
+void CanWorker::process()
+{
 	qDebug() << "CanWorker::process() "
 			"- Initializing node handler";
 	const int node_init_res = initializeNodeHandler();
 
 	// Stop worker if initialization failed
-	if (node_init_res < 0) {
+	if (node_init_res < 0)
+	{
 		qCritical() << "CanWorker::process() "
 				"- NodeHandler initialization failed.";
 		stopWorker();
 	}
 
-	if (working_) {
+	// Check if working for debug output
+	if (working_)
+	{
 		qDebug() << "CanWorker::process() "
 				"- Starting work.";
 	}
 
 	// Do the work... spin the nodes
-	while (working_) {
-
+	while (working_)
+	{
 		qDebug() << "CanWorker::process() "
 				"- Doing work.";
 		const int res_id = runNodeHandler();
@@ -69,21 +72,21 @@ void CanWorker::process() {
 	emit finished();
 }
 
-int CanWorker::initializeNodeHandler() {
-
+int CanWorker::initializeNodeHandler()
+{
 	canNodeHandler_ = new NodeHandler(*this);
 
-	try {
-
+	try
+	{
 		qDebug() << "CanWorker::initializeNodeHandler() "
 				"- trying to initialize node handler.";
 		// Try creating new node.
 		const int res_id = canNodeHandler_->
 				createNewNode(ifaceName_, nodeID_);
 		return res_id;
-
-	}  catch (const std::exception &ex) {
-
+	}
+	catch (const std::exception &ex)
+	{
 		qCritical() << "CanWorker::initializeNodeHandler() "
 				"- Failed to initialized node handler.";
 		// Emit error message
@@ -102,15 +105,16 @@ int CanWorker::initializeNodeHandler() {
 
 int CanWorker::runNodeHandler() {
 
-	try {
-
+	try
+	{
 		// Try spinning the current node
 		const int res_id = canNodeHandler_->spinCurrentNode(NODE_TIMEOUT);
 		return res_id;
-
-	} catch (const std::exception& ex) {
-
-		qCritical() << "Failed to run node handler.";
+	}
+	catch (const std::exception& ex)
+	{
+		qCritical() << "CanWorker::runNodeHandler() "
+				"- Failed to run node handler.";
 
 		// Emit error message
 		std::string error_message(ex.what());
@@ -123,14 +127,11 @@ int CanWorker::runNodeHandler() {
 
 		return -1;
 	}
-
 }
 
-void CanWorker::stopWorker() {
-
+void CanWorker::stopWorker()
+{
 	qDebug() << "CanWorker::stopWorker() "
 			"- Stopping CAN worker.";
-	mutex_.lock();
 	working_ = false;
-	mutex_.unlock();
 }

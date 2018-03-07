@@ -10,21 +10,21 @@
 
 const uavcan::NodeStatusProvider::NodeName DEFAULT_NODE_NAME = "morus.can.node";
 
-NodeHandler::NodeHandler(CanWorker& worker) {
-
+NodeHandler::NodeHandler(CanWorker& worker)
+{
 	this->canWorker_ = &worker;
 }
 
-NodeHandler::~NodeHandler() {
-
+NodeHandler::~NodeHandler()
+{
 	qDebug() << "NodeHandler::~NodeHandler() "
 			"- destructor called.";
 
 	delete canNode_;
 }
 
-int NodeHandler::createNewNode(std::string ifaceName, int nodeID) {
-
+int NodeHandler::createNewNode(std::string ifaceName, int nodeID)
+{
 	qDebug() << "NodeHandler::createNewNode() "
 			"- Started node creation.";
 
@@ -46,16 +46,16 @@ int NodeHandler::createNewNode(std::string ifaceName, int nodeID) {
      * header file uavcan/error.hpp.
      */
     const int nodeStartRes = canNode_->start();
-    if (nodeStartRes < 0) {
+    if (nodeStartRes < 0)
+    {
     	qDebug() << "NodeHandler::createNewNode() "
     			"- Unable to start the CAN node.";
         return nodeStartRes;
     }
 
-    // Initialize the node info retriever object
+    // Initialize the node info retriever and collector
     uavcan::NodeInfoRetriever retriever(*canNode_);
-    qDebug() << "NodeHandler::createNewNode() "
-    		"- Initialized retriever.";
+    collector_ = new NodeInfoCollector();
 
     /*
 	 * Registering our collector against the retriever object.
@@ -88,8 +88,8 @@ int NodeHandler::createNewNode(std::string ifaceName, int nodeID) {
     return nodeStartRes;
 }
 
-int NodeHandler::spinCurrentNode(int timeout_ms) {
-
+int NodeHandler::spinCurrentNode(int timeout_ms)
+{
 	/*
 	 * If there's nothing to do, the thread blocks inside the driver's
 	 * method select() until the timeout expires or an error occurs
@@ -97,7 +97,8 @@ int NodeHandler::spinCurrentNode(int timeout_ms) {
 	 */
 
 	// If node is not created return -1
-	if (!nodeWorking_) {
+	if (!nodeWorking_)
+	{
 		qDebug() << "NodeHandler::spinCurrentNode() "
 				"- Unable to spin node. No longer working.\n";
 		return -1;
@@ -110,22 +111,23 @@ int NodeHandler::spinCurrentNode(int timeout_ms) {
 	const int res = canNode_->spin(
 			uavcan::MonotonicDuration::fromMSec(timeout_ms));
 
-	qDebug() << "NodeHandler - spin node.\n";
+	qDebug() << "NodeHandler::spinCurrentNode() "
+			"- spin node.\n";
 
 	return res;
 }
 
-void NodeHandler::collectNodeInformation() {
-
+void NodeHandler::collectNodeInformation()
+{
 	// Clear currently active nodes
 	activeNodesInfo_.clear();
 
 	NodeInfo_t tempNodeInfo;
-	for (uint8_t i = 1; i <= uavcan::NodeID::Max; i++) {
-
+	for (uint8_t i = 1; i <= uavcan::NodeID::Max; i++)
+	{
 		// Try to get new node information
-		if (auto p = collector_->getNodeInfo(i)) {
-
+		if (auto p = collector_->getNodeInfo(i))
+		{
 			tempNodeInfo.id = int(i);
 			tempNodeInfo.nodeName = std::string(p->name.c_str());
 			tempNodeInfo.softwareVersionMinor = p->software_version.minor;
@@ -145,15 +147,15 @@ void NodeHandler::collectNodeInformation() {
 	emit canWorker_->nodeInformationFound(&activeNodesInfo_);
 }
 
-void NodeHandler::destroyCurrentNode() {
-
+void NodeHandler::destroyCurrentNode()
+{
 	qDebug() << "NodeHandler::destroyCurrentNode()"
 			"- Current node is destroyed.";
 	canNode_ = NULL;
 }
 
-void NodeHandler::stopCurrentNode() {
-
+void NodeHandler::stopCurrentNode()
+{
 	qDebug() << "NodeHandler::stopCurrentNode() "
 			"- Current node is stopped.";
 	nodeWorking_ = false;

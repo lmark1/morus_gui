@@ -100,7 +100,7 @@ class NodeHandler {
         /**
 		 * Node information collector attached to the canNode.
 		 */
-		NodeInfoCollector *collector_ = NULL;;
+		NodeInfoCollector *collector_ = NULL;
 
 		/**
 		 * Can worker object reference used for emitting signals to the

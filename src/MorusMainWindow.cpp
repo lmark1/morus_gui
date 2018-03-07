@@ -27,6 +27,15 @@ MorusMainWindow::~MorusMainWindow() {
 	qDebug() << "MorusMainWindow::~MorusMainWindow "
 			"- destructor called.";
 
+
+	// Stop can worker if it's initialized
+	if (canNodeWorker_ != NULL) {
+		canNodeWorker_->stopWorker();
+	}
+
+
+	// canWorker and canThread are connected to
+	// the deleteLater() funcion when they are finished
     delete ui_;
 }
 
@@ -78,6 +87,7 @@ void MorusMainWindow::on_startLocalNodeButton_clicked() {
 
 void MorusMainWindow::workerFinished() {
 
+	qDebug() << "MorusMainWindow::workerFinished()";
 	// Re-enable the start button when current current CAN thread is finished
 	ui_->startLocalNodeButton->setEnabled(true);
 }
@@ -91,7 +101,9 @@ void MorusMainWindow::handleErrorMessage(QString error) {
 void MorusMainWindow::updateCanMonitor(
 		std::vector<NodeInfo_t> *activeNodesInfo) {
 
-	cout << activeNodesInfo->size();
+
+	qInfo() << "MorusMainWindow::updateCanMonitor() "
+			"- Number of active nodes: " << activeNodesInfo->size();
 }
 
 void MorusMainWindow::generateMessageBox(std::string message) {
