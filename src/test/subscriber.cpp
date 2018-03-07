@@ -78,7 +78,7 @@ public:
             const int res = node_.spin(uavcan::MonotonicDuration::getInfinite());
             if (res < 0)
             {
-                std::cerr << "Transient failure: " << res << std::endl;
+                std::qDebug() << "Transient failure: " << res << std::endl;
             }
         }
     }
@@ -88,7 +88,7 @@ int main(int argc, const char** argv)
 {
     if (argc < 2)
     {
-        std::cerr << "Usage: " << argv[0] << " <node-id>" << std::endl;
+        std::qDebug() << "Usage: " << argv[0] << " <node-id>" << std::endl;
         return 1;
     }
 

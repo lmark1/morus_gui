@@ -1,3 +1,5 @@
+#include <QDebug>
+
 #include <cstddef>
 #include <iostream>
 
@@ -10,37 +12,50 @@ const uavcan::NodeStatusProvider::NodeName DEFAULT_NODE_NAME = "morus.can.node";
 
 NodeHandler::NodeHandler(CanWorker& worker) {
 
-	this->canWorker = &worker;
+	this->canWorker_ = &worker;
 }
 
 NodeHandler::~NodeHandler() {
 
-	delete canNode;
+	qDebug() << "NodeHandler::~NodeHandler() "
+			"- destructor called.";
+
+	delete canNode_;
 }
 
 int NodeHandler::createNewNode(std::string ifaceName, int nodeID) {
+
+	qDebug() << "NodeHandler::createNewNode() "
+			"- Started node creation.";
 
 	/*
      * Node initialization.
      * Node ID and name are required; otherwise, the node will refuse to start.
      * Version info is optional.
      */
-	canNode = &getCanNode(ifaceName);
-	canNode->setNodeID(nodeID);
-	canNode->setName(DEFAULT_NODE_NAME);
+	canNode_ = &getCanNode(ifaceName);
+	canNode_->setNodeID(nodeID);
+	canNode_->setName(DEFAULT_NODE_NAME);
+
+	qDebug() << "NodeHandler::createNewNode() "
+			"- Node successfully created.";
 
 	/*
      * Start the node.
      * All returnable error codes are listed in the
      * header file uavcan/error.hpp.
      */
-    const int nodeStartRes = canNode->start();
+    const int nodeStartRes = canNode_->start();
     if (nodeStartRes < 0) {
+    	qDebug() << "NodeHandler::createNewNode() "
+    			"- Unable to start the CAN node.";
         return nodeStartRes;
     }
 
     // Initialize the node info retriever object
-    uavcan::NodeInfoRetriever retriever(*canNode);
+    uavcan::NodeInfoRetriever retriever(*canNode_);
+    qDebug() << "NodeHandler::createNewNode() "
+    		"- Initialized retriever.";
 
     /*
 	 * Registering our collector against the retriever object.
@@ -48,20 +63,27 @@ int NodeHandler::createNewNode(std::string ifaceName, int nodeID) {
 	 * dynamic memory pool, therefore the operation may fail if the
 	 * node runs out of memory in the pool.
 	 */
-	const int addListenerRes = retriever.addListener(collector);
+	const int addListenerRes = retriever.addListener(collector_);
 	if (addListenerRes < 0)
 	{
+		qDebug() << "NodeHandler::createNewNode() "
+				"- Unable to start the NodeListener.";
 		throw std::runtime_error(
 				"Failed to add listener; error: " +
 				std::to_string(addListenerRes));
 	}
+	qDebug() << "NodeHandler::createNewNode() "
+			"- Added node listener.";
 
     /*
      * Informing other nodes that we're ready to work.
      * Default mode is INITIALIZING.
      */
-    canNode->setModeOperational();
-    nodeCreated = true;
+    canNode_->setModeOperational();
+    nodeWorking_ = true;
+
+    qDebug() << "NodeHandler::createNewNode() "
+    		"- Successfully created the node.";
 
     return nodeStartRes;
 }
@@ -75,15 +97,20 @@ int NodeHandler::spinCurrentNode(int timeout_ms) {
 	 */
 
 	// If node is not created return -1
-	if (!nodeCreated) {
+	if (!nodeWorking_) {
+		qDebug() << "NodeHandler::spinCurrentNode() "
+				"- Unable to spin node. No longer working.\n";
 		return -1;
 	}
 
 	// Collect available node information
 	collectNodeInformation();
 
-	const int res = canNode->spin(
+	// Spin the node
+	const int res = canNode_->spin(
 			uavcan::MonotonicDuration::fromMSec(timeout_ms));
+
+	qDebug() << "NodeHandler - spin node.\n";
 
 	return res;
 }
@@ -91,13 +118,13 @@ int NodeHandler::spinCurrentNode(int timeout_ms) {
 void NodeHandler::collectNodeInformation() {
 
 	// Clear currently active nodes
-	activeNodesInfo.clear();
+	activeNodesInfo_.clear();
 
 	NodeInfo_t tempNodeInfo;
 	for (uint8_t i = 1; i <= uavcan::NodeID::Max; i++) {
 
 		// Try to get new node information
-		if (auto p = collector->getNodeInfo(i)) {
+		if (auto p = collector_->getNodeInfo(i)) {
 
 			tempNodeInfo.id = int(i);
 			tempNodeInfo.nodeName = std::string(p->name.c_str());
@@ -110,19 +137,27 @@ void NodeHandler::collectNodeInformation() {
 			tempNodeInfo.vendorSpecificStatusCode = p->status
 					.vendor_specific_status_code;
 
-			activeNodesInfo.push_back(tempNodeInfo);
+			activeNodesInfo_.push_back(tempNodeInfo);
 		}
 	}
 
-	emit canWorker->nodeInformationFound(&activeNodesInfo);
+	// Emit new node information to the main thread
+	emit canWorker_->nodeInformationFound(&activeNodesInfo_);
 }
 
 void NodeHandler::destroyCurrentNode() {
 
-	canNode = NULL;
-	nodeCreated = false;
+	qDebug() << "NodeHandler::destroyCurrentNode()"
+			"- Current node is destroyed.";
+	canNode_ = NULL;
 }
 
+void NodeHandler::stopCurrentNode() {
+
+	qDebug() << "NodeHandler::stopCurrentNode() "
+			"- Current node is stopped.";
+	nodeWorking_ = false;
+}
 
 CustomNode_t& getCanNode(std::string iface_name)
 {

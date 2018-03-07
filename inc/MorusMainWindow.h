@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QThread>
+#include <QCloseEvent>
 
 #include "NodeInfo.h"
 

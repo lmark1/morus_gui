@@ -74,6 +74,12 @@ class NodeHandler {
         void destroyCurrentNode();
 
         /**
+         * Stops current node from doing further work. Unable to spin a node
+         * in this state (Negative value will be returned).
+         */
+        void stopCurrentNode();
+
+        /**
 		 * This method collects node information through the
 		 * and emits it using CanWorker signals to the main UI thread.
 		 */
@@ -84,28 +90,28 @@ class NodeHandler {
         /**
          * Flag indicating if node is created.
          */
-        bool nodeCreated = false;
+        bool nodeWorking_ = false;
 
         /**
          * Pointer to CAN node.
          */
-        CustomNode_t *canNode = NULL;
+        CustomNode_t *canNode_ = NULL;
 
         /**
 		 * Node information collector attached to the canNode.
 		 */
-		NodeInfoCollector *collector = NULL;;
+		NodeInfoCollector *collector_ = NULL;;
 
 		/**
 		 * Can worker object reference used for emitting signals to the
 		 * UI thread.
 		 */
-		CanWorker *canWorker = NULL;
+		CanWorker *canWorker_ = NULL;
 
 		/**
 		 * Vector of active nodes found by the collector.
 		 */
-		std::vector<NodeInfo_t> activeNodesInfo;
+		std::vector<NodeInfo_t> activeNodesInfo_;
 };
 
 

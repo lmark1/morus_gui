@@ -1,3 +1,5 @@
+#include <QDebug>
+
 #include <string>
 
 #include "MorusMainWindow.h"
@@ -22,16 +24,15 @@ MorusMainWindow::MorusMainWindow(QWidget *parent) :
 
 MorusMainWindow::~MorusMainWindow() {
 
-	//TODO(lmark): Stop worker and thread
+	qDebug() << "MorusMainWindow::~MorusMainWindow "
+			"- destructor called.";
+
     delete ui_;
-    delete canNodeWorker_;
-    delete canThread_;
 }
 
 void MorusMainWindow::on_startLocalNodeButton_clicked() {
 
-	cout << "Hello from start button";
-    // Get node id and interface name from GUI
+	// Get node id and interface name from GUI
     int node_id = ui_->localNodeIDSpinBox->value();
     std::string iface_name = ui_->
     		canIfaceNamePlainTextEdit->
@@ -65,9 +66,9 @@ void MorusMainWindow::on_startLocalNodeButton_clicked() {
     		canThread_, SLOT( deleteLater() ));		// marks objects for deletion
 
     connect(canNodeWorker_, // Connect information found signal...
-    		SIGNAL( nodeInformationFound(std::vector<NodeInfo_t>) ),
+    		SIGNAL( nodeInformationFound(std::vector<NodeInfo_t>*) ),
     		this, // ... to the update monitor slot.
-			SLOT( updateCanMonitor(std::vector<NodeInfo_t>) ));
+			SLOT( updateCanMonitor(std::vector<NodeInfo_t>*) ));
 
     canThread_->start();
 

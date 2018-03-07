@@ -20,7 +20,7 @@ int main(int argc, const char** argv)
 {
     if (argc < 2)
     {
-        std::cerr << "Usage: " << argv[0] << " <node-id>" << std::endl;
+        std::qDebug() << "Usage: " << argv[0] << " <node-id>" << std::endl;
         return 1;
     }
 
@@ -87,7 +87,7 @@ int main(int argc, const char** argv)
         const int spin_res = node.spin(uavcan::MonotonicDuration::fromMSec(1000));
         if (spin_res < 0)
         {
-            std::cerr << "Transient failure: " << spin_res << std::endl;
+            std::qDebug() << "Transient failure: " << spin_res << std::endl;
         }
 
         /*
@@ -115,7 +115,7 @@ int main(int argc, const char** argv)
         const int pub_res = kv_pub.broadcast(kv_msg);
         if (pub_res < 0)
         {
-            std::cerr << "KV publication failure: " << pub_res << std::endl;
+            std::qDebug() << "KV publication failure: " << pub_res << std::endl;
         }
     }
 }

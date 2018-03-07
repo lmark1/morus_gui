@@ -7,5 +7,6 @@ int main(int argc, char *argv[])
     MorusMainWindow w;
     w.show();
     
-    return a.exec();
+    int res = a.exec();
+    return res;
 }

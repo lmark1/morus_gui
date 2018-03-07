@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QEventLoop>
+#include <QMutex>
 
 #include "NodeInfo.h"
 
@@ -109,6 +110,11 @@ private:
      * Node handler used for CAN node operations.
      */
     NodeHandler *canNodeHandler_ = NULL;
+
+    /**
+     * Mutex used for locking worker a
+     */
+    QMutex mutex_;
 };
 
 #endif //CAN_WORKER_H

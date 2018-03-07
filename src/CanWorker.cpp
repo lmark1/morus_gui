@@ -1,3 +1,5 @@
+#include <QDebug>
+
 #include "CanWorker.h"
 #include "NodeHandler.h"
 
@@ -20,30 +22,50 @@ CanWorker::CanWorker(
  
 CanWorker::~CanWorker() {
 
+	qDebug() << "CanWorker::~CanWorker() "
+			"- destructor called!";
+	// Destroy CAN node handled by the node_handler
+	canNodeHandler_->stopCurrentNode();
+	canNodeHandler_->destroyCurrentNode();
+
 	delete canNodeHandler_;
 }
 
 void CanWorker::process() {
 
+	qDebug() << "CanWorker::process() "
+			"- Initializing node handler";
 	const int node_init_res = initializeNodeHandler();
 
 	// Stop worker if initialization failed
 	if (node_init_res < 0) {
+		qCritical() << "CanWorker::process() "
+				"- NodeHandler initialization failed.";
 		stopWorker();
+	}
+
+	if (working_) {
+		qDebug() << "CanWorker::process() "
+				"- Starting work.";
 	}
 
 	// Do the work... spin the nodes
 	while (working_) {
 
-		std::cout << "Processing";
+		qDebug() << "CanWorker::process() "
+				"- Doing work.";
 		const int res_id = runNodeHandler();
 
 		// If something went wrong stop doing work.
 		if (res_id < 0) {
+			qCritical() << "CanWorker::process() "
+					"- Something went wrong while running the node.";
 			stopWorker();
 		}
 	}
 
+	qDebug() << "CanWorker::process() "
+			"- worker finished.";
 	emit finished();
 }
 
@@ -53,6 +75,8 @@ int CanWorker::initializeNodeHandler() {
 
 	try {
 
+		qDebug() << "CanWorker::initializeNodeHandler() "
+				"- trying to initialize node handler.";
 		// Try creating new node.
 		const int res_id = canNodeHandler_->
 				createNewNode(ifaceName_, nodeID_);
@@ -60,6 +84,8 @@ int CanWorker::initializeNodeHandler() {
 
 	}  catch (const std::exception &ex) {
 
+		qCritical() << "CanWorker::initializeNodeHandler() "
+				"- Failed to initialized node handler.";
 		// Emit error message
 		std::string error_message(ex.what());
         emit error(
@@ -84,6 +110,8 @@ int CanWorker::runNodeHandler() {
 
 	} catch (const std::exception& ex) {
 
+		qCritical() << "Failed to run node handler.";
+
 		// Emit error message
 		std::string error_message(ex.what());
 		emit error(
@@ -100,7 +128,9 @@ int CanWorker::runNodeHandler() {
 
 void CanWorker::stopWorker() {
 
-	//TODO(lmark): add mutex for outside stopping
+	qDebug() << "CanWorker::stopWorker() "
+			"- Stopping CAN worker.";
+	mutex_.lock();
 	working_ = false;
-	canNodeHandler_->destroyCurrentNode();
+	mutex_.unlock();
 }
