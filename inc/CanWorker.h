@@ -88,27 +88,27 @@ private:
     /**
      * CAN interface name.
      */
-    std::string ifaceName;
+    std::string ifaceName_;
 
     /**
      * New CAN node ID.
      */
-    int nodeID;
+    int nodeID_;
 
     /**
      *	Flag indicating worker started processing.
      */
-    bool working = false;
+    bool working_ = false;
 
     /**
      * Flag indicating that node handler was initialized.
      */
-    bool nodeHandlerInitialized = false;
+    bool nodeHandlerInitialized_ = false;
 
     /**
      * Node handler used for CAN node operations.
      */
-    NodeHandler *canNodeHandler = NULL;
+    NodeHandler *canNodeHandler_ = NULL;
 };
 
 #endif //CAN_WORKER_H

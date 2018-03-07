@@ -11,13 +11,21 @@
 #ifndef SRC_NODEINFOCOLLECTOR_H_
 #define SRC_NODEINFOCOLLECTOR_H_
 
-#include <iostream>
-#include <unistd.h>
 #include <unordered_map>
-#include <uavcan/uavcan.hpp>
 #include <uavcan/protocol/node_info_retriever.hpp>
 
 using namespace uavcan;
+
+/**
+ *	NodeID hash function. For use with unordered_map(...) -
+ *	Custom keys need their own hash function implementation.
+ */
+struct NodeIDHash {
+
+	std::size_t operator()(NodeID nid) const {
+			return nid.get();
+	}
+};
 
 class NodeInfoCollector final : public uavcan::INodeInfoListener{
 
@@ -80,17 +88,6 @@ class NodeInfoCollector final : public uavcan::INodeInfoListener{
 				uavcan::NodeID node_id) const;
 
 	private:
-
-		/**
-		 *	NodeID hash function. For use with unordered_map(...) -
-		 *	Custom keys need their own hash function implementation.
-		 */
-		struct NodeIDHash {
-
-			std::size_t operator()(NodeID nid) const {
-		        	return nid.get();
-			}
-		};
 
 		/**
 		 *	Map object used for storing Node responses.

@@ -4,8 +4,6 @@
 #include <QMainWindow>
 #include <QThread>
 
-#include <string>
-
 #include "NodeInfo.h"
 
 // Forward declaration of CanWorker
@@ -71,19 +69,19 @@ class MorusMainWindow : public QMainWindow
 		/**
 		 * Pointer to morus_main_window UI.
 		 */
-		Ui::MorusMainWindow *ui;
+		Ui::MorusMainWindow *ui_;
 
 		/**
 		 * Pointer to the CAN node worker. It acts as a wrapper
 		 * object for node_handler. Used for safe QThread work.
 		 */
-		CanWorker *canNodeWorker = NULL;
+		CanWorker *canNodeWorker_ = NULL;
 
 		/**
 		 * Thread used by pCan_node_worker. Used for spinning CAN
 		 * node.
 		 */
-		QThread *canThread = NULL;
+		QThread *canThread_ = NULL;
 };
 
 #endif // MORUS_MAIN_WINDOW_H

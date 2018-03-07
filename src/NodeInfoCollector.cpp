@@ -5,6 +5,10 @@
  *      Author: lmark
  */
 
+#include <iostream>
+#include <unistd.h>
+#include <uavcan/uavcan.hpp>
+
 #include "NodeInfoCollector.h"
 
 NodeInfoCollector::NodeInfoCollector() { }

@@ -1,6 +1,7 @@
+#include <string>
+
 #include "MorusMainWindow.h"
 #include "UiMorusMainWindow.h"
-
 #include "CanWorker.h"
 #include "NodeHandler.h"
 
@@ -9,75 +10,75 @@ const int DEFAULT_NODE_ID = 127;
 
 MorusMainWindow::MorusMainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MorusMainWindow) {
+    ui_(new Ui::MorusMainWindow) {
 
-    ui->setupUi(this);
+    ui_->setupUi(this);
     
     // Set initial node-id and node interface values
-    ui->localNodeIDSpinBox->setValue(DEFAULT_NODE_ID);
-    ui->localNodeIDSpinBox->setMaximum(DEFAULT_NODE_ID);
-    ui->canIfaceNamePlainTextEdit->setPlainText(DEFAULT_IFACE_NAME);
+    ui_->localNodeIDSpinBox->setValue(DEFAULT_NODE_ID);
+    ui_->localNodeIDSpinBox->setMaximum(DEFAULT_NODE_ID);
+    ui_->canIfaceNamePlainTextEdit->setPlainText(DEFAULT_IFACE_NAME);
 }
 
 MorusMainWindow::~MorusMainWindow() {
 
 	//TODO(lmark): Stop worker and thread
-    delete ui;
-    delete canNodeWorker;
-    delete canThread;
+    delete ui_;
+    delete canNodeWorker_;
+    delete canThread_;
 }
 
 void MorusMainWindow::on_startLocalNodeButton_clicked() {
 
 	cout << "Hello from start button";
     // Get node id and interface name from GUI
-    int node_id = ui->localNodeIDSpinBox->value();
-    std::string iface_name = ui->
+    int node_id = ui_->localNodeIDSpinBox->value();
+    std::string iface_name = ui_->
     		canIfaceNamePlainTextEdit->
 			toPlainText().toStdString();
 
     // Initialize thread
-    canThread = new QThread();
+    canThread_ = new QThread();
 
     // Initialize CAN worker
-    canNodeWorker = new CanWorker(iface_name, node_id);
+    canNodeWorker_ = new CanWorker(iface_name, node_id);
 
     // Setup QThread object
-    canNodeWorker->moveToThread(canThread);
+    canNodeWorker_->moveToThread(canThread_);
 
     // Do connections...
-    connect(canNodeWorker, SIGNAL( error(QString) ),  		// Connect worker error()...
+    connect(canNodeWorker_, SIGNAL( error(QString) ),  		// Connect worker error()...
     		this, SLOT( handleErrorMessage(QString) ));		// To morus_main_window errorString()
 
-    connect(canThread, SIGNAL( started() ),			// Connect thread started()...
-    		canNodeWorker, SLOT( process() ));		// to worker process()
+    connect(canThread_, SIGNAL( started() ),			// Connect thread started()...
+    		canNodeWorker_, SLOT( process() ));		// to worker process()
 
-    connect(canNodeWorker, SIGNAL( finished() ),	// Connect worker finished()...
-    		canThread, SLOT( quit() ));				// to thread quit() - exits the thread
+    connect(canNodeWorker_, SIGNAL( finished() ),	// Connect worker finished()...
+    		canThread_, SLOT( quit() ));				// to thread quit() - exits the thread
 
-    connect(canNodeWorker, SIGNAL( finished() ),	// Connect worker finished()...
+    connect(canNodeWorker_, SIGNAL( finished() ),	// Connect worker finished()...
     		this, SLOT( workerFinished() ));		// to morus_window workerFinished()
 
-    connect(canNodeWorker, SIGNAL( finished() ),
-    		canNodeWorker, SLOT( deleteLater() )); 	// Connect worker finished()...
-    connect(canThread, SIGNAL( finished() ),		// to deleteLater() - QObject SLOT that
-    		canThread, SLOT( deleteLater() ));		// marks objects for deletion
+    connect(canNodeWorker_, SIGNAL( finished() ),
+    		canNodeWorker_, SLOT( deleteLater() )); 	// Connect worker finished()...
+    connect(canThread_, SIGNAL( finished() ),		// to deleteLater() - QObject SLOT that
+    		canThread_, SLOT( deleteLater() ));		// marks objects for deletion
 
-    connect(canNodeWorker, // Connect information found signal...
+    connect(canNodeWorker_, // Connect information found signal...
     		SIGNAL( nodeInformationFound(std::vector<NodeInfo_t>) ),
     		this, // ... to the update monitor slot.
 			SLOT( updateCanMonitor(std::vector<NodeInfo_t>) ));
 
-    canThread->start();
+    canThread_->start();
 
     // Disable start button after generating a node
-    ui->startLocalNodeButton->setEnabled(false);
+    ui_->startLocalNodeButton->setEnabled(false);
 }
 
 void MorusMainWindow::workerFinished() {
 
 	// Re-enable the start button when current current CAN thread is finished
-	ui->startLocalNodeButton->setEnabled(true);
+	ui_->startLocalNodeButton->setEnabled(true);
 }
 
 void MorusMainWindow::handleErrorMessage(QString error) {

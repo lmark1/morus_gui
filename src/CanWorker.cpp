@@ -8,19 +8,19 @@ CanWorker::CanWorker(
 		int node_id,
 		QObject *parent) : QObject(parent) {
 
-	this->nodeID = node_id;
-	this->ifaceName = iface_name;
+	this->nodeID_ = node_id;
+	this->ifaceName_ = iface_name;
 
 	// Avoid initializing anything in this constructor.
 	// Object created here remain in the main thread and
 	// not in the QThread as needed.
 
-	working = true;
+	working_ = true;
 }
  
 CanWorker::~CanWorker() {
 
-	delete canNodeHandler;
+	delete canNodeHandler_;
 }
 
 void CanWorker::process() {
@@ -33,7 +33,7 @@ void CanWorker::process() {
 	}
 
 	// Do the work... spin the nodes
-	while (working) {
+	while (working_) {
 
 		std::cout << "Processing";
 		const int res_id = runNodeHandler();
@@ -49,13 +49,13 @@ void CanWorker::process() {
 
 int CanWorker::initializeNodeHandler() {
 
-	canNodeHandler = new NodeHandler(*this);
+	canNodeHandler_ = new NodeHandler(*this);
 
 	try {
 
 		// Try creating new node.
-		const int res_id = canNodeHandler->
-				createNewNode(ifaceName, nodeID);
+		const int res_id = canNodeHandler_->
+				createNewNode(ifaceName_, nodeID_);
 		return res_id;
 
 	}  catch (const std::exception &ex) {
@@ -79,7 +79,7 @@ int CanWorker::runNodeHandler() {
 	try {
 
 		// Try spinning the current node
-		const int res_id = canNodeHandler->spinCurrentNode(NODE_TIMEOUT);
+		const int res_id = canNodeHandler_->spinCurrentNode(NODE_TIMEOUT);
 		return res_id;
 
 	} catch (const std::exception& ex) {
@@ -101,6 +101,6 @@ int CanWorker::runNodeHandler() {
 void CanWorker::stopWorker() {
 
 	//TODO(lmark): add mutex for outside stopping
-	working = false;
-	canNodeHandler->destroyCurrentNode();
+	working_ = false;
+	canNodeHandler_->destroyCurrentNode();
 }
