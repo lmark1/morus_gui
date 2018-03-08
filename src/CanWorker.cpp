@@ -5,19 +5,11 @@
 
 const int NODE_TIMEOUT = 1000;
 
-CanWorker::CanWorker(
-		std::string iface_name,
-		int node_id,
-		QObject *parent) : QObject(parent)
+CanWorker::CanWorker(QObject *parent) : QObject(parent)
 {
-	this->nodeID_ = node_id;
-	this->ifaceName_ = iface_name;
-
 	// Avoid initializing anything in this constructor.
 	// Object created here remain in the main thread and
 	// not in the QThread as needed.
-
-	working_ = true;
 }
  
 CanWorker::~CanWorker()
@@ -29,6 +21,17 @@ CanWorker::~CanWorker()
 	canNodeHandler_->destroyCurrentNode();
 
 	delete canNodeHandler_;
+}
+
+void CanWorker::initializeWorker(
+		std::string ifaceName,
+		int nodeId)
+{
+	this->ifaceName_ = ifaceName;
+	this->nodeID_ = nodeId;
+
+	// Set flag as able to start working
+	working_ = true;
 }
 
 void CanWorker::process()

@@ -30,27 +30,18 @@ public:
     
 	/**
 	 * Explicit node_worker constructor.
-	 *
-	 * iface_name - CAN interface name
-	 * node_id - new CAN node I
 	 */
-    explicit CanWorker(
-			std::string ifaceName,
-			int nodeID,
-			QObject *parent = 0);
+    explicit CanWorker(QObject *parent = 0);
     ~CanWorker();
 
     /**
-     * Initialize node_handler object. If it fails,
-     * exception will be thrown and error message emitted.
+     * Initialize CanWorker object. Unable to run the worker without
+     * calling this method.
+     *
+     * iface_name - CAN interface name
+	 * node_id - new CAN node id
      */
-    int initializeNodeHandler();
-
-    /**
-     * Start running the node handler. If unable to run,
-     * exception will be thrown and error message emitted.
-     */
-    int runNodeHandler();
+    void initializeWorker(std::string ifaceName, int nodeId);
 
     /**
      * Stops the node_worker.
@@ -87,6 +78,18 @@ signals:
 private:
 
     /**
+	 * Initialize node_handler object. If it fails,
+	 * exception will be thrown and error message emitted.
+	 */
+	int initializeNodeHandler();
+
+	/**
+	 * Start running the node handler. If unable to run,
+	 * exception will be thrown and error message emitted.
+	 */
+	int runNodeHandler();
+
+    /**
      * CAN interface name.
      */
     std::string ifaceName_;
@@ -94,7 +97,7 @@ private:
     /**
      * New CAN node ID.
      */
-    int nodeID_;
+    int nodeID_ = -1;
 
     /**
      *	Flag indicating worker started processing.

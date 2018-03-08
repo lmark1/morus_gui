@@ -20,12 +20,22 @@ MorusMainWindow::MorusMainWindow(QWidget *parent) :
     ui_->localNodeIDSpinBox->setValue(DEFAULT_NODE_ID);
     ui_->localNodeIDSpinBox->setMaximum(DEFAULT_NODE_ID);
     ui_->canIfaceNamePlainTextEdit->setPlainText(DEFAULT_IFACE_NAME);
+
+    // Initialize thread
+	canThread_ = new QThread();
+
+	// Initialize CAN worker
+	canNodeWorker_ = new CanWorker();
+
+	// Setup QThread object
+	canNodeWorker_->moveToThread(canThread_);
+
+	// Setup signal / slot connections
+	setupThreadConnections();
 }
 
 MorusMainWindow::~MorusMainWindow()
 {
-	//TODO(lmark): Still geting SEGABRT when closing
-
 	qDebug() << "MorusMainWindow::~MorusMainWindow "
 				"- Stopping CanWorker.";
 	// Stop can worker if it's initialized
@@ -33,6 +43,8 @@ MorusMainWindow::~MorusMainWindow()
 		canNodeWorker_->stopWorker();
 	}
 
+	// TODO(lmark): segmentation fault when stopping canThread...
+	//				(Check the issue on the repository)
 	qDebug() << "MorusMainWindow::~MorusMainWindow "
 				"- stopping CanThread";
 	// Stopping canNodeWorker should stop and delete QThread...
@@ -57,38 +69,10 @@ void MorusMainWindow::on_startLocalNodeButton_clicked()
     		canIfaceNamePlainTextEdit->
 			toPlainText().toStdString();
 
-    // Initialize thread
-    canThread_ = new QThread();
+    // Initialize node worker
+    canNodeWorker_->initializeWorker(iface_name, node_id);
 
-    // Initialize CAN worker
-    canNodeWorker_ = new CanWorker(iface_name, node_id);
-
-    // Setup QThread object
-    canNodeWorker_->moveToThread(canThread_);
-
-    // Do connections...
-    connect(canNodeWorker_, SIGNAL( error(QString) ),  		// Connect worker error()...
-    		this, SLOT( handleErrorMessage(QString) ));		// To morus_main_window errorString()
-
-    connect(canThread_, SIGNAL( started() ),			// Connect thread started()...
-    		canNodeWorker_, SLOT( process() ));		// to worker process()
-
-    connect(canNodeWorker_, SIGNAL( finished() ),	// Connect worker finished()...
-    		canThread_, SLOT( quit() ));				// to thread quit() - exits the thread
-
-    connect(canNodeWorker_, SIGNAL( finished() ),	// Connect worker finished()...
-    		this, SLOT( workerFinished() ));		// to morus_window workerFinished()
-
-    connect(canNodeWorker_, SIGNAL( finished() ),
-    		canNodeWorker_, SLOT( deleteLater() )); 	// Connect worker finished()...
-    connect(canThread_, SIGNAL( finished() ),		// to deleteLater() - QObject SLOT that
-    		canThread_, SLOT( deleteLater() ));		// marks objects for deletion
-
-    connect(canNodeWorker_, // Connect information found signal...
-    		SIGNAL( nodeInformationFound(std::vector<NodeInfo_t>*) ),
-    		this, // ... to the update monitor slot.
-			SLOT( updateCanMonitor(std::vector<NodeInfo_t>*) ));
-
+    // Start the thread
     canThread_->start();
 
     // Disable start button after generating a node
@@ -125,5 +109,46 @@ void MorusMainWindow::generateMessageBox(std::string message)
     msgBox.setStandardButtons(QMessageBox::Ok);
     msgBox.setDefaultButton(QMessageBox::Ok);
     msgBox.exec();
+}
+
+void MorusMainWindow::setupThreadConnections()
+{
+	// Do connections...
+	connect(canNodeWorker_, // Connect worker error()...
+			SIGNAL( error(QString) ),
+			this, 			// To morus_main_window errorString()
+			SLOT( handleErrorMessage(QString) ));
+
+	connect(canThread_, 	// Connect thread started()...
+			SIGNAL( started() ),
+			canNodeWorker_, // to worker process()
+			SLOT( process() ));
+
+	connect(canNodeWorker_, // Connect worker finished()...
+			SIGNAL( finished() ),
+			canThread_,		// to thread quit() - exits the thread
+			SLOT( quit() ));
+
+	connect(canNodeWorker_, // Connect worker finished()...
+			SIGNAL( finished() ),
+			this,			// to morus_window workerFinished()
+			SLOT( workerFinished() ));
+
+	// Connect worker finished() to deleteLater() - QObject SLOT
+	// ... marks objects for deletion
+	connect(canNodeWorker_,
+			SIGNAL( finished() ),
+			canNodeWorker_,
+			SLOT( deleteLater() ));
+	connect(canThread_,
+			SIGNAL( finished() ),
+			canThread_,
+			SLOT( deleteLater() ));
+
+	connect(canNodeWorker_, // Connect information found signal...
+			SIGNAL( nodeInformationFound(std::vector<NodeInfo_t>*) ),
+			this, // ... to the update monitor slot.
+			SLOT( updateCanMonitor(std::vector<NodeInfo_t>*) ));
+
 }
 
