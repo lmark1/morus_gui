@@ -71,7 +71,7 @@ class MorusMainWindow : public QMainWindow
 		 * Perform all necessary signal / slot connections
 		 * between canWorker and canThread.
 		 */
-		void setupThreadConnections();
+		void setupThreadWorkerConnections();
 
 		/**
 		 * Pointer to morus_main_window UI.

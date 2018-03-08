@@ -31,7 +31,7 @@ MorusMainWindow::MorusMainWindow(QWidget *parent) :
 	canNodeWorker_->moveToThread(canThread_);
 
 	// Setup signal / slot connections
-	setupThreadConnections();
+	setupThreadWorkerConnections();
 }
 
 MorusMainWindow::~MorusMainWindow()
@@ -39,7 +39,9 @@ MorusMainWindow::~MorusMainWindow()
 	qDebug() << "MorusMainWindow::~MorusMainWindow "
 				"- Stopping CanWorker.";
 	// Stop can worker if it's initialized
-	if (canNodeWorker_ != NULL) {
+	if (canNodeWorker_ != NULL)
+	{
+		// It should also stop the nodeHandler inside - Check debug() output!
 		canNodeWorker_->stopWorker();
 	}
 
@@ -111,7 +113,7 @@ void MorusMainWindow::generateMessageBox(std::string message)
     msgBox.exec();
 }
 
-void MorusMainWindow::setupThreadConnections()
+void MorusMainWindow::setupThreadWorkerConnections()
 {
 	// Do connections...
 	connect(canNodeWorker_, // Connect worker error()...
