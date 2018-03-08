@@ -12,8 +12,8 @@ const int DEFAULT_NODE_ID = 127;
 
 MorusMainWindow::MorusMainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui_(new Ui::MorusMainWindow) {
-
+    ui_(new Ui::MorusMainWindow)
+{
     ui_->setupUi(this);
     
     // Set initial node-id and node interface values
@@ -22,25 +22,35 @@ MorusMainWindow::MorusMainWindow(QWidget *parent) :
     ui_->canIfaceNamePlainTextEdit->setPlainText(DEFAULT_IFACE_NAME);
 }
 
-MorusMainWindow::~MorusMainWindow() {
+MorusMainWindow::~MorusMainWindow()
+{
+	//TODO(lmark): Still geting SEGABRT when closing
 
 	qDebug() << "MorusMainWindow::~MorusMainWindow "
-			"- destructor called.";
-
-
+				"- Stopping CanWorker.";
 	// Stop can worker if it's initialized
 	if (canNodeWorker_ != NULL) {
 		canNodeWorker_->stopWorker();
 	}
 
+	qDebug() << "MorusMainWindow::~MorusMainWindow "
+				"- stopping CanThread";
+	// Stopping canNodeWorker should stop and delete QThread...
+	// Do it anyway
+	if (canThread_ != NULL && canThread_->isRunning()) {
+		canThread_->terminate();
+		canThread_->wait();
+	}
 
+	qDebug() << "MorusMainWindow::~MorusMainWindow "
+				"- deleting UI.";
 	// canWorker and canThread are connected to
 	// the deleteLater() funcion when they are finished
     delete ui_;
 }
 
-void MorusMainWindow::on_startLocalNodeButton_clicked() {
-
+void MorusMainWindow::on_startLocalNodeButton_clicked()
+{
 	// Get node id and interface name from GUI
     int node_id = ui_->localNodeIDSpinBox->value();
     std::string iface_name = ui_->
@@ -85,29 +95,30 @@ void MorusMainWindow::on_startLocalNodeButton_clicked() {
     ui_->startLocalNodeButton->setEnabled(false);
 }
 
-void MorusMainWindow::workerFinished() {
-
+void MorusMainWindow::workerFinished()
+{
 	qDebug() << "MorusMainWindow::workerFinished()";
 	// Re-enable the start button when current current CAN thread is finished
 	ui_->startLocalNodeButton->setEnabled(true);
 }
 
-void MorusMainWindow::handleErrorMessage(QString error) {
-
+void MorusMainWindow::handleErrorMessage(QString error)
+{
 	// Generate message box about the error
 	this->generateMessageBox(error.toStdString());
 }
 
 void MorusMainWindow::updateCanMonitor(
-		std::vector<NodeInfo_t> *activeNodesInfo) {
-
-
+		std::vector<NodeInfo_t> *activeNodesInfo)
+{
 	qInfo() << "MorusMainWindow::updateCanMonitor() "
 			"- Number of active nodes: " << activeNodesInfo->size();
+
+	//TODO(lmark): update the table with found nodes
 }
 
-void MorusMainWindow::generateMessageBox(std::string message) {
-
+void MorusMainWindow::generateMessageBox(std::string message)
+{
     // Display message box
     QMessageBox msgBox;
     msgBox.setText(QString::fromStdString(message));

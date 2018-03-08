@@ -7,6 +7,7 @@
 #include <uavcan/uavcan.hpp>
 
 #include "NodeInfo.h"
+#include "NodeInfoCollector.h"
 
 using namespace std;
 
@@ -79,13 +80,20 @@ class NodeHandler {
          */
         void stopCurrentNode();
 
+    private:
+
         /**
 		 * This method collects node information through the
 		 * and emits it using CanWorker signals to the main UI thread.
 		 */
 		void collectNodeInformation();
 
-    private:
+		/**
+		 * This method does all the necessary work to setup and start the
+		 * node collector. If anything goes wrong runtime exception will be
+		 * thrown.
+		 */
+		void setupNodeInfoCollector();
 
         /**
          * Flag indicating if node is created.
@@ -100,7 +108,7 @@ class NodeHandler {
         /**
 		 * Node information collector attached to the canNode.
 		 */
-		NodeInfoCollector *collector_ = NULL;
+		NodeInfoCollector nodeInfoCollector_;
 
 		/**
 		 * Can worker object reference used for emitting signals to the
@@ -112,6 +120,12 @@ class NodeHandler {
 		 * Vector of active nodes found by the collector.
 		 */
 		std::vector<NodeInfo_t> activeNodesInfo_;
+
+		/**
+		 * Node information retriever. Initialized inside
+		 * setupNodeInfoCollector() method.
+		 */
+		uavcan::NodeInfoRetriever *nodeInfoRetriever_ = NULL;
 };
 
 

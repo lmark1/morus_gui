@@ -4,6 +4,7 @@
  *  Created on: Mar 5, 2018
  *      Author: lmark
  */
+#include <QDebug>
 
 #include <iostream>
 #include <unistd.h>
@@ -11,7 +12,10 @@
 
 #include "NodeInfoCollector.h"
 
-NodeInfoCollector::NodeInfoCollector() { }
+NodeInfoCollector::NodeInfoCollector()
+{
+	qDebug() << "NodeInfoCollector::NodeInfoCollector()";
+}
 
 NodeInfoCollector::~NodeInfoCollector() { }
 
@@ -19,6 +23,7 @@ void NodeInfoCollector::handleNodeInfoRetrieved(
 				NodeID node_id,
 				const protocol::GetNodeInfo::Response& node_info) {
 
+	qDebug() << "NodeInfoCollector::handleNodeInfoRetrieved()";
 	registry_[node_id] = node_info;
 }
 
