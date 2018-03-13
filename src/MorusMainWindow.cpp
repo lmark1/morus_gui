@@ -6,6 +6,7 @@
 #include "UiMorusMainWindow.h"
 #include "CanWorker.h"
 #include "NodeHandler.h"
+#include "MonitorWorker.h"
 
 const QString DEFAULT_IFACE_NAME = "can0";
 const int DEFAULT_NODE_ID = 127;
@@ -21,17 +22,22 @@ MorusMainWindow::MorusMainWindow(QWidget *parent) :
     ui_->localNodeIDSpinBox->setMaximum(DEFAULT_NODE_ID);
     ui_->canIfaceNamePlainTextEdit->setPlainText(DEFAULT_IFACE_NAME);
 
-    // Initialize thread
-	canThread_ = new QThread();
+    // Initialize monitor thread
+	monitorWorkerThread_ = new QThread();
 
-	// Initialize CAN worker
-	canNodeWorker_ = new CanWorker();
+	// Initialize monitorWorker
+	monitorWorker_ = new MonitorWorker();
 
 	// Setup QThread object
-	canNodeWorker_->moveToThread(canThread_);
+	monitorWorker_->moveToThread(monitorWorkerThread_);
 
 	// Setup signal / slot connections
-	setupThreadConnections();
+	setupMonitorThreadConnections();
+
+	// Start monitor
+	std::string iface(DEFAULT_IFACE_NAME.toStdString());
+	monitorWorker_->initializeWorker(iface, 1);
+	monitorWorkerThread_->start();
 }
 
 MorusMainWindow::~MorusMainWindow()
@@ -49,9 +55,10 @@ MorusMainWindow::~MorusMainWindow()
 				"- stopping CanThread";
 	// Stopping canNodeWorker should stop and delete QThread...
 	// Do it anyway
-	if (canThread_ != NULL && canThread_->isRunning()) {
-		canThread_->terminate();
-		canThread_->wait();
+	if (canWorkerThread_ != NULL && canWorkerThread_->isRunning())
+	{
+		canWorkerThread_->terminate();
+		canWorkerThread_->wait();
 	}
 
 	qDebug() << "MorusMainWindow::~MorusMainWindow "
@@ -69,11 +76,21 @@ void MorusMainWindow::on_startLocalNodeButton_clicked()
     		canIfaceNamePlainTextEdit->
 			toPlainText().toStdString();
 
+    /*
+     * Can worker needs to be initialized inside the start button
+     * callback. Both canWorker and canThread get deleted each time
+     * they finish working.
+     */
+    canWorkerThread_ = new QThread();
+    canNodeWorker_ = new CanWorker();
+    canNodeWorker_->moveToThread(canWorkerThread_);
+    setupCanThreadConnections();
+
     // Initialize node worker
     canNodeWorker_->initializeWorker(iface_name, node_id);
 
     // Start the thread
-    canThread_->start();
+    canWorkerThread_->start();
 
     // Disable start button after generating a node
     ui_->startLocalNodeButton->setEnabled(false);
@@ -111,22 +128,22 @@ void MorusMainWindow::generateMessageBox(std::string message)
     msgBox.exec();
 }
 
-void MorusMainWindow::setupThreadConnections()
+void MorusMainWindow::setupCanThreadConnections()
 {
-	// Do connections...
+	// **** CanWorker / Thread connections ****
 	connect(canNodeWorker_, // Connect worker error()...
 			SIGNAL( error(QString) ),
 			this, 			// To morus_main_window errorString()
 			SLOT( handleErrorMessage(QString) ));
 
-	connect(canThread_, 	// Connect thread started()...
+	connect(canWorkerThread_, 	// Connect thread started()...
 			SIGNAL( started() ),
 			canNodeWorker_, // to worker process()
 			SLOT( process() ));
 
 	connect(canNodeWorker_, // Connect worker finished()...
 			SIGNAL( finished() ),
-			canThread_,		// to thread quit() - exits the thread
+			canWorkerThread_,		// to thread quit() - exits the thread
 			SLOT( quit() ));
 
 	connect(canNodeWorker_, // Connect worker finished()...
@@ -140,9 +157,9 @@ void MorusMainWindow::setupThreadConnections()
 			SIGNAL( finished() ),
 			canNodeWorker_,
 			SLOT( deleteLater() ));
-	connect(canThread_,
+	connect(canWorkerThread_,
 			SIGNAL( finished() ),
-			canThread_,
+			canWorkerThread_,
 			SLOT( deleteLater() ));
 
 	connect(canNodeWorker_, // Connect information found signal...
@@ -150,5 +167,34 @@ void MorusMainWindow::setupThreadConnections()
 			this, // ... to the update monitor slot.
 			SLOT( updateCanMonitor(std::vector<NodeInfo_t>*) ));
 
+}
+
+void MorusMainWindow::setupMonitorThreadConnections()
+{
+	// **** CanMonitor / Thread connections ****
+	// Connect errors
+	connect(monitorWorker_,
+			SIGNAL( error(QString) ),
+			this,
+			SLOT( handleErrorMessage(QString) ));
+	// Connect started signal
+	connect(monitorWorkerThread_,
+			SIGNAL( started() ),
+			monitorWorker_,
+			SLOT( process() ));
+	// Connect finished signal
+	connect(monitorWorker_,
+			SIGNAL( finished() ),
+			monitorWorkerThread_,
+			SLOT( quit() ));
+	// Connect finished to delete later for both
+	connect(monitorWorker_,
+			SIGNAL( finished() ),
+			monitorWorker_,
+			SLOT( deleteLater() ));
+	connect(monitorWorkerThread_,
+			SIGNAL( finished() ),
+			monitorWorkerThread_,
+			SLOT( deleteLater() ));
 }
 

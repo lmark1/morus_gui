@@ -2,8 +2,6 @@
 #define CAN_WORKER_H
 
 #include <QObject>
-#include <QEventLoop>
-#include <QMutex>
 
 #include "NodeInfo.h"
 

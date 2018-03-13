@@ -19,7 +19,6 @@ NodeHandler::~NodeHandler()
 	qDebug() << "NodeHandler::~NodeHandler() "
 			"- destructor called.";
 
-	delete nodeInfoRetriever_;
 	delete canNode_;
 }
 
@@ -52,9 +51,6 @@ int NodeHandler::createNewNode(std::string ifaceName, int nodeID)
     			"- Unable to start the CAN node.";
         return nodeStartRes;
     }
-
-    // Run node collector setup
-	setupNodeInfoCollector();
 
     /*
      * Informing other nodes that we're ready to work.
@@ -145,9 +141,6 @@ int NodeHandler::spinCurrentNode(int timeout_ms)
 	// Spin the node
 	const int res = canNode_->spin(
 			uavcan::MonotonicDuration::fromMSec(timeout_ms));
-
-	// Collect available node information
-	collectNodeInformation();
 
 	return res;
 }

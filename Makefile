@@ -22,11 +22,13 @@ QT_DEFINES = -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB
 SOURCES_USER += $(SOURCES_DIR)/main.cpp \
 				$(SOURCES_DIR)/moc_MorusMainWindow.cpp \
 				$(SOURCES_DIR)/moc_CanWorker.cpp \
+				$(SOURCES_DIR)/moc_MonitorWorker.cpp \
 				$(SOURCES_DIR)/MorusMainWindow.cpp \
 				$(SOURCES_DIR)/NodeHandler.cpp \
 				$(SOURCES_DIR)/PlatformLinux.cpp \
 				$(SOURCES_DIR)/CanWorker.cpp \
-				$(SOURCES_DIR)/NodeInfoCollector.cpp
+				$(SOURCES_DIR)/NodeInfoCollector.cpp \
+				$(SOURCES_DIR)/MonitorWorker.cpp
 
 
 # Include libuavcan .mk file - Initialize libuavcan sources / directories / includes
@@ -128,7 +130,9 @@ clean_moc:
 		@rm -rf $(SOURCES_DIR)/moc_*
 
 # Generate moc files
-moc_files: $(SOURCES_DIR)/moc_MorusMainWindow.cpp $(SOURCES_DIR)/moc_CanWorker.cpp
+moc_files: $(SOURCES_DIR)/moc_MorusMainWindow.cpp $(SOURCES_DIR)/moc_CanWorker.cpp \
+		   $(SOURCES_DIR)/moc_MonitorWorker.cpp
+		   
 $(SOURCES_DIR)/moc_%.cpp: $(INCLUDE_DIR)/%.h
 		moc $(UAVCANDEFS) $(INCLUDES) $< -o $@
 

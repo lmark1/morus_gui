@@ -13,6 +13,9 @@ class CanWorker;
 // Forward declaration of NodeHandler
 class NodeHandler;
 
+// Forward declaration of MonitorWorker
+class MonitorWorker;
+
 /**
  * Default CAN interface name. Set as initial value in GUI.
  */
@@ -71,7 +74,13 @@ class MorusMainWindow : public QMainWindow
 		 * Perform all necessary signal / slot connections
 		 * between canWorker and canThread.
 		 */
-		void setupThreadConnections();
+		void setupCanThreadConnections();
+
+		/**
+		 * Perform all necessary signal / slot connections
+		 * between monitorWorker and monitorThread.
+		 */
+		void setupMonitorThreadConnections();
 
 		/**
 		 * Pointer to morus_main_window UI.
@@ -81,14 +90,27 @@ class MorusMainWindow : public QMainWindow
 		/**
 		 * Pointer to the CAN node worker. It acts as a wrapper
 		 * object for node_handler. Used for safe QThread work.
+		 * Runs on canWorkerThread.
 		 */
 		CanWorker *canNodeWorker_ = NULL;
+
+		/**
+		 * Monitor worker. Used for distributing information
+		 * about nodes. Run on the monitorWorkerThread.
+		 */
+		MonitorWorker *monitorWorker_ = NULL;
 
 		/**
 		 * Thread used by pCan_node_worker. Used for spinning CAN
 		 * node.
 		 */
-		QThread *canThread_ = NULL;
+		QThread *canWorkerThread_ = NULL;
+
+		/**
+		 * Thread used by CanMonitorWorker. Used for collecting information
+		 * about other nodes.
+		 */
+		QThread *monitorWorkerThread_ = NULL;
 };
 
 #endif // MORUS_MAIN_WINDOW_H
