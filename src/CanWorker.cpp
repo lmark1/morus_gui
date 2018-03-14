@@ -58,6 +58,7 @@ void CanWorker::process()
 	// Do the work... spin the nodes
 	while (working_)
 	{
+		mutex_.lock();
 		qDebug() << "CanWorker::process() "
 				"- Doing work.";
 		const int res_id = runNodeHandler();
@@ -66,12 +67,16 @@ void CanWorker::process()
 		if (res_id < 0) {
 			qCritical() << "CanWorker::process() "
 					"- Something went wrong while running the node.";
-			stopWorker();
+			working_ = false;
 		}
+
+		mutex_.unlock();
 	}
 
 	qDebug() << "CanWorker::process() "
 			"- worker finished.";
+	stopWorker();
+
 	emit finished();
 }
 
@@ -132,9 +137,30 @@ int CanWorker::runNodeHandler() {
 	}
 }
 
+
 void CanWorker::stopWorker()
 {
+	while (mutex_.tryLock()) {
+		qDebug() << "CanWorker::stopWorker "
+				"- Trying to unlock mutex.";
+	}
+
 	qDebug() << "CanWorker::stopWorker() "
 			"- Stopping CAN worker.";
 	working_ = false;
+
+	mutex_.unlock();
+}
+
+bool CanWorker::isRunning()
+{
+//	while (mutex_.tryLock())
+//	{
+//		qDebug() << "CanWorker::isRunning "
+//				"- Trying to unlock mutex.";
+//	}
+	bool value = working_;
+//	mutex_.unlock();
+
+	return value;
 }

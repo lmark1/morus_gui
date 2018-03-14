@@ -2,6 +2,7 @@
 #define CAN_WORKER_H
 
 #include <QObject>
+#include <QMutex>
 
 #include "NodeInfo.h"
 
@@ -24,93 +25,103 @@ extern const int NODE_TIMEOUT;
 class CanWorker : public QObject {
     Q_OBJECT
  
-public:
-    
-	/**
-	 * Explicit node_worker constructor.
-	 */
-    explicit CanWorker(QObject *parent = 0);
-    ~CanWorker();
+	public:
 
-    /**
-     * Initialize CanWorker object. Unable to run the worker without
-     * calling this method.
-     *
-     * iface_name - CAN interface name
-	 * node_id - new CAN node id
-     */
-    void initializeWorker(std::string ifaceName, int nodeId);
+		/**
+		 * Explicit node_worker constructor.
+		 */
+		explicit CanWorker(QObject *parent = 0);
+		~CanWorker();
 
-    /**
-     * Stops the node_worker.
-     */
-    void stopWorker();
+		/**
+		 * Initialize CanWorker object. Unable to run the worker without
+		 * calling this method.
+		 *
+		 * iface_name - CAN interface name
+		 * node_id - new CAN node id
+		 */
+		void initializeWorker(std::string ifaceName, int nodeId);
 
-public slots:
+		/**
+		 * Stops the node_worker.
+		 */
+		void stopWorker();
 
-	/**
-	 * Whole workload is done in this method.
-	 * Creating CAN node, spinning CAN node etc.
-	 */
-    void process();
- 
-signals:
+		/**
+		 * Returns true if canWorker is running, otherwise false.
+		 */
+		bool isRunning();
 
-	/**
-	 * Emit this signal when worker is done.
-	 */
-    void finished();
+	public slots:
 
-    /**
-     * Emit this signal when something goes wrong.
-     */
-    void error(QString err);
+		/**
+		 * Whole workload is done in this method.
+		 * Creating CAN node, spinning CAN node etc.
+		 */
+		void process();
 
-    /**
-     * Emit this signal when new node information is found.
-     * In current implementation this will be emitted from inside the
-     * NodeHandler object where the NodeInfoCollector is found.
-     */
-    void nodeInformationFound(std::vector<NodeInfo_t> *activeNodeInfo);
+	signals:
 
-private:
+		/**
+		 * Emit this signal when worker is done.
+		 */
+		void finished();
 
-    /**
-	 * Initialize node_handler object. If it fails,
-	 * exception will be thrown and error message emitted.
-	 */
-	int initializeNodeHandler();
+		/**
+		 * Emit this signal when something goes wrong.
+		 */
+		void error(QString err);
 
-	/**
-	 * Start running the node handler. If unable to run,
-	 * exception will be thrown and error message emitted.
-	 */
-	int runNodeHandler();
+		/**
+		 * Emit this signal when new node information is found.
+		 * In current implementation this will be emitted from inside the
+		 * NodeHandler object where the NodeInfoCollector is found.
+		 */
+		void nodeInformationFound(std::vector<NodeInfo_t> *activeNodeInfo);
 
-    /**
-     * CAN interface name.
-     */
-    std::string ifaceName_;
+	private:
 
-    /**
-     * New CAN node ID.
-     */
-    int nodeID_ = -1;
+		/**
+		 * Initialize node_handler object. If it fails,
+		 * exception will be thrown and error message emitted.
+		 */
+		int initializeNodeHandler();
 
-    /**
-     *	Flag indicating worker started processing.
-     */
-    bool working_ = false;
+		/**
+		 * Start running the node handler. If unable to run,
+		 * exception will be thrown and error message emitted.
+		 */
+		int runNodeHandler();
 
-    /**
-     * Flag indicating that node handler was initialized.
-     */
-    bool nodeHandlerInitialized_ = false;
+		/**
+		 * CAN interface name.
+		 */
+		std::string ifaceName_;
 
-    /**
-     * Node handler used for CAN node operations.
-     */
-    NodeHandler *canNodeHandler_ = NULL;
+		/**
+		 * New CAN node ID.
+		 */
+		int nodeID_ = -1;
+
+		/**
+		 *	Flag indicating worker started processing.
+		 */
+		bool working_ = false;
+
+		/**
+		 * Flag indicating that node handler was initialized.
+		 */
+		bool nodeHandlerInitialized_ = false;
+
+		/**
+		 * Node handler used for CAN node operations.
+		 */
+		NodeHandler *canNodeHandler_ = NULL;
+
+		/**
+		 * Mutex used for managing processing and calls from other threads.
+		 */
+		QMutex mutex_;
 };
 
 #endif //CAN_WORKER_H

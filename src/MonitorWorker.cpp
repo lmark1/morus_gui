@@ -150,6 +150,8 @@ void MonitorWorker::process()
 
 	while (working_)
 	{
+		mutex_.lock();
+		// TODO(lmark): protect this spin call with try - catch.
 		const int res = node->spin(
 				uavcan::MonotonicDuration::fromMSec(1000));
 
@@ -159,22 +161,42 @@ void MonitorWorker::process()
 					QString::fromStdString(
 							"Error occurred while spinning monitor.")
 			);
-			stopWorker();
-			return;
+			working_ = false;
 		}
+		mutex_.unlock();
 	}
 
 	qDebug() << "MonitorWorker::process() "
 			"- Finished processing, deleting monitor";
 
 	stopWorker();
+	emit finished();
 }
 
 void MonitorWorker::stopWorker()
 {
+	while (mutex_.tryLock()) {
+		qDebug() << "MonitorWorker::stopWorker() "
+				"- Trying to lock mutex.";
+	}
+
 	qDebug() << "MonitorWorker::stopWorker() "
 			"- Stopping monitor worker.";
 	working_ = false;
-	emit finished();
+
+	mutex_.unlock();
+}
+
+bool MonitorWorker::isRunning()
+{
+//	while (mutex_.tryLock())
+//	{
+//		qDebug() << "MonitorWorker::isRunning() "
+//				"- Trying to lock mutex.";
+//	}
+	bool value = working_;
+//	mutex_.unlock();
+
+	return value;
 }
 

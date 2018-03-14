@@ -9,6 +9,7 @@
 #define MONITORWORKER_H_
 
 #include <QObject>
+#include <QMutex>
 
 /**
  * This class implements a QObject worker for use with QThreads.
@@ -35,6 +36,11 @@ class MonitorWorker : public QObject {
 		 * Stops the worker.
 		 */
 		void stopWorker();
+
+		/**
+		 * Returns true if monitorWorker is running, otherwise false.
+		 */
+		bool isRunning();
 
 	public slots:
 
@@ -72,6 +78,11 @@ class MonitorWorker : public QObject {
 		 *	Flag indicating worker started processing.
 		 */
 		bool working_ = false;
+
+		/**
+		 * Mutex used for managing processing and calls from other threads.
+		 */
+		QMutex mutex_;
 };
 
 #endif /* MONITORWORKER_H_ */

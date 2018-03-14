@@ -44,18 +44,20 @@ MorusMainWindow::~MorusMainWindow()
 {
 	qDebug() << "MorusMainWindow::~MorusMainWindow "
 				"- Stopping CanWorker.";
-	// Stop can worker if it's initialized
-	if (canNodeWorker_ != NULL) {
+	if (canNodeWorker_ != NULL && canNodeWorker_->isRunning()) {
 		canNodeWorker_->stopWorker();
 	}
 
-	// TODO(lmark): segmentation fault when stopping canThread...
-	//				(Check the issue on the repository)
 	qDebug() << "MorusMainWindow::~MorusMainWindow "
-				"- stopping CanThread";
-	// Stopping canNodeWorker should stop and delete QThread...
-	// Do it anyway
-	if (canWorkerThread_ != NULL && canWorkerThread_->isRunning())
+			"- Stopping monitorWorker";
+	if (monitorWorker_ != NULL && monitorWorker_->isRunning()) {
+		monitorWorker_->stopWorker();
+	}
+
+	monitorWorkerThread_->terminate();
+	monitorWorkerThread_->wait();
+
+	if (canWorkerThread_)
 	{
 		canWorkerThread_->terminate();
 		canWorkerThread_->wait();
@@ -63,9 +65,9 @@ MorusMainWindow::~MorusMainWindow()
 
 	qDebug() << "MorusMainWindow::~MorusMainWindow "
 				"- deleting UI.";
-	// canWorker and canThread are connected to
-	// the deleteLater() funcion when they are finished
-    delete ui_;
+	delete canNodeWorker_;
+	delete monitorWorker_;
+	delete ui_;
 }
 
 void MorusMainWindow::on_startLocalNodeButton_clicked()
@@ -153,14 +155,14 @@ void MorusMainWindow::setupCanThreadConnections()
 
 	// Connect worker finished() to deleteLater() - QObject SLOT
 	// ... marks objects for deletion
-	connect(canNodeWorker_,
-			SIGNAL( finished() ),
-			canNodeWorker_,
-			SLOT( deleteLater() ));
-	connect(canWorkerThread_,
-			SIGNAL( finished() ),
-			canWorkerThread_,
-			SLOT( deleteLater() ));
+//	connect(canNodeWorker_,
+//			SIGNAL( finished() ),
+//			canNodeWorker_,
+//			SLOT( deleteLater() ));
+//	connect(canWorkerThread_,
+//			SIGNAL( finished() ),
+//			canWorkerThread_,
+//			SLOT( deleteLater() ));
 
 	connect(canNodeWorker_, // Connect information found signal...
 			SIGNAL( nodeInformationFound(std::vector<NodeInfo_t>*) ),
@@ -188,13 +190,13 @@ void MorusMainWindow::setupMonitorThreadConnections()
 			monitorWorkerThread_,
 			SLOT( quit() ));
 	// Connect finished to delete later for both
-	connect(monitorWorker_,
-			SIGNAL( finished() ),
-			monitorWorker_,
-			SLOT( deleteLater() ));
-	connect(monitorWorkerThread_,
-			SIGNAL( finished() ),
-			monitorWorkerThread_,
-			SLOT( deleteLater() ));
+//	connect(monitorWorker_,
+//			SIGNAL( finished() ),
+//			monitorWorker_,
+//			SLOT( deleteLater() ));
+//	connect(monitorWorkerThread_,
+//			SIGNAL( finished() ),
+//			monitorWorkerThread_,
+//			SLOT( deleteLater() ));
 }
 
