@@ -153,17 +153,6 @@ void MorusMainWindow::setupCanThreadConnections()
 			this,			// to morus_window workerFinished()
 			SLOT( workerFinished() ));
 
-	// Connect worker finished() to deleteLater() - QObject SLOT
-	// ... marks objects for deletion
-//	connect(canNodeWorker_,
-//			SIGNAL( finished() ),
-//			canNodeWorker_,
-//			SLOT( deleteLater() ));
-//	connect(canWorkerThread_,
-//			SIGNAL( finished() ),
-//			canWorkerThread_,
-//			SLOT( deleteLater() ));
-
 	connect(canNodeWorker_, // Connect information found signal...
 			SIGNAL( nodeInformationFound(std::vector<NodeInfo_t>*) ),
 			this, // ... to the update monitor slot.
@@ -189,14 +178,5 @@ void MorusMainWindow::setupMonitorThreadConnections()
 			SIGNAL( finished() ),
 			monitorWorkerThread_,
 			SLOT( quit() ));
-	// Connect finished to delete later for both
-//	connect(monitorWorker_,
-//			SIGNAL( finished() ),
-//			monitorWorker_,
-//			SLOT( deleteLater() ));
-//	connect(monitorWorkerThread_,
-//			SIGNAL( finished() ),
-//			monitorWorkerThread_,
-//			SLOT( deleteLater() ));
 }
 
