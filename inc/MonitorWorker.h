@@ -10,6 +10,8 @@
 
 #include <QObject>
 #include <QMutex>
+#include <vector>
+#include <NodeInfo.h>
 
 /**
  * This class implements a QObject worker for use with QThreads.
@@ -61,6 +63,8 @@ class MonitorWorker : public QObject {
 		 * Emit this signal when something goes wrong.
 		 */
 		void error(QString err);
+
+		void foundNodes(std::vector<NodeInfo_t> *activeNodes);
 
 	private:
 

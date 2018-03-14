@@ -13,11 +13,34 @@
 #include <uavcan/protocol/node_status_monitor.hpp>
 
 /**
+ * Initializes node in passive mode.
+ *
+ * @param ifaces - String vector of all available interfaces.
+ * @param node_name - Node name
+ */
+static uavcan_linux::NodePtr initNodeInPassiveMode(
+    		const std::vector<std::string>& ifaces,
+			const std::string& node_name)
+{
+	auto node = uavcan_linux::makeNode(
+			ifaces, node_name.c_str(),
+			uavcan::protocol::SoftwareVersion(),
+			uavcan::protocol::HardwareVersion());
+	node->setModeOperational();
+	return node;
+}
+
+/**
  * Node status monitor class. Used for tracking and monitoring
  * node activity.
  */
 class CanNodeMonitor : public uavcan::NodeStatusMonitor
 {
+
+	/**
+	 * Timer object used for periodic function calls.
+	 */
+	uavcan_linux::TimerPtr timer_;
 
 	/**
 	 * Map registry where node information is saved.
@@ -48,29 +71,37 @@ class CanNodeMonitor : public uavcan::NodeStatusMonitor
 		status_registry_[msg.getSrcNodeID().get()] = msg;
 	}
 
+
 public:
+
+	std::vector<NodeInfo_t> activeNodesInfo;
 
     explicit CanNodeMonitor(uavcan_linux::NodePtr node)
         : uavcan::NodeStatusMonitor(*node) { };
-};
 
-/**
- * Initializes node in passive mode.
- *
- * @param ifaces - String vector of all available interfaces.
- * @param node_name - Node name
- */
-static uavcan_linux::NodePtr initNodeInPassiveMode(
-    		const std::vector<std::string>& ifaces,
-			const std::string& node_name)
-{
-	auto node = uavcan_linux::makeNode(
-			ifaces, node_name.c_str(),
-			uavcan::protocol::SoftwareVersion(),
-			uavcan::protocol::HardwareVersion());
-	node->setModeOperational();
-	return node;
-}
+    void checkForNodes()
+	{
+		activeNodesInfo.clear();
+		NodeInfo_t tempNodeInfo;
+
+		for (unsigned i = 1; i <= uavcan::NodeID::Max; i++)
+		{
+			if (isNodeKnown(i))
+			{
+				NodeStatus status = getNodeStatus(i);
+				// Collect node information
+				tempNodeInfo.id = int(i);
+				tempNodeInfo.uptime = status_registry_[i].uptime_sec;
+				tempNodeInfo.health = status.health;
+				tempNodeInfo.mode = status.mode;
+				tempNodeInfo.vendorSpecificStatusCode =
+						status_registry_[i].vendor_specific_status_code;
+
+				activeNodesInfo.emplace_back(tempNodeInfo);
+			}
+		}
+	};
+};
 
 MonitorWorker::MonitorWorker(QObject *parent) : QObject(parent)
 {
@@ -155,6 +186,8 @@ void MonitorWorker::process()
 		const int res = node->spin(
 				uavcan::MonotonicDuration::fromMSec(1000));
 
+		canNodeMonitor.checkForNodes();
+		emit foundNodes(&canNodeMonitor.activeNodesInfo);
 		if ( res < 0)
 		{
 			emit error(

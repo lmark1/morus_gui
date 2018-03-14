@@ -152,12 +152,6 @@ void MorusMainWindow::setupCanThreadConnections()
 			SIGNAL( finished() ),
 			this,			// to morus_window workerFinished()
 			SLOT( workerFinished() ));
-
-	connect(canNodeWorker_, // Connect information found signal...
-			SIGNAL( nodeInformationFound(std::vector<NodeInfo_t>*) ),
-			this, // ... to the update monitor slot.
-			SLOT( updateCanMonitor(std::vector<NodeInfo_t>*) ));
-
 }
 
 void MorusMainWindow::setupMonitorThreadConnections()
@@ -178,5 +172,54 @@ void MorusMainWindow::setupMonitorThreadConnections()
 			SIGNAL( finished() ),
 			monitorWorkerThread_,
 			SLOT( quit() ));
+
+	connect(monitorWorker_, // Connect information found signal...
+			SIGNAL( foundNodes(std::vector<NodeInfo_t>*) ),
+			this, // ... to the update monitor slot.
+			SLOT( updateCanMonitor(std::vector<NodeInfo_t>*) ));
+
+}
+
+
+static std::string healthToString(const std::uint8_t health)
+{
+
+	// TODO(lmark): Put these 2 conversion methods somewhere where it makes
+	// More sense
+	static const std::unordered_map<std::uint8_t, std::string> map
+	{
+	   { uavcan::protocol::NodeStatus::HEALTH_OK,       "OK" },
+	   { uavcan::protocol::NodeStatus::HEALTH_WARNING,  "WARNING"},
+	   { uavcan::protocol::NodeStatus::HEALTH_ERROR,    "ERROR"},
+	   { uavcan::protocol::NodeStatus::HEALTH_CRITICAL, "CRITICAL"}
+	};
+	try
+	{
+	   return map.at(health);
+	}
+	catch (std::out_of_range&)
+	{
+	   return std::to_string(health);
+	}
+}
+
+static std::string modeToString(const std::uint8_t mode)
+{
+	static const std::unordered_map<std::uint8_t, std::string> map
+	{
+		{ uavcan::protocol::NodeStatus::MODE_OPERATIONAL,     "OPERATIONAL"},
+		{ uavcan::protocol::NodeStatus::MODE_INITIALIZATION,  "INITIALIZATION"},
+		{ uavcan::protocol::NodeStatus::MODE_MAINTENANCE,     "MAINTENANCE"},
+		{ uavcan::protocol::NodeStatus::MODE_SOFTWARE_UPDATE, "SOFTWARE_UPDATE"},
+		{ uavcan::protocol::NodeStatus::MODE_OFFLINE,         "OFFLINE" }
+	};
+	try
+	{
+		return map.at(mode);
+	}
+	catch (std::out_of_range&)
+	{
+		return std::to_string(mode);
+	}
 }
 
