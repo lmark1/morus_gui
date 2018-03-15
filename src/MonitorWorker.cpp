@@ -81,6 +81,9 @@ public:
 
     void checkForNodes()
 	{
+
+    	qDebug() << "checkForNodes() "
+    			"- Checking for nodes.";
 		activeNodesInfo.clear();
 		NodeInfo_t tempNodeInfo;
 

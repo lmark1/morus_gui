@@ -11,6 +11,21 @@
 const QString DEFAULT_IFACE_NAME = "can0";
 const int DEFAULT_NODE_ID = 127;
 
+
+/**
+ * Returns string representation of node health.
+ *
+ * @param health - integer representation of node health
+ */
+static std::string healthToString(const std::uint8_t health);
+
+/**
+ * Returns string representation of node mode.
+ *
+ * @param mode - integer representation of node mode
+ */
+static std::string modeToString(const std::uint8_t mode);
+
 MorusMainWindow::MorusMainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui_(new Ui::MorusMainWindow)
@@ -114,10 +129,117 @@ void MorusMainWindow::handleErrorMessage(QString error)
 void MorusMainWindow::updateCanMonitor(
 		std::vector<NodeInfo_t> *activeNodesInfo)
 {
-	qInfo() << "MorusMainWindow::updateCanMonitor() "
-			"- Number of active nodes: " << activeNodesInfo->size();
 
-	//TODO(lmark): update the table with found nodes
+	qDebug() << "MorusMainWindow::updateCanMonitor() "
+			"- found nodes " << activeNodesInfo->size();
+	// Check all the recieved nodes
+	for (uint8_t i = 0; i < activeNodesInfo->size(); i++)
+	{
+		qDebug() << "Hello from for loop";
+		bool alreadyExists = false;
+
+		// Go through all existing canMonitor items and
+		// check if this one exists
+		for (int j = 0; j < ui_->canNodeMonitor->topLevelItemCount(); j++)
+		{
+			// Check if the node already exits in the node monitor
+			if (ui_->canNodeMonitor->topLevelItem(j)->text(0).toInt()
+					== activeNodesInfo->at(i).id)
+			{
+				alreadyExists = true;
+
+				qDebug() << "MorusMainWindow::updateCanMonitor() "
+						"- updating existing node";
+				// Update existing canMonitor text
+				ui_->canNodeMonitor->topLevelItem(j)->setText(
+						0,
+						std::to_string(
+								int(activeNodesInfo->at(i).id)).c_str());
+				ui_->canNodeMonitor->topLevelItem(j)->setText(
+						1,
+						"N/A");
+				ui_->canNodeMonitor->topLevelItem(j)->setText(
+						2,
+						modeToString(activeNodesInfo->at(i).mode).c_str());
+				ui_->canNodeMonitor->topLevelItem(j)->setText(
+						3,
+						healthToString(activeNodesInfo->at(i).health).c_str());
+				ui_->canNodeMonitor->topLevelItem(j)->setText(
+						4,
+						std::to_string(activeNodesInfo->at(i).uptime).c_str());
+				ui_->canNodeMonitor->topLevelItem(j)->setText(
+						5,
+						std::to_string(activeNodesInfo->at(i).
+								vendorSpecificStatusCode).c_str());
+
+				// Node is found break out of the loop
+				break;
+			}
+		} // canMonitor->size() loop
+
+		// If there is no such nodes add a new node
+		if (!alreadyExists)
+		{
+			qDebug() << "MorusMainWindow::updateCanMonitor() "
+					"- Adding new node";
+			QTreeWidgetItem *newItem = new QTreeWidgetItem();
+			newItem->setText(
+					0,
+					std::to_string(
+							int(activeNodesInfo->at(i).id)).c_str());
+			newItem->setText(
+					1,
+					"N/A");
+			newItem->setText(
+					2,
+					modeToString(activeNodesInfo->at(i).mode).c_str());
+			newItem->setText(
+					3,
+					healthToString(activeNodesInfo->at(i).health).c_str());
+			newItem->setText(
+					4,
+					std::to_string(activeNodesInfo->at(i).uptime).c_str());
+			newItem->setText(
+					5,
+					std::to_string(activeNodesInfo->at(i).
+							vendorSpecificStatusCode).c_str());
+
+			// Add new item to canMonitor
+			ui_->canNodeMonitor->addTopLevelItem(newItem);
+		}
+
+	} // activeNodes.size() loop
+
+	// Delete any existing items if necessary
+	if (ui_->canNodeMonitor->topLevelItemCount() >
+		int(activeNodesInfo->size()))
+	{
+		// Go through all existing items on the list
+		for (int i = 0; i < ui_->canNodeMonitor->topLevelItemCount(); i++)
+		{
+			bool alreadyExists = false;
+
+			for (uint8_t j = 0; j < activeNodesInfo->size(); j++)
+			{
+				// Check if the node already exits in the node monitor
+				if (ui_->canNodeMonitor->topLevelItem(i)->text(0).toInt()
+						== activeNodesInfo->at(j).id)
+				{
+					alreadyExists = true;
+					break;
+				}
+
+				// Delete it if it does not exist
+				if (!alreadyExists)
+				{
+					qDebug() << "MorusMainWindow::updateCanMonitor() "
+							"- deleting existing node.";
+					delete ui_->canNodeMonitor->takeTopLevelItem(i);
+				}
+
+			} // activeNodes list loop
+		} // canMonitor list loop
+	} // If clause
 }
 
 void MorusMainWindow::generateMessageBox(std::string message)
