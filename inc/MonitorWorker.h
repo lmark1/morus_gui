@@ -12,6 +12,12 @@
 #include <QMutex>
 #include <vector>
 #include <NodeInfo.h>
+#include <uavcan/uavcan.hpp>
+
+/**
+ * Default node name used by node handler.
+ */
+extern const uavcan::NodeStatusProvider::NodeName DEFAULT_MONITOR_NAME;
 
 /**
  * This class implements a QObject worker for use with QThreads.

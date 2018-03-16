@@ -11,7 +11,6 @@
 const QString DEFAULT_IFACE_NAME = "can0";
 const int DEFAULT_NODE_ID = 127;
 
-
 /**
  * Returns string representation of node health.
  *

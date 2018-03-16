@@ -12,6 +12,9 @@
 #include <uavcan_linux/uavcan_linux.hpp>
 #include <uavcan/protocol/node_status_monitor.hpp>
 
+extern const uavcan::NodeStatusProvider::NodeName
+	DEFAULT_MONITOR_NAME = "org.uavcan.linux_app.node_status_monitor";
+
 /**
  * Initializes node in passive mode.
  *
@@ -19,11 +22,10 @@
  * @param node_name - Node name
  */
 static uavcan_linux::NodePtr initNodeInPassiveMode(
-    		const std::vector<std::string>& ifaces,
-			const std::string& node_name)
+    		const std::vector<std::string>& ifaces)
 {
 	auto node = uavcan_linux::makeNode(
-			ifaces, node_name.c_str(),
+			ifaces, DEFAULT_MONITOR_NAME,
 			uavcan::protocol::SoftwareVersion(),
 			uavcan::protocol::HardwareVersion());
 	node->setModeOperational();
@@ -141,9 +143,7 @@ void MonitorWorker::process()
 		std::vector<std::string> ifaces;
 		ifaces.emplace_back(ifaceName_);
 
-		node = initNodeInPassiveMode(
-				ifaces,
-				"org.uavcan.linux_app.node_status_monitor");
+		node = initNodeInPassiveMode(ifaces);
 	}
 	catch (const std::exception &ex)
 	{
@@ -185,20 +185,40 @@ void MonitorWorker::process()
 	while (working_)
 	{
 		mutex_.lock();
-		// TODO(lmark): protect this spin call with try - catch.
-		const int res = node->spin(
-				uavcan::MonotonicDuration::fromMSec(1000));
 
-		canNodeMonitor.checkForNodes();
-		emit foundNodes(&canNodeMonitor.activeNodesInfo);
-		if ( res < 0)
+		try
 		{
-			emit error(
-					QString::fromStdString(
-							"Error occurred while spinning monitor.")
-			);
-			working_ = false;
+			const int res = node->spin(
+					uavcan::MonotonicDuration::fromMSec(1000));
+
+			canNodeMonitor.checkForNodes();
+			emit foundNodes(&canNodeMonitor.activeNodesInfo);
+			if ( res < 0)
+			{
+				emit error(
+						QString::fromStdString(
+								"Error occurred while spinning monitor.")
+				);
+				working_ = false;
+			}
 		}
+		catch (std::exception& ex)
+		{
+			// Node initialization failed.
+			qCritical() << "MonitorWorker::process()"
+							"- Failed to spin monitor.";
+
+			// Emit error message
+			std::string error_message(ex.what());
+			emit error(
+				QString::fromStdString(
+					 "MonitorWorker::process()\n "
+					 "Error occurred while spinning monitor.\n" +
+					 error_message
+					 )
+				);
+		}
+
 		mutex_.unlock();
 	}
 
