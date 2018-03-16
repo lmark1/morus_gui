@@ -107,6 +107,7 @@ class CanFirmwareVersionChecker final :
 				const protocol::file::BeginFirmwareUpdate::Response& response)
 				override;
 
+	private:
 
 		/*
 		 * This function is specific for this example implementation.
@@ -115,9 +116,9 @@ class CanFirmwareVersionChecker final :
 		 * The implementation is made so that it can work even on a
 		 * deeply embedded system.
 		 */
-		static FirmwareFilePath makeFirmwareFileSymlinkName(
-				const char* file_name,
-				unsigned file_name_length);
+		FirmwareFilePath makeFirmwareFileSymlinkName(
+			const char* file_name,
+			unsigned file_name_length);
 
 		/*
 		 * This function is specific for this example implementation.
@@ -130,16 +131,8 @@ class CanFirmwareVersionChecker final :
 		 *      <hw-minor>-<sw-major>.
 		 *      <sw-minor>.<vcs-hash-hex>.uavcan.bin
 		 */
-		static uavcan::protocol::GetNodeInfo::Response parseFirmwareFileName(
+		uavcan::protocol::GetNodeInfo::Response parseFirmwareFileName(
 				const char* name);
-
-
-		/*
-		 * This function is specific for this example implementation.
-		 * It returns the firmware files available for given node info struct.
-		 */
-		static std::vector<std::string> findAvailableFirmwareFiles(
-				const uavcan::protocol::GetNodeInfo::Response& info);
 
 };
 

@@ -28,7 +28,8 @@ SOURCES_USER += $(SOURCES_DIR)/main.cpp \
 				$(SOURCES_DIR)/PlatformLinux.cpp \
 				$(SOURCES_DIR)/CanWorker.cpp \
 				$(SOURCES_DIR)/NodeInfoCollector.cpp \
-				$(SOURCES_DIR)/MonitorWorker.cpp
+				$(SOURCES_DIR)/MonitorWorker.cpp \
+				$(SOURCES_DIR)/CanFirmwareVersionChecker.cpp
 
 
 # Include libuavcan .mk file - Initialize libuavcan sources / directories / includes
