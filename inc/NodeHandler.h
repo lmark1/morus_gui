@@ -105,27 +105,11 @@ class NodeHandler {
          */
         CustomNode_t *canNode_ = NULL;
 
-        /**
-		 * Node information collector attached to the canNode.
-		 */
-		NodeInfoCollector nodeInfoCollector_;
-
 		/**
 		 * Can worker object reference used for emitting signals to the
 		 * UI thread.
 		 */
 		CanWorker *canWorker_ = NULL;
-
-		/**
-		 * Vector of active nodes found by the collector.
-		 */
-		std::vector<NodeInfo_t> activeNodesInfo_;
-
-		/**
-		 * Node information retriever. Initialized inside
-		 * setupNodeInfoCollector() method.
-		 */
-		uavcan::NodeInfoRetriever *nodeInfoRetriever_ = NULL;
 };
 
 
