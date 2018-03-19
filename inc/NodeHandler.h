@@ -5,18 +5,30 @@
 #include <QString>
 
 #include <uavcan/uavcan.hpp>
+#include <uavcan/protocol/firmware_update_trigger.hpp>
+#include <uavcan/protocol/node_info_retriever.hpp>
 
-#include "NodeInfo.h"
-#include "NodeInfoCollector.h"
+/*
+ * POSIX-dependent classes and POSIX API.
+ * (Portable Operating System Interface UNIX)
+ * This means that the example will only work as-is on a POSIX-compliant system
+ * (e.g. Linux, NuttX),
+ * otherwise the said classes will have to be re-implemented.
+ */
+#include <uavcan_posix/basic_file_server_backend.hpp>
+
+/*
+ * Function pathname generator. Implements the rules defined in Shell and
+ * Utilities volume of IEEE std.
+ */
+#include <glob.h>
+
+#include "CanFirmwareVersionChecker.h"
 
 using namespace std;
 
-// Forward declaration of NodeInfoCollector
-class NodeInfoCollector;
-
 // Forward declaration of CanWorker
 class CanWorker;
-
 
 /**
  * Memory pool size largely depends on the number of CAN ifaces and on
@@ -82,18 +94,13 @@ class NodeHandler {
 
     private:
 
-        /**
-		 * This method collects node information through the
-		 * and emits it using CanWorker signals to the main UI thread.
-		 */
-		void collectNodeInformation();
-
 		/**
 		 * This method does all the necessary work to setup and start the
-		 * node collector. If anything goes wrong runtime exception will be
+		 * file server.
+		 * If anything goes wrong runtime exception will be
 		 * thrown.
 		 */
-		void setupNodeInfoCollector();
+		void setupNodeFileServer();
 
         /**
          * Flag indicating if node is created.
@@ -110,6 +117,35 @@ class NodeHandler {
 		 * UI thread.
 		 */
 		CanWorker *canWorker_ = NULL;
+
+		/**
+		 * Used by the firmware version checker.
+		 */
+		NodeInfoRetriever *updateNodeInfoRetriever_ = NULL;
+
+		/**
+		 * This class monitors the output of uavcan::NodeInfoRetriever,
+		 * and using this output decides which nodes need to update their
+		 * firmware.
+		 * When a node that requires an update is detected, the class sends
+		 * a service request uavcan.protocol.file.BeginFirmwareUpdate to it.
+		 *
+		 * The application-specific logic that performs the checks is
+		 * implemented in the class ExampleFirmwareVersionChecker,
+		 * defined above in this file.
+		 */
+		CanFirmwareVersionChecker *versionChecker_ = NULL;
+
+		/**
+		 * Attached to the version checker. Triggers the update when needed.
+		 */
+		FirmwareUpdateTrigger *updateTrigger_ = NULL;
+
+		/*
+		 * TODO(lmark): add description to server / backend
+		 */
+		uavcan_posix::BasicFileServerBackend *fileServerBackend_ = NULL;
+		uavcan::FileServer *fileServer_ = NULL;
 };
 
 

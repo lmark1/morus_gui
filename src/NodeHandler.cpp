@@ -53,6 +53,11 @@ int NodeHandler::createNewNode(std::string ifaceName, int nodeID)
     }
 
     /*
+	 * Setup this node as a file server.
+	 */
+	setupNodeFileServer();
+
+    /*
      * Informing other nodes that we're ready to work.
      * Default mode is INITIALIZING.
      */
@@ -93,6 +98,52 @@ int NodeHandler::spinCurrentNode(int timeout_ms)
 			uavcan::MonotonicDuration::fromMSec(timeout_ms));
 
 	return res;
+}
+
+void NodeHandler::setupNodeFileServer()
+{
+	// Try starting the node info retriever
+	qDebug() << "NodeHandler::setupNodeFileServer() "
+			"- Starting node info retriever.";
+	updateNodeInfoRetriever_ = new NodeInfoRetriever(*canNode_);
+	const int recieverRes = updateNodeInfoRetriever_->start();
+	if (recieverRes < 0)
+	{
+		throw std::runtime_error(
+				"Failed to start the node info retriever: "
+				+ std::to_string(recieverRes));
+	}
+
+	// Initialize and start the update trigger
+	qDebug() << "NodeHandler::setupNodeFileServer() "
+			"- Starting versionChecker / trigger.";
+	versionChecker_ = new CanFirmwareVersionChecker();
+	updateTrigger_ = new FirmwareUpdateTrigger(*canNode_, *versionChecker_);
+	const int triggerRes = updateTrigger_->start(*updateNodeInfoRetriever_);
+	if (triggerRes < 0)
+	{
+		throw std::runtime_error("Failed to start the firmware update trigger:"
+				+ std::to_string(triggerRes));
+	}
+
+	/*
+	 * Initializing the file server.
+	 * It is not necessary to run the file server on the same node
+	 * with the firmware update trigger
+	 * (this is explained in the specification),
+	 * but this use case is the most common case.
+	 */
+	qDebug() << "NodeHandler::setupFileServer "
+			"- Starting server / backend.";
+	fileServerBackend_ = new uavcan_posix::BasicFileServerBackend(*canNode_);
+	fileServer_ = new FileServer(*canNode_, *fileServerBackend_);
+	const int fileServerRes = fileServer_->start();
+	if (fileServerRes < 0)
+	{
+	   throw std::runtime_error(
+			   "Failed to start the file server: "
+			   + std::to_string(fileServerRes));
+	}
 }
 
 void NodeHandler::destroyCurrentNode()

@@ -134,6 +134,13 @@ class CanFirmwareVersionChecker final :
 		uavcan::protocol::GetNodeInfo::Response parseFirmwareFileName(
 				const char* name);
 
+		/*
+		 * This function is specific for this example implementation.
+		 * It returns the firmware files available for given node info struct.
+		 */
+		std::vector<std::string> findAvailableFirmwareFiles(
+				const uavcan::protocol::GetNodeInfo::Response& info);
+
 };
 
 #endif /* CAN_FIRMWARE_VERSION_CHECKER_H */

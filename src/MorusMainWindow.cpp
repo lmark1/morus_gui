@@ -134,7 +134,6 @@ void MorusMainWindow::updateCanMonitor(
 	// Check all the recieved nodes
 	for (uint8_t i = 0; i < activeNodesInfo->size(); i++)
 	{
-		qDebug() << "Hello from for loop";
 		bool alreadyExists = false;
 
 		// Go through all existing canMonitor items and

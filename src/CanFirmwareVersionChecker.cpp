@@ -8,12 +8,7 @@
 
 #include "CanFirmwareVersionChecker.h"
 
-/*
- * This function is specific for this example implementation.
- * It returns the firmware files available for given node info struct.
- */
-static std::vector<std::string> findAvailableFirmwareFiles(
-		const uavcan::protocol::GetNodeInfo::Response& info);
+#include <QDebug>
 
 CanFirmwareVersionChecker::CanFirmwareVersionChecker()
 {
@@ -37,6 +32,9 @@ bool CanFirmwareVersionChecker::shouldRequestFirmwareUpdate(
 	 * so the solution provided here may not work
 	 * for some real-world applications.
 	 */
+
+	qDebug() << "CanFirmwareVersionChecker::shouldRequestFirmwareUpdate "
+			"called";
 	return false;
 }
 
@@ -46,6 +44,9 @@ bool CanFirmwareVersionChecker::shouldRetryFirmwareUpdate(
 					error_response,
 				FirmwareFilePath& out_firmware_file_path)
 {
+
+	qDebug() << "CanFirmwareVersionChecker::shouldRetryFirmwareUpdate "
+			"called";
 	return false;
 }
 
@@ -54,7 +55,8 @@ void CanFirmwareVersionChecker::handleFirmwareUpdateConfirmation(
 				NodeID node_id,
 				const protocol::file::BeginFirmwareUpdate::Response& response)
 {
-
+	qDebug() << "CanFirmwareVersionChecker::handleFirmwareUpdateConfirmation "
+				"called";
 }
 
 
@@ -69,6 +71,12 @@ uavcan::IFirmwareVersionChecker::FirmwareFilePath
 uavcan::protocol::GetNodeInfo::Response
 	CanFirmwareVersionChecker::parseFirmwareFileName(
 		const char* name)
+{
+
+}
+
+std::vector<std::string> findAvailableFirmwareFiles(
+		const uavcan::protocol::GetNodeInfo::Response& info)
 {
 
 }
