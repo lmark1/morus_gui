@@ -47,9 +47,16 @@ class MorusMainWindow : public QMainWindow
 	private slots:
 
 		/**
-		 * Start button click method.
+		 * This method executes when start button is clicked.
+		 * Current implementations starts the CAN node.
 		 */
 		void on_startLocalNodeButton_clicked();
+
+		/**
+		 * This method executes when update firmware button is clicked.
+		 * It will prompt the user to find a path to the firmware image file.
+		 */
+		void on_updateFirmwareButton_clicked();
 
 	public slots:
 

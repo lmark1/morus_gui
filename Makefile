@@ -23,7 +23,9 @@ SOURCES_USER += $(SOURCES_DIR)/main.cpp \
 				$(SOURCES_DIR)/moc_MorusMainWindow.cpp \
 				$(SOURCES_DIR)/moc_CanWorker.cpp \
 				$(SOURCES_DIR)/moc_MonitorWorker.cpp \
+				$(SOURCES_DIR)/moc_CanUpdaterWindow.cpp \
 				$(SOURCES_DIR)/MorusMainWindow.cpp \
+				$(SOURCES_DIR)/CanUpdaterWindow.cpp \
 				$(SOURCES_DIR)/NodeHandler.cpp \
 				$(SOURCES_DIR)/PlatformLinux.cpp \
 				$(SOURCES_DIR)/CanWorker.cpp \
@@ -132,7 +134,7 @@ clean_moc:
 
 # Generate moc files
 moc_files: $(SOURCES_DIR)/moc_MorusMainWindow.cpp $(SOURCES_DIR)/moc_CanWorker.cpp \
-		   $(SOURCES_DIR)/moc_MonitorWorker.cpp
+		   $(SOURCES_DIR)/moc_MonitorWorker.cpp $(SOURCES_DIR)/moc_CanUpdaterWindow.cpp
 		   
 $(SOURCES_DIR)/moc_%.cpp: $(INCLUDE_DIR)/%.h
 		moc $(UAVCANDEFS) $(INCLUDES) $< -o $@

@@ -1,12 +1,14 @@
 #include <QDebug>
 
 #include <string>
+#include <unordered_map>
 
 #include "MorusMainWindow.h"
 #include "UiMorusMainWindow.h"
 #include "CanWorker.h"
 #include "NodeHandler.h"
 #include "MonitorWorker.h"
+#include "CanUpdaterWindow.h"
 
 const QString DEFAULT_IFACE_NAME = "can0";
 const int DEFAULT_NODE_ID = 127;
@@ -112,6 +114,24 @@ void MorusMainWindow::on_startLocalNodeButton_clicked()
     ui_->startLocalNodeButton->setEnabled(false);
 }
 
+void MorusMainWindow::on_updateFirmwareButton_clicked()
+{
+	qDebug() << "MorusMainWindow::on_updateFirmwareButton_clicked()";
+
+	// Prompt the user with updater dialog
+	CanUpdaterWindow updaterDialog;
+	int dialogResult = updaterDialog.exec();
+
+	// Return if dialog is rejected
+	if (dialogResult == QDialog::Rejected)
+	{
+		return;
+	}
+
+	qDebug() << updaterDialog.getFirmwarePath().c_str();
+	//TODO(lmark): do something with the firmware path
+}
+
 void MorusMainWindow::workerFinished()
 {
 	qDebug() << "MorusMainWindow::workerFinished()";
@@ -134,6 +154,7 @@ void MorusMainWindow::updateCanMonitor(
 	// Check all the recieved nodes
 	for (uint8_t i = 0; i < activeNodesInfo->size(); i++)
 	{
+		qDebug() << "Hello from for loop";
 		bool alreadyExists = false;
 
 		// Go through all existing canMonitor items and
@@ -325,6 +346,9 @@ static std::string healthToString(const std::uint8_t health)
 
 static std::string modeToString(const std::uint8_t mode)
 {
+
+	// TODO(lmark): Put these 2 conversion methods somewhere where it makes
+	// More sense
 	static const std::unordered_map<std::uint8_t, std::string> map
 	{
 		{ uavcan::protocol::NodeStatus::MODE_OPERATIONAL,     "OPERATIONAL"},

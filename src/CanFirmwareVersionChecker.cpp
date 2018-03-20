@@ -10,15 +10,9 @@
 
 #include <QDebug>
 
-CanFirmwareVersionChecker::CanFirmwareVersionChecker()
-{
-	// TODO Auto-generated constructor stub
-}
+CanFirmwareVersionChecker::CanFirmwareVersionChecker() { }
 
-CanFirmwareVersionChecker::~CanFirmwareVersionChecker()
-{
-	// TODO Auto-generated destructor stub
-}
+CanFirmwareVersionChecker::~CanFirmwareVersionChecker() { }
 
 bool CanFirmwareVersionChecker::shouldRequestFirmwareUpdate(
 		NodeID node_id,
