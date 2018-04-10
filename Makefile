@@ -1,6 +1,6 @@
 # -*- Makefile -*-
 
-PROJECT_NAME = lmark_gui
+PROJECT_NAME = morus_gui
 
 # Define Directories
 BUILD_DIR = build
