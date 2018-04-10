@@ -107,6 +107,17 @@ class CanFirmwareVersionChecker final :
 				const protocol::file::BeginFirmwareUpdate::Response& response)
 				override;
 
+		/**
+		 * Enable firmware update for the node with the given ID.
+		 *
+		 * @param nodeId
+		 * 		Node ID which requested update
+		 *
+		 * @param firmwareFilePath
+		 * 		File path containing firmware image.
+		 */
+		void enableFirmwareUpdate(std::string firmwareFilePath, int nodeId);
+
 	private:
 
 		/*
@@ -140,6 +151,21 @@ class CanFirmwareVersionChecker final :
 		 */
 		std::vector<std::string> findAvailableFirmwareFiles(
 				const uavcan::protocol::GetNodeInfo::Response& info);
+
+		/**
+		 * Flag indicating if firmware update is enabled.
+		 */
+		bool firmwareUpdateEnabled_ = false;
+
+		/**
+		 * Current firmware file path.
+		 */
+		std::string current_firmwareFilePath_;
+
+		/**
+		 * Current node id.
+		 */
+		int current_nodeId_ = -1;
 
 };
 

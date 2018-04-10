@@ -92,6 +92,19 @@ class NodeHandler {
          */
         void stopCurrentNode();
 
+        /**
+		 * This class monitors the output of uavcan::NodeInfoRetriever,
+		 * and using this output decides which nodes need to update their
+		 * firmware.
+		 * When a node that requires an update is detected, the class sends
+		 * a service request uavcan.protocol.file.BeginFirmwareUpdate to it.
+		 *
+		 * The application-specific logic that performs the checks is
+		 * implemented in the class ExampleFirmwareVersionChecker,
+		 * defined above in this file.
+		 */
+		CanFirmwareVersionChecker *versionChecker_ = NULL;
+
     private:
 
 		/**
@@ -122,19 +135,6 @@ class NodeHandler {
 		 * Used by the firmware version checker.
 		 */
 		NodeInfoRetriever *updateNodeInfoRetriever_ = NULL;
-
-		/**
-		 * This class monitors the output of uavcan::NodeInfoRetriever,
-		 * and using this output decides which nodes need to update their
-		 * firmware.
-		 * When a node that requires an update is detected, the class sends
-		 * a service request uavcan.protocol.file.BeginFirmwareUpdate to it.
-		 *
-		 * The application-specific logic that performs the checks is
-		 * implemented in the class ExampleFirmwareVersionChecker,
-		 * defined above in this file.
-		 */
-		CanFirmwareVersionChecker *versionChecker_ = NULL;
 
 		/**
 		 * Attached to the version checker. Triggers the update when needed.

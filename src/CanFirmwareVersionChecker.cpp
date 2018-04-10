@@ -53,6 +53,17 @@ void CanFirmwareVersionChecker::handleFirmwareUpdateConfirmation(
 				"called";
 }
 
+void CanFirmwareVersionChecker::enableFirmwareUpdate(
+		std::string firmwareFilePath,
+		int nodeId)
+{
+	qDebug() << "CanFirmwareVersionChecker::enableFirmwareUpdate";
+
+	// Save current update information
+	this->current_nodeId_ = nodeId;
+	this->current_firmwareFilePath_ = firmwareFilePath;
+	firmwareUpdateEnabled_ = true;
+}
 
 uavcan::IFirmwareVersionChecker::FirmwareFilePath
 	CanFirmwareVersionChecker::makeFirmwareFileSymlinkName(

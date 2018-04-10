@@ -75,6 +75,13 @@ class MorusMainWindow : public QMainWindow
 		 */
 		void updateCanMonitor(std::vector<NodeInfo_t> *activeNodesInfo);
 
+	signals:
+
+		/**
+		 * Signal that the user has requested a firmware update.
+		 */
+		void requestFirmwareUpdate(std::string firmawareFilePath, int nodeId);
+
 	private:
 
 		/**

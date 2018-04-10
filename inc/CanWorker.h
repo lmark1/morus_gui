@@ -60,6 +60,12 @@ class CanWorker : public QObject {
 		 */
 		void process();
 
+		/**
+		 * Firmware update is requested. Notify firmwareVersionChecker
+		 * in node handler to check if update is allowed.
+		 */
+		void firmwareUpdateRequested(std::string firmwareFilePath, int nodeId);
+
 	signals:
 
 		/**

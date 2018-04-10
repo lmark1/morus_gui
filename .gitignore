@@ -1,2 +1,6 @@
 /build
 /dsdlc_generated
+/src/moc_CanUpdaterWindow.cpp
+/src/moc_CanWorker.cpp
+/src/moc_MonitorWorker.cpp
+/src/moc_MorusMainWindow.cpp

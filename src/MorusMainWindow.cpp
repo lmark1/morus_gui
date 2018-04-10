@@ -54,6 +54,8 @@ MorusMainWindow::MorusMainWindow(QWidget *parent) :
 	std::string iface(DEFAULT_IFACE_NAME.toStdString());
 	monitorWorker_->initializeWorker(iface, 1);
 	monitorWorkerThread_->start();
+
+	// TODO(lmark): disable update / restart buttons until user selects a node
 }
 
 MorusMainWindow::~MorusMainWindow()
@@ -96,7 +98,7 @@ void MorusMainWindow::on_startLocalNodeButton_clicked()
 
     /*
      * Can worker needs to be initialized inside the start button
-     * callback. Both canWorker and canThread get deleted each time
+     * callback. canWorker gets deleted each time
      * they finish working.
      */
     canWorkerThread_ = new QThread();
@@ -129,7 +131,10 @@ void MorusMainWindow::on_updateFirmwareButton_clicked()
 	}
 
 	qDebug() << updaterDialog.getFirmwarePath().c_str();
-	//TODO(lmark): do something with the firmware path
+	// TODO(lmark): Check which ID user selected and emit it along with
+	// firmware path string
+	int tempID = 1;
+	emit requestFirmwareUpdate(updaterDialog.getFirmwarePath(), tempID);
 }
 
 void MorusMainWindow::workerFinished()
@@ -293,6 +298,13 @@ void MorusMainWindow::setupCanThreadConnections()
 			SIGNAL( finished() ),
 			this,			// to morus_window workerFinished()
 			SLOT( workerFinished() ));
+
+	// Connect firmware update request
+	connect(this,
+			SIGNAL( requestFirmwareUpdate(std::string, int) ),
+			canNodeWorker_,
+			SLOT( firmwareUpdateRequested(std::string, int) ));
+
 }
 
 void MorusMainWindow::setupMonitorThreadConnections()
@@ -318,7 +330,6 @@ void MorusMainWindow::setupMonitorThreadConnections()
 			SIGNAL( foundNodes(std::vector<NodeInfo_t>*) ),
 			this, // ... to the update monitor slot.
 			SLOT( updateCanMonitor(std::vector<NodeInfo_t>*) ));
-
 }
 
 

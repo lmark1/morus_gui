@@ -137,6 +137,16 @@ int CanWorker::runNodeHandler() {
 	}
 }
 
+void CanWorker::firmwareUpdateRequested(
+		std::string firmwareFilePath, int nodeId) {
+
+	qDebug() << "CanWorker::firmwareUpdateRequested "
+			"- update signal received.";
+
+	// Enable version checker
+	canNodeHandler_->versionChecker_->enableFirmwareUpdate(
+			firmwareFilePath, nodeId);
+}
 
 void CanWorker::stopWorker()
 {
