@@ -31,6 +31,9 @@ class CanFirmwareVersionChecker final :
 		 * This method will be invoked when the class obtains a
 		 * response to GetNodeInfo request.
 		 *
+		 * Check weather the node requires an update. Check currently
+		 * saved node ID and check if firmware update flag is enabled.
+		 *
 		 * @param node_id
 		 * 		Node ID that this GetNodeInfo response was received from.
 		 *
@@ -120,38 +123,6 @@ class CanFirmwareVersionChecker final :
 
 	private:
 
-		/*
-		 * This function is specific for this example implementation.
-		 * It computes the name of a symlink to the firmware file.
-		 * Please see explanation above, where the function is called from.
-		 * The implementation is made so that it can work even on a
-		 * deeply embedded system.
-		 */
-		FirmwareFilePath makeFirmwareFileSymlinkName(
-			const char* file_name,
-			unsigned file_name_length);
-
-		/*
-		 * This function is specific for this example implementation.
-		 * It extracts the version information from firmware file name.
-		 * The implementation is made so that it can work even on a
-		 * deeply embedded system.
-		 *
-		 * Assumed format is:
-		 *      <node-name>-<hw-major>.
-		 *      <hw-minor>-<sw-major>.
-		 *      <sw-minor>.<vcs-hash-hex>.uavcan.bin
-		 */
-		uavcan::protocol::GetNodeInfo::Response parseFirmwareFileName(
-				const char* name);
-
-		/*
-		 * This function is specific for this example implementation.
-		 * It returns the firmware files available for given node info struct.
-		 */
-		std::vector<std::string> findAvailableFirmwareFiles(
-				const uavcan::protocol::GetNodeInfo::Response& info);
-
 		/**
 		 * Flag indicating if firmware update is enabled.
 		 */
@@ -165,7 +136,7 @@ class CanFirmwareVersionChecker final :
 		/**
 		 * Current node id.
 		 */
-		int current_nodeId_ = -1;
+		uint8_t current_nodeId_ = -1;
 
 };
 

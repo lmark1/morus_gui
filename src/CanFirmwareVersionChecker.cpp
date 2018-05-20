@@ -19,17 +19,37 @@ bool CanFirmwareVersionChecker::shouldRequestFirmwareUpdate(
 		const protocol::GetNodeInfo::Response& node_info,
 		FirmwareFilePath& out_firmware_file_path)
 {
-	/*
-	 * We need to make the decision, given the inputs,
-	 * whether the node requires an update.
-	 * This part of the logic is deeply application-specific,
-	 * so the solution provided here may not work
-	 * for some real-world applications.
-	 */
-
-	qDebug() << "CanFirmwareVersionChecker::shouldRequestFirmwareUpdate "
+	qDebug() << "CanFirmwareVersionChecker::shouldRequestFirmwareUpdate() - "
 			"called";
-	return false;
+
+	// Check if update is requested
+	if (!this->firmwareUpdateEnabled_)
+	{
+		qDebug() << "CanFirmwareVersionChecker::"
+				"shouldRequestFirmwareUpdate() - "
+				"Firmware update not requested by user - "
+				"cancelling request...";
+		return false;
+	}
+
+	// Check if node ID matches requested node ID
+	if (node_id.get() == this->current_nodeId_)
+	{
+		qDebug() << "CanFirmwareVersionChecker::"
+				"shouldRequestFirmwareUpdate() - "
+				"Node ID does not match user - selected ID - "
+				"canceling request...";
+	}
+
+	// TODO(lmark): Check if this file path was added correctly
+	// Update is valid, make new firmware file path
+	FirmwareFilePath newFilePath;
+	newFilePath.operator += (this->current_firmwareFilePath_.c_str());
+
+	qDebug() << "CanFirmwareVersionChecker::"
+			"shouldRequestFirmwareUpdate() - "
+			"Firmware update accepted.";
+	return true;
 }
 
 bool CanFirmwareVersionChecker::shouldRetryFirmwareUpdate(
@@ -41,6 +61,8 @@ bool CanFirmwareVersionChecker::shouldRetryFirmwareUpdate(
 
 	qDebug() << "CanFirmwareVersionChecker::shouldRetryFirmwareUpdate "
 			"called";
+
+	// Always deny firmware update if an error occurs.
 	return false;
 }
 
@@ -49,8 +71,9 @@ void CanFirmwareVersionChecker::handleFirmwareUpdateConfirmation(
 				NodeID node_id,
 				const protocol::file::BeginFirmwareUpdate::Response& response)
 {
-	qDebug() << "CanFirmwareVersionChecker::handleFirmwareUpdateConfirmation "
-				"called";
+	qDebug() << "CanFirmwareVersionChecker::"
+			"handleFirmwareUpdateConfirmation() "
+			"called";
 }
 
 void CanFirmwareVersionChecker::enableFirmwareUpdate(
@@ -63,26 +86,5 @@ void CanFirmwareVersionChecker::enableFirmwareUpdate(
 	this->current_nodeId_ = nodeId;
 	this->current_firmwareFilePath_ = firmwareFilePath;
 	firmwareUpdateEnabled_ = true;
-}
-
-uavcan::IFirmwareVersionChecker::FirmwareFilePath
-	CanFirmwareVersionChecker::makeFirmwareFileSymlinkName(
-		const char* file_name,
-		unsigned file_name_length)
-{
-
-}
-
-uavcan::protocol::GetNodeInfo::Response
-	CanFirmwareVersionChecker::parseFirmwareFileName(
-		const char* name)
-{
-
-}
-
-std::vector<std::string> findAvailableFirmwareFiles(
-		const uavcan::protocol::GetNodeInfo::Response& info)
-{
-
 }
 
