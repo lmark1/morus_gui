@@ -119,6 +119,7 @@ void MorusMainWindow::on_startLocalNodeButton_clicked()
 void MorusMainWindow::on_updateFirmwareButton_clicked()
 {
 	qDebug() << "MorusMainWindow::on_updateFirmwareButton_clicked()";
+	monitorWorker_->pauseWorker();
 
 	// Prompt the user with updater dialog
 	CanUpdaterWindow updaterDialog;
@@ -127,6 +128,7 @@ void MorusMainWindow::on_updateFirmwareButton_clicked()
 	// Return if dialog is rejected
 	if (dialogResult == QDialog::Rejected)
 	{
+		monitorWorker_->resumeWorker();
 		return;
 	}
 
@@ -134,6 +136,8 @@ void MorusMainWindow::on_updateFirmwareButton_clicked()
 	// TODO(lmark): Check which ID user selected and emit it along with
 	// firmware path string
 	int tempID = 1;
+
+	monitorWorker_->resumeWorker();
 	emit requestFirmwareUpdate(updaterDialog.getFirmwarePath(), tempID);
 }
 
@@ -153,13 +157,11 @@ void MorusMainWindow::handleErrorMessage(QString error)
 void MorusMainWindow::updateCanMonitor(
 		std::vector<NodeInfo_t> *activeNodesInfo)
 {
-
 	qDebug() << "MorusMainWindow::updateCanMonitor() "
 			"- found nodes " << activeNodesInfo->size();
 	// Check all the recieved nodes
 	for (uint8_t i = 0; i < activeNodesInfo->size(); i++)
 	{
-		qDebug() << "Hello from for loop";
 		bool alreadyExists = false;
 
 		// Go through all existing canMonitor items and

@@ -50,6 +50,16 @@ class MonitorWorker : public QObject {
 		 */
 		bool isRunning();
 
+		/**
+		 * Pause monitor worker.
+		 */
+		void pauseWorker();
+
+		/**
+		 * Resume monitor worker.
+		 */
+		void resumeWorker();
+
 	public slots:
 
 		/**
@@ -93,6 +103,8 @@ class MonitorWorker : public QObject {
 		 * Mutex used for managing processing and calls from other threads.
 		 */
 		QMutex mutex_;
+
+		bool paused = false;
 };
 
 #endif /* MONITORWORKER_H_ */

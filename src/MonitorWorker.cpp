@@ -84,7 +84,7 @@ public:
     void checkForNodes()
 	{
 
-    	qDebug() << "checkForNodes() "
+    	qDebug() << "CanNodeMonitor::checkForNodes() "
     			"- Checking for nodes.";
 		activeNodesInfo.clear();
 		NodeInfo_t tempNodeInfo;
@@ -184,15 +184,12 @@ void MonitorWorker::process()
 
 	while (working_)
 	{
+		if (paused) {continue;}
 		mutex_.lock();
-
 		try
 		{
 			const int res = node->spin(
 					uavcan::MonotonicDuration::fromMSec(1000));
-
-			canNodeMonitor.checkForNodes();
-			emit foundNodes(&canNodeMonitor.activeNodesInfo);
 			if ( res < 0)
 			{
 				emit error(
@@ -201,6 +198,8 @@ void MonitorWorker::process()
 				);
 				working_ = false;
 			}
+			canNodeMonitor.checkForNodes();
+			emit foundNodes(&canNodeMonitor.activeNodesInfo);
 		}
 		catch (std::exception& ex)
 		{
@@ -218,7 +217,6 @@ void MonitorWorker::process()
 					 )
 				);
 		}
-
 		mutex_.unlock();
 	}
 
@@ -254,5 +252,17 @@ bool MonitorWorker::isRunning()
 //	mutex_.unlock();
 
 	return value;
+}
+
+void MonitorWorker::pauseWorker()
+{
+	qDebug() << "MonitorWorker::pauseWorker()";
+	paused = true;
+}
+
+void MonitorWorker::resumeWorker()
+{
+	qDebug() << "MonitorWorker::resumeWorker()";
+	paused = false;
 }
 

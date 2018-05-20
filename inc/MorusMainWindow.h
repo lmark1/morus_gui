@@ -96,6 +96,8 @@ class MorusMainWindow : public QMainWindow
 		 */
 		void setupMonitorThreadConnections();
 
+		bool flag = false;
+
 		/**
 		 * Pointer to morus_main_window UI.
 		 */
