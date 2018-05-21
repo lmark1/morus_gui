@@ -32,6 +32,8 @@ MorusMainWindow::MorusMainWindow(QWidget *parent) :
 {
     ui_->setupUi(this);
     
+    qRegisterMetaType<std::vector<uavcan::protocol::param::GetSet::Response>>(
+    		"std::vector<uavcan::protocol::param::GetSet::Response>");
     // Set initial node-id and node interface values
     ui_->localNodeIDSpinBox->setValue(DEFAULT_NODE_ID);
     ui_->localNodeIDSpinBox->setMaximum(DEFAULT_NODE_ID);
@@ -61,7 +63,6 @@ MorusMainWindow::MorusMainWindow(QWidget *parent) :
 			SIGNAL( itemClicked(QTreeWidgetItem*, int) ),
 			this,
 			SLOT ( onCanMonitorItemClicked(QTreeWidgetItem*, int) ));
-
 }
 
 MorusMainWindow::~MorusMainWindow()
@@ -349,6 +350,16 @@ void MorusMainWindow::setupCanThreadConnections()
 			canNodeWorker_,
 			SLOT( firmwareUpdateRequested(std::string, int) ));
 
+	// Connect signal for updating parameters
+	connect(canNodeWorker_,
+			SIGNAL( nodeParametersFound(
+					std::vector
+					<uavcan::protocol::param::GetSet::Response>) ),
+			this,
+			SLOT( updateNodeParameters(
+					std::vector
+					<uavcan::protocol::param::GetSet::Response>) ));
+
 }
 
 void MorusMainWindow::setupMonitorThreadConnections()
@@ -396,6 +407,14 @@ void MorusMainWindow::onCanMonitorItemClicked(
 	currentNodeID_ = item->text(0).toInt();
 	qDebug() << "MorusMainWindow::onCanMonitorItemClicked() - "
 			<< item->text(0).toStdString().c_str();
+}
+
+void MorusMainWindow::updateNodeParameters(
+				std::vector
+				<uavcan::protocol::param::GetSet::Response> params)
+{
+	qDebug() << "MorusMainWindow::updateNodeParameters() - "
+			<< params.size();
 }
 
 static std::string healthToString(const std::uint8_t health)

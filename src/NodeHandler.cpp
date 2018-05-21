@@ -224,13 +224,11 @@ void NodeHandler::readAllParameters()
 	 * Note that access by index should be used only to list params,
 	 * not to get or set them.
 	 */
-
 	readParametersFlag_ = false;
-	qDebug() << "NodeHandler::readAllParameters() - "
-			"read all params.";
 	std::vector<uavcan::protocol::param::GetSet::Response> remoteParams;
 
-	cout << "START" << endl;
+	qDebug() << "NodeHandler::readAllParameters() - "
+				"start reading parameters.";
 	while (true)
 	{
 		qDebug() << "NodeHandler::readAllParameters() - "
@@ -247,6 +245,7 @@ void NodeHandler::readAllParameters()
 		cout << res.first << endl;
 		if (res.first < 0)
 		{
+			// TODO(lmark): Do not throw an error here !
 			throw std::runtime_error(
 					"Failed to get param: " + std::to_string(res.first));
 		}
@@ -261,9 +260,12 @@ void NodeHandler::readAllParameters()
 		std::cout << "Response:\n" << res.second << std::endl << std::endl;
 		        remoteParams.push_back(res.second);
 	}
-	cout << "END" << endl;
+	qDebug() << "NodeHandler::readAllParameters() - "
+				"finished reading parameters.";
 
-	canWorker_->parameterList(remoteParams);
+	// Start propagating parameters towards CanWorker -> MorusMainWindow
+	canWorker_->updateNodeParameters(remoteParams);
+
 	// Reset read parameter flags
 	paramNodeID_ = -1;
 }

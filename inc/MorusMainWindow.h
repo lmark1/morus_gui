@@ -5,6 +5,7 @@
 #include <QThread>
 #include <QCloseEvent>
 
+#include <uavcan/protocol/param/GetSet.hpp>
 #include "UiMorusMainWindow.h"
 #include "NodeInfo.h"
 
@@ -86,6 +87,15 @@ class MorusMainWindow : public QMainWindow
 		 * canMonitor widget tree.
 		 */
 		void onCanMonitorItemClicked(QTreeWidgetItem *item, int column);
+
+		/**
+		 *	Update node parameter list with the given set of parameters.
+		 *
+		 *	@param params
+		 */
+		void updateNodeParameters(
+				std::vector
+				<uavcan::protocol::param::GetSet::Response> params);
 
 	signals:
 

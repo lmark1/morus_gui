@@ -90,6 +90,7 @@ int CanWorker::initializeNodeHandler()
 	{
 		qDebug() << "CanWorker::initializeNodeHandler() "
 				"- trying to initialize node handler.";
+
 		// Try creating new node.
 		const int res_id = canNodeHandler_->
 				createNewNode(ifaceName_, workerID_);
@@ -119,9 +120,7 @@ int CanWorker::runNodeHandler() {
 	{
 		// Try spinning the current node
 		const int res_id = canNodeHandler_->spinCurrentNode(NODE_TIMEOUT);
-
 		return res_id;
-
 	}
 	catch (const std::exception& ex)
 	{
@@ -197,8 +196,9 @@ void CanWorker::readParameterSignal(int nodeID)
 	canNodeHandler_->paramNodeID_ = nodeID;
 }
 
-void CanWorker::parameterList(
+void CanWorker::updateNodeParameters(
 		std::vector<uavcan::protocol::param::GetSet::Response> params)
 {
 	qDebug() << "CanWorker::parameterList() - " << params.size();
+	emit nodeParametersFound(params);
 }

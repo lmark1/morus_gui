@@ -72,8 +72,17 @@ class CanWorker : public QObject {
 		 */
 		void readParameterSignal(int nodeID);
 
-		void parameterList(
-						std::vector<uavcan::protocol::param::GetSet::Response> params);
+		/**
+		 * This method will be called from the node handler with all
+		 * the parameters found in the node configuration.
+		 * Parameters will be further propagated to MorusMainWindow where
+		 * they can be updated.
+		 *
+		 * @param params
+		 */
+		void updateNodeParameters(
+				std::vector
+				<uavcan::protocol::param::GetSet::Response> params);
 
 	public slots:
 
@@ -108,6 +117,16 @@ class CanWorker : public QObject {
 		 */
 		void nodeInformationFound(std::vector<NodeInfo_t> *activeNodeInfo);
 
+		/**
+		 * This signal will be emitted when node handler has found
+		 * node parameter configuration.
+		 *
+		 * @param params
+		 */
+		void nodeParametersFound(
+				std::vector
+				<uavcan::protocol::param::GetSet::Response> params);
+
 	private:
 
 		/**
@@ -123,7 +142,7 @@ class CanWorker : public QObject {
 		int runNodeHandler();
 
 		/**
-		 * Attempts to read all parameters from node with paramNodeID_.
+		 * Attempts to read all parameters from node with given paramNodeID_.
 		 */
 		void readAllParameters();
 
