@@ -105,6 +105,21 @@ class NodeHandler {
 		 */
 		CanFirmwareVersionChecker *versionChecker_ = NULL;
 
+		/**
+		 * Pointer to CAN node.
+		 */
+		CustomNode_t *canNode_ = NULL;
+
+		/**
+		 * ID of the node whose parameters are being read.
+		 */
+		int paramNodeID_ = -1;
+
+		/**
+		 * True if parameters will be read, false otherwise.
+		 */
+		bool readParametersFlag_ = false;
+
     private:
 
 		/**
@@ -115,15 +130,12 @@ class NodeHandler {
 		 */
 		void setupNodeFileServer();
 
+		void readAllParameters();
+
         /**
          * Flag indicating if node is created.
          */
         bool nodeWorking_ = false;
-
-        /**
-         * Pointer to CAN node.
-         */
-        CustomNode_t *canNode_ = NULL;
 
 		/**
 		 * Can worker object reference used for emitting signals to the

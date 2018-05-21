@@ -1,13 +1,61 @@
 #include <QDebug>
-
 #include <cstddef>
 #include <iostream>
+#include <unistd.h>
+
+#include <uavcan/protocol/param/GetSet.hpp>
+#include <uavcan/protocol/param/ExecuteOpcode.hpp>
 
 #include "NodeHandler.h"
 #include "PlatformLinux.h"
 #include "CanWorker.h"
 
 const uavcan::NodeStatusProvider::NodeName DEFAULT_NODE_NAME = "morus.can.node";
+
+/**
+ * Convenience function for blocking service calls.
+ */
+template <typename T>
+std::pair<int, typename T::Response> performBlockingServiceCall(
+		uavcan::INode& node,
+        uavcan::NodeID remote_node_id,
+        const typename T::Request& request)
+{
+    bool success = false;
+
+    // Generated types have zero-initializing constructors, always.
+    typename T::Response response;
+
+    uavcan::ServiceClient<T> client(node);
+    client.setCallback([&](const uavcan::ServiceCallResult<T>& result)
+        {
+            success = result.isSuccessful();
+            response = result.getResponse();
+        });
+
+    const int call_res = client.call(remote_node_id, request);
+    qDebug() << "performBlockingServiceCall() - "
+    		"Call res: " << call_res;
+    if (call_res >= 0)
+    {
+        while (client.hasPendingCalls())
+        {
+            const int spin_res = node.spin(
+            		uavcan::MonotonicDuration::fromMSec(100));
+
+            qDebug() << "performBlockingServiceCall() - "
+            		"Spin res: " << spin_res;
+            if (spin_res < 0)
+            {
+                return {spin_res, response};
+            }
+        }
+        qDebug() << "performBlockingServiceCall() - "
+        		"Success res: " << success;
+        return {success ? 0 : -uavcan::ErrFailure, response};
+    }
+    return {call_res, response};
+}
 
 NodeHandler::NodeHandler(CanWorker& worker)
 {
@@ -90,12 +138,13 @@ int NodeHandler::spinCurrentNode(int timeout_ms)
 	 * No longer using this nod to collect information about other
 	 * nodes.
 	 */
+
 	qDebug() << "NodeHandler::spinCurrentNode() "
 				"- spin node.\n";
-
 	// Spin the node
 	const int res = canNode_->spin(
 			uavcan::MonotonicDuration::fromMSec(timeout_ms));
+	if (readParametersFlag_) {readAllParameters();}
 
 	return res;
 }
@@ -164,6 +213,58 @@ CustomNode_t& getCanNode(std::string iface_name)
 {
     static CustomNode_t node(getCanDriver(iface_name), getSystemClock());
     return node;
+}
+
+
+void NodeHandler::readAllParameters()
+{
+	/*
+	 * Reading all params from the remote node (access by index);
+	 * printing request/response to stdout in YAML format.
+	 * Note that access by index should be used only to list params,
+	 * not to get or set them.
+	 */
+
+	readParametersFlag_ = false;
+	qDebug() << "NodeHandler::readAllParameters() - "
+			"read all params.";
+	std::vector<uavcan::protocol::param::GetSet::Response> remoteParams;
+
+	cout << "START" << endl;
+	while (true)
+	{
+		qDebug() << "NodeHandler::readAllParameters() - "
+				"do request.";
+		uavcan::protocol::param::GetSet::Request paramRequest;
+		paramRequest.index = remoteParams.size();
+		std::cout << "Param GET request:\n" << paramRequest
+				<< std::endl << std::endl;
+		auto res = performBlockingServiceCall
+				<uavcan::protocol::param::GetSet>(
+						*canNode_,
+						paramNodeID_,
+						paramRequest);
+		cout << res.first << endl;
+		if (res.first < 0)
+		{
+			throw std::runtime_error(
+					"Failed to get param: " + std::to_string(res.first));
+		}
+
+		// Empty name means no such param, which means we're finished
+		if (res.second.name.empty())
+		{
+			std::cout << "Param read done!\n\n" << std::endl;
+			break;
+		}
+
+		std::cout << "Response:\n" << res.second << std::endl << std::endl;
+		        remoteParams.push_back(res.second);
+	}
+	cout << "END" << endl;
+
+	// Reset read parameter flags
+	paramNodeID_ = -1;
 }
 
 

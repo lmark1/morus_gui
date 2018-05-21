@@ -133,16 +133,6 @@ class CanWorker : public QObject {
 		int workerID_ = -1;
 
 		/**
-		 * ID of the node whose parameters are being read.
-		 */
-		int paramNodeID_ = -1;
-
-		/**
-		 * True if parameters will be read, false otherwise.
-		 */
-		bool readParametersFlag_ = false;
-
-		/**
 		 *	Flag indicating worker started processing.
 		 */
 		bool working_ = false;

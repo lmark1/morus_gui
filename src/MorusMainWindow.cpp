@@ -173,6 +173,14 @@ void MorusMainWindow::on_fetchParamButton_clicked()
 		return;
 	}
 
+	// Check if a node is selected for firmware update
+	if (currentNodeID_ == -1)
+	{
+		generateMessageBox("Please select a node first.");
+		return;
+	}
+
+	canNodeWorker_->readParameterSignal(currentNodeID_);
 }
 
 void MorusMainWindow::workerFinished()
