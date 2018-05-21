@@ -263,6 +263,7 @@ void NodeHandler::readAllParameters()
 	}
 	cout << "END" << endl;
 
+	canWorker_->parameterList(remoteParams);
 	// Reset read parameter flags
 	paramNodeID_ = -1;
 }

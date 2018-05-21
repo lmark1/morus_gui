@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QMutex>
 
+#include <uavcan/protocol/param/GetSet.hpp>
+#include <uavcan/protocol/param/ExecuteOpcode.hpp>
 #include "NodeInfo.h"
 
 // Forward declaration of the NodeHandler class.
@@ -69,6 +71,9 @@ class CanWorker : public QObject {
 		 * @param nodeID
 		 */
 		void readParameterSignal(int nodeID);
+
+		void parameterList(
+						std::vector<uavcan::protocol::param::GetSet::Response> params);
 
 	public slots:
 

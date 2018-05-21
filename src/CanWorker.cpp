@@ -196,3 +196,9 @@ void CanWorker::readParameterSignal(int nodeID)
 	canNodeHandler_->readParametersFlag_ = true;
 	canNodeHandler_->paramNodeID_ = nodeID;
 }
+
+void CanWorker::parameterList(
+		std::vector<uavcan::protocol::param::GetSet::Response> params)
+{
+	qDebug() << "CanWorker::parameterList() - " << params.size();
+}
