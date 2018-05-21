@@ -41,7 +41,7 @@ std::pair<int, typename T::Response> performBlockingServiceCall(
         while (client.hasPendingCalls())
         {
             const int spin_res = node.spin(
-            		uavcan::MonotonicDuration::fromMSec(100));
+            		uavcan::MonotonicDuration::fromMSec(10));
 
             qDebug() << "performBlockingServiceCall() - "
             		"Spin res: " << spin_res;

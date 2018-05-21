@@ -28,6 +28,11 @@ extern const QString DEFAULT_IFACE_NAME;
  */
 extern const int DEFAULT_NODE_ID;
 
+/**
+ * Define parameter namespace.
+ */
+namespace param_ns = uavcan::protocol::param;
+
 namespace Ui {
 class MorusMainWindow;
 }

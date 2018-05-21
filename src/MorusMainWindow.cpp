@@ -32,8 +32,10 @@ MorusMainWindow::MorusMainWindow(QWidget *parent) :
 {
     ui_->setupUi(this);
     
+    // Register this type for signaling parameters
     qRegisterMetaType<std::vector<uavcan::protocol::param::GetSet::Response>>(
     		"std::vector<uavcan::protocol::param::GetSet::Response>");
+
     // Set initial node-id and node interface values
     ui_->localNodeIDSpinBox->setValue(DEFAULT_NODE_ID);
     ui_->localNodeIDSpinBox->setMaximum(DEFAULT_NODE_ID);
@@ -415,6 +417,164 @@ void MorusMainWindow::updateNodeParameters(
 {
 	qDebug() << "MorusMainWindow::updateNodeParameters() - "
 			<< params.size();
+
+	QTreeWidget *paramTree = ui_->parameterTreeWidget;
+
+	// Initialize some colors
+	QBrush grey(QColor(230, 230, 230, 255));
+	QBrush white(QColor(255, 255, 255, 255));
+
+	// Clear current parameter configuration
+	paramTree->clear();
+
+	for (int index = params.size()-1; index >= 0; index--)
+	{
+		QTreeWidgetItem *paramItem = new QTreeWidgetItem();
+
+		std::string paramName(params[index].name.c_str());
+		paramItem->setText(0, QString::fromStdString(paramName));
+
+		// Color columns differently
+		if (index % 2 == 0)
+		{ for (int k=0; k<7; k++) paramItem->setBackground(k, grey); }
+		else
+		{ for (int k=0; k<7; k++) paramItem->setBackground(k, white); }
+
+		// Check parameter type and set fields accordingly
+		if (params[index].value.is(param_ns::Value::Tag::integer_value))
+		{
+			// Set int type and value
+			paramItem->setText(1, QString("int"));
+			paramItem->setText(2,
+					QString::fromStdString(std::to_string
+					(
+						params[index].value.to
+						<param_ns::Value::Tag::integer_value>()
+					).c_str()));
+			paramItem->setText(4,
+					QString::fromStdString(std::to_string
+					(
+						params[index].default_value.to
+						<param_ns::Value::Tag::integer_value>()
+					).c_str()));
+
+			// Initialize min values
+			if (params[index].min_value.is(param_ns::NumericValue::Tag::empty))
+				paramItem->setText(5, QString("-"));
+			else
+				paramItem->setText(5,
+						QString::fromStdString(std::to_string
+						(
+							params[index].min_value.to
+							<param_ns::NumericValue::Tag::integer_value>()
+						).c_str()));
+
+			// Initialize max values
+			if (params[index].max_value.is(param_ns::NumericValue::Tag::empty))
+				paramItem->setText(6, QString("-"));
+			else
+				paramItem->setText(6,
+						QString::fromStdString(std::to_string
+						(
+							params[index].max_value.to
+							<param_ns::NumericValue::Tag::integer_value>()
+						).c_str()));
+		}
+		else if (params[index].value.is(param_ns::Value::Tag::real_value))
+		{
+			paramItem->setText(1, QString("float"));
+			paramItem->setText(2,
+					QString::fromStdString(std::to_string
+					(
+						params[index].value.to
+						<param_ns::Value::Tag::real_value>()
+					).c_str()));
+			paramItem->setText(4,
+					QString::fromStdString(std::to_string
+					(
+						params[index].default_value.to
+						<param_ns::Value::Tag::real_value>()
+					).c_str()));
+
+			// Set minimum value
+			if (params[index].min_value.is(param_ns::NumericValue::Tag::empty))
+				paramItem->setText(5, "-");
+			else
+				paramItem->setText(5,
+						std::to_string
+						(
+							params[index].min_value.to
+							<param_ns::NumericValue::Tag::real_value>()
+						).c_str());
+
+			// Set maximum value
+			if (params[index].max_value.is(param_ns::NumericValue::Tag::empty))
+				paramItem->setText(6, "-");
+			else
+				paramItem->setText(6,
+						std::to_string
+						(
+							params[index].max_value.to
+							<param_ns::NumericValue::Tag::real_value>()
+						).c_str());
+		}
+		else if (params[index].value.is(param_ns::Value::Tag::string_value))
+		{
+			paramItem->setText(1, QString("string"));
+			paramItem->setText(2,
+					QString::fromStdString(std::string
+					(
+						params[index].value.to
+						<param_ns::Value::Tag::string_value>().c_str()
+					)));
+			paramItem->setText(4,
+					QString::fromStdString
+					(
+						std::string(params[index].default_value.to
+						<param_ns::Value::Tag::string_value>().c_str()
+					)));
+			paramItem->setText(5, "-");
+			paramItem->setText(6, "-");
+		}
+		else if (params[index].value.is(param_ns::Value::Tag::boolean_value))
+		{
+			paramItem->setText(1, QString("uint8"));
+			paramItem->setText(2,
+					QString::fromStdString(std::to_string
+					(
+						params[index].value.to
+						<param_ns::Value::Tag::boolean_value>()
+					).c_str()));
+			paramItem->setText(4,
+					QString::fromStdString(std::to_string(
+						params[index].default_value.to
+						<param_ns::Value::Tag::boolean_value>()
+					).c_str()));
+
+			if (params[index].min_value.is(param_ns::NumericValue::Tag::empty))
+				paramItem->setText(5, "-");
+			else
+				paramItem->setText(5,
+						std::to_string
+						(
+							params[index].min_value.to
+							<param_ns::NumericValue::Tag::integer_value>()
+						).c_str());
+
+			if (params[index].max_value.is(param_ns::NumericValue::Tag::empty))
+				paramItem->setText(6, "-");
+			else
+				paramItem->setText(6,
+						std::to_string
+						(
+							params[index].max_value.to
+							<param_ns::NumericValue::Tag::integer_value>()
+						).c_str());
+		}
+
+		paramTree->insertTopLevelItem(0, paramItem);
+	} // Param index FOR loop
+
 }
 
 static std::string healthToString(const std::uint8_t health)

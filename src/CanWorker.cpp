@@ -200,5 +200,7 @@ void CanWorker::updateNodeParameters(
 		std::vector<uavcan::protocol::param::GetSet::Response> params)
 {
 	qDebug() << "CanWorker::parameterList() - " << params.size();
+
+	// Emit found parameters towards MorusMainWindow
 	emit nodeParametersFound(params);
 }
