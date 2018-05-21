@@ -184,7 +184,9 @@ void MonitorWorker::process()
 
 	while (working_)
 	{
-		if (paused) {continue;}
+		// Do nothing when paused
+		if (paused_) {continue;}
+
 		mutex_.lock();
 		try
 		{
@@ -257,12 +259,12 @@ bool MonitorWorker::isRunning()
 void MonitorWorker::pauseWorker()
 {
 	qDebug() << "MonitorWorker::pauseWorker()";
-	paused = true;
+	paused_ = true;
 }
 
 void MonitorWorker::resumeWorker()
 {
 	qDebug() << "MonitorWorker::resumeWorker()";
-	paused = false;
+	paused_ = false;
 }
 

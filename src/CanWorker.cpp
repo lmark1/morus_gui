@@ -58,6 +58,9 @@ void CanWorker::process()
 	// Do the work... spin the nodes
 	while (working_)
 	{
+		// Do nothing when paused
+		if (paused_) {continue;}
+
 		mutex_.lock();
 		qDebug() << "CanWorker::process() "
 				"- Doing work.";
@@ -173,4 +176,16 @@ bool CanWorker::isRunning()
 //	mutex_.unlock();
 
 	return value;
+}
+
+void CanWorker::pauseWorker()
+{
+	qDebug() << "CanWorker::pauseWorker()";
+	paused_ = true;
+}
+
+void CanWorker::resumeWorker()
+{
+	qDebug() << "CanWorker::resumeWorker()";
+	paused_ = false;
 }

@@ -52,6 +52,16 @@ class CanWorker : public QObject {
 		 */
 		bool isRunning();
 
+		/**
+		 * Pause monitor worker.
+		 */
+		void pauseWorker();
+
+		/**
+		 * Resume monitor worker.
+		 */
+		void resumeWorker();
+
 	public slots:
 
 		/**
@@ -128,6 +138,11 @@ class CanWorker : public QObject {
 		 * Mutex used for managing processing and calls from other threads.
 		 */
 		QMutex mutex_;
+
+		/**
+		 * True if node is paused, otherwise false.
+		 */
+		bool paused_ = false;
 };
 
 #endif //CAN_WORKER_H

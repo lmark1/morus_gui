@@ -104,7 +104,10 @@ class MonitorWorker : public QObject {
 		 */
 		QMutex mutex_;
 
-		bool paused = false;
+		/**
+		 * True if node is paused, otherwise false.
+		 */
+		bool paused_ = false;
 };
 
 #endif /* MONITORWORKER_H_ */

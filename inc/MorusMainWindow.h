@@ -96,7 +96,17 @@ class MorusMainWindow : public QMainWindow
 		 */
 		void setupMonitorThreadConnections();
 
-		bool flag = false;
+		/**
+		 * Pauses all local nodes. Prevents them from spinning and performing
+		 * actions.
+		 */
+		void pauseLocalNodes();
+
+		/**
+		 * Resumes all local nodes. They continue performing their respective
+		 * actions.
+		 */
+		void resumeLocalNodes();
 
 		/**
 		 * Pointer to morus_main_window UI.

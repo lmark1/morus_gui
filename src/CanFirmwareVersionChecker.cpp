@@ -62,8 +62,8 @@ bool CanFirmwareVersionChecker::shouldRetryFirmwareUpdate(
 	qDebug() << "CanFirmwareVersionChecker::shouldRetryFirmwareUpdate "
 			"called";
 
-	// Always deny firmware update if an error occurs.
-	return false;
+	// Always retry
+	return true;
 }
 
 

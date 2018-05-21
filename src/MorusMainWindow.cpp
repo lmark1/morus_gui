@@ -119,7 +119,9 @@ void MorusMainWindow::on_startLocalNodeButton_clicked()
 void MorusMainWindow::on_updateFirmwareButton_clicked()
 {
 	qDebug() << "MorusMainWindow::on_updateFirmwareButton_clicked()";
-	monitorWorker_->pauseWorker();
+
+	// IMPORTANT: Pause all local nodes before
+	pauseLocalNodes();
 
 	// Prompt the user with updater dialog
 	CanUpdaterWindow updaterDialog;
@@ -128,7 +130,7 @@ void MorusMainWindow::on_updateFirmwareButton_clicked()
 	// Return if dialog is rejected
 	if (dialogResult == QDialog::Rejected)
 	{
-		monitorWorker_->resumeWorker();
+		resumeLocalNodes();
 		return;
 	}
 
@@ -137,7 +139,9 @@ void MorusMainWindow::on_updateFirmwareButton_clicked()
 	// firmware path string
 	int tempID = 1;
 
-	monitorWorker_->resumeWorker();
+	// IMPORTANT: Resume all local nodes
+	resumeLocalNodes();
+
 	emit requestFirmwareUpdate(updaterDialog.getFirmwarePath(), tempID);
 }
 
@@ -334,6 +338,19 @@ void MorusMainWindow::setupMonitorThreadConnections()
 			SLOT( updateCanMonitor(std::vector<NodeInfo_t>*) ));
 }
 
+void MorusMainWindow::pauseLocalNodes()
+{
+	// Pause all available local nodes
+	if (monitorWorker_ != NULL) { monitorWorker_->pauseWorker(); }
+	if (canNodeWorker_ != NULL) { canNodeWorker_->pauseWorker(); }
+}
+
+void MorusMainWindow::resumeLocalNodes()
+{
+	// Resume all available local nodes
+	if (monitorWorker_ != NULL) { monitorWorker_->resumeWorker(); }
+	if (canNodeWorker_ != NULL) { canNodeWorker_->resumeWorker(); }
+}
 
 static std::string healthToString(const std::uint8_t health)
 {
