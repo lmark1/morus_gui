@@ -5,6 +5,7 @@
 #include <QThread>
 #include <QCloseEvent>
 
+#include "UiMorusMainWindow.h"
 #include "NodeInfo.h"
 
 // Forward declaration of CanWorker
@@ -75,6 +76,12 @@ class MorusMainWindow : public QMainWindow
 		 */
 		void updateCanMonitor(std::vector<NodeInfo_t> *activeNodesInfo);
 
+		/**
+		 * Slot will be activated when user clicks on an item from the
+		 * canMonitor widget tree.
+		 */
+		void onCanMonitorItemClicked(QTreeWidgetItem *item, int column);
+
 	signals:
 
 		/**
@@ -137,6 +144,12 @@ class MorusMainWindow : public QMainWindow
 		 * about other nodes.
 		 */
 		QThread *monitorWorkerThread_ = NULL;
+
+		/**
+		 * Currently selected node ID in the canNodeMonitor list.
+		 * Value -1 signals that no node is currently selected.
+		 */
+		int currentNodeID_ = -1;
 };
 
 #endif // MORUS_MAIN_WINDOW_H

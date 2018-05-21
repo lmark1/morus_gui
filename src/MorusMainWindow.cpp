@@ -4,7 +4,6 @@
 #include <unordered_map>
 
 #include "MorusMainWindow.h"
-#include "UiMorusMainWindow.h"
 #include "CanWorker.h"
 #include "NodeHandler.h"
 #include "MonitorWorker.h"
@@ -56,6 +55,13 @@ MorusMainWindow::MorusMainWindow(QWidget *parent) :
 	monitorWorkerThread_->start();
 
 	// TODO(lmark): disable update / restart buttons until user selects a node
+
+	// Connect canMonitor click signal
+	connect(ui_->canNodeMonitor,
+			SIGNAL( itemClicked(QTreeWidgetItem*, int) ),
+			this,
+			SLOT ( onCanMonitorItemClicked(QTreeWidgetItem*, int) ));
+
 }
 
 MorusMainWindow::~MorusMainWindow()
@@ -120,6 +126,21 @@ void MorusMainWindow::on_updateFirmwareButton_clicked()
 {
 	qDebug() << "MorusMainWindow::on_updateFirmwareButton_clicked()";
 
+	// Check if a node is selected for firmware update
+	if (currentNodeID_ == -1)
+	{
+		generateMessageBox("Please select a node first.");
+		return;
+	}
+
+	// Check if user selected the default node (the one performing the update)
+	if (currentNodeID_ == DEFAULT_NODE_ID)
+	{
+		generateMessageBox("Node with ID performs "
+				"firmware update. Please select another node");
+		return;
+	}
+
 	// IMPORTANT: Pause all local nodes before
 	pauseLocalNodes();
 
@@ -135,14 +156,12 @@ void MorusMainWindow::on_updateFirmwareButton_clicked()
 	}
 
 	qDebug() << updaterDialog.getFirmwarePath().c_str();
-	// TODO(lmark): Check which ID user selected and emit it along with
-	// firmware path string
-	int tempID = 1;
-
 	// IMPORTANT: Resume all local nodes
 	resumeLocalNodes();
 
-	emit requestFirmwareUpdate(updaterDialog.getFirmwarePath(), tempID);
+	emit requestFirmwareUpdate(
+			updaterDialog.getFirmwarePath(),
+			currentNodeID_);
 }
 
 void MorusMainWindow::workerFinished()
@@ -352,6 +371,14 @@ void MorusMainWindow::resumeLocalNodes()
 	if (canNodeWorker_ != NULL) { canNodeWorker_->resumeWorker(); }
 }
 
+void MorusMainWindow::onCanMonitorItemClicked(
+		QTreeWidgetItem *item, int column)
+{
+	currentNodeID_ = item->text(0).toInt();
+	qDebug() << "MorusMainWindow::onCanMonitorItemClicked() - "
+			<< item->text(0).toStdString().c_str();
+}
+
 static std::string healthToString(const std::uint8_t health)
 {
 
@@ -376,7 +403,6 @@ static std::string healthToString(const std::uint8_t health)
 
 static std::string modeToString(const std::uint8_t mode)
 {
-
 	// TODO(lmark): Put these 2 conversion methods somewhere where it makes
 	// More sense
 	static const std::unordered_map<std::uint8_t, std::string> map
