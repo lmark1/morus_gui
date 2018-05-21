@@ -59,6 +59,11 @@ class MorusMainWindow : public QMainWindow
 		 */
 		void on_updateFirmwareButton_clicked();
 
+		/**
+		 * Method will execute when fetchParamButton is clicked.
+		 */
+		void on_fetchParamButton_clicked();
+
 	public slots:
 
 		/**

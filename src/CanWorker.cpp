@@ -1,4 +1,6 @@
 #include <QDebug>
+#include <uavcan/protocol/param/GetSet.hpp>
+#include <uavcan/protocol/param/ExecuteOpcode.hpp>
 
 #include "CanWorker.h"
 #include "NodeHandler.h"
@@ -28,7 +30,7 @@ void CanWorker::initializeWorker(
 		int nodeId)
 {
 	this->ifaceName_ = ifaceName;
-	this->nodeID_ = nodeId;
+	this->workerID_ = nodeId;
 
 	// Set flag as able to start working
 	working_ = true;
@@ -59,7 +61,7 @@ void CanWorker::process()
 	while (working_)
 	{
 		// Do nothing when paused
-		if (paused_) {continue;}
+		if (paused_) { continue; }
 
 		mutex_.lock();
 		qDebug() << "CanWorker::process() "
@@ -93,7 +95,7 @@ int CanWorker::initializeNodeHandler()
 				"- trying to initialize node handler.";
 		// Try creating new node.
 		const int res_id = canNodeHandler_->
-				createNewNode(ifaceName_, nodeID_);
+				createNewNode(ifaceName_, workerID_);
 		return res_id;
 	}
 	catch (const std::exception &ex)
@@ -120,6 +122,10 @@ int CanWorker::runNodeHandler() {
 	{
 		// Try spinning the current node
 		const int res_id = canNodeHandler_->spinCurrentNode(NODE_TIMEOUT);
+
+		// Read all parameters if enabled
+		if (readParametersFlag_) { readAllParameters(); }
+
 		return res_id;
 	}
 	catch (const std::exception& ex)
@@ -188,4 +194,19 @@ void CanWorker::resumeWorker()
 {
 	qDebug() << "CanWorker::resumeWorker()";
 	paused_ = false;
+}
+
+void CanWorker::readParameterSignal(int nodeID)
+{
+	readParametersFlag_ = true;
+	paramNodeID_ = nodeID;
+}
+
+void CanWorker::readAllParameters()
+{
+	// Reset read parameter flags
+	readParametersFlag_ = false;
+	paramNodeID_ = -1;
+
+	std::vector<uavcan::protocol::param::GetSet::Response> remote_params;
 }

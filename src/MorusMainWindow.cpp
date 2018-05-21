@@ -164,6 +164,17 @@ void MorusMainWindow::on_updateFirmwareButton_clicked()
 			currentNodeID_);
 }
 
+void MorusMainWindow::on_fetchParamButton_clicked()
+{
+	qDebug() << "MorusMainWindow::on_fetchParamButton_clicked()";
+	if (canNodeWorker_ == NULL)
+	{
+		generateMessageBox("Please initialize the local node worker first");
+		return;
+	}
+
+}
+
 void MorusMainWindow::workerFinished()
 {
 	qDebug() << "MorusMainWindow::workerFinished()";

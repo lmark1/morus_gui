@@ -80,6 +80,9 @@ class MonitorWorker : public QObject {
 		 */
 		void error(QString err);
 
+		/**
+		 * Signal emitted when monitor finds nodes.
+		 */
 		void foundNodes(std::vector<NodeInfo_t> *activeNodes);
 
 	private:

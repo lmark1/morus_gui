@@ -62,6 +62,14 @@ class CanWorker : public QObject {
 		 */
 		void resumeWorker();
 
+		/**
+		 * Signals to the Can Worker to start reading parameters
+		 * from the node with given ID.
+		 *
+		 * @param nodeID
+		 */
+		void readParameterSignal(int nodeID);
+
 	public slots:
 
 		/**
@@ -110,6 +118,11 @@ class CanWorker : public QObject {
 		int runNodeHandler();
 
 		/**
+		 * Attempts to read all parameters from node with paramNodeID_.
+		 */
+		void readAllParameters();
+
+		/**
 		 * CAN interface name.
 		 */
 		std::string ifaceName_;
@@ -117,7 +130,17 @@ class CanWorker : public QObject {
 		/**
 		 * New CAN node ID.
 		 */
-		int nodeID_ = -1;
+		int workerID_ = -1;
+
+		/**
+		 * ID of the node whose parameters are being read.
+		 */
+		int paramNodeID_ = -1;
+
+		/**
+		 * True if parameters will be read, false otherwise.
+		 */
+		bool readParametersFlag_ = false;
 
 		/**
 		 *	Flag indicating worker started processing.
