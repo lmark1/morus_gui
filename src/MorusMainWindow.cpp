@@ -227,6 +227,8 @@ void MorusMainWindow::on_fetchParamButton_clicked()
 		return;
 	}
 
+	// Clear local changed item list
+	changedItems_.clear();
 	canNodeWorker_->readParameterSignal(currentNodeID_);
 }
 
@@ -591,6 +593,25 @@ void MorusMainWindow::onParamListItemDoubleClicked(
 				QLineEdit::Normal,
                 item->text(VALUE_INDEX),
 				&ok_pressed);
+
+		// Check if value is different
+		if (ok_pressed &&
+			QString::compare(
+					desired_text,
+					item->text(VALUE_INDEX),
+					Qt::CaseSensitive) != 0)
+		{
+			item->setText(
+					VALUE_INDEX,
+					desired_text);
+			for (int k = 0; k < PARAM_COLUMN_COUNT; k++)
+				item->setBackground(k, RED_COLOR);
+		}
+	}
+	// ... unknown type
+	else
+	{
+		throw runtime_error("Trying to change unknown parameter type...");
 	}
 }
 

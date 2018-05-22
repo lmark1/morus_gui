@@ -117,6 +117,7 @@ class MorusMainWindow : public QMainWindow
 		 */
 		void requestFirmwareUpdate(std::string firmawareFilePath, int nodeId);
 
+
 	private:
 
 		/**
@@ -178,6 +179,13 @@ class MorusMainWindow : public QMainWindow
 		 * Value -1 signals that no node is currently selected.
 		 */
 		int currentNodeID_ = -1;
+
+		/**
+		 * This list is used to store changed items on the parameter list.
+		 * It will be propagated towards NodeHandler when store parameter
+		 * command is requested.
+		 */
+		std::vector<QTreeWidgetItem> changedItems_;
 };
 
 #endif // MORUS_MAIN_WINDOW_H
