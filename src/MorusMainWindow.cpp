@@ -62,9 +62,11 @@ MorusMainWindow::MorusMainWindow(QWidget *parent) :
 {
     ui_->setupUi(this);
     
-    // Register this type for signaling parameters
+    // Register this types for signaling parameters
     qRegisterMetaType<std::vector<uavcan::protocol::param::GetSet::Response>>(
     		"std::vector<uavcan::protocol::param::GetSet::Response>");
+    qRegisterMetaType<std::vector<QTreeWidgetItem>>(
+    		"std::vector<QTreeWidgetItem>");
 
     // Set initial node-id and node interface values
     ui_->localNodeIDSpinBox->setValue(DEFAULT_NODE_ID);
@@ -232,6 +234,37 @@ void MorusMainWindow::on_fetchParamButton_clicked()
 	canNodeWorker_->readParameterSignal(currentNodeID_);
 }
 
+void MorusMainWindow::on_storeParamButton_clicked()
+{
+	qDebug() << "MorusMainWindow::on_storeParamButton_clicked() - "
+			<< changedItems_.size();
+
+	// Check if a node is selected for firmware update
+	if (currentNodeID_ == -1)
+	{
+		generateMessageBox("Please select a node first.");
+		return;
+	}
+
+	// Check if current ID selected is the same as the local node
+	if (currentNodeID_ == ui_->localNodeIDSpinBox->value())
+	{
+		generateMessageBox("Node with selected ID performs parameter "
+				"upload / download. Please select another node.");
+		return;
+	}
+
+	// Check if changed param list is empty
+	if (changedItems_.size() == 0)
+	{
+		generateMessageBox("No parameters changed.");
+		return;
+	}
+
+	canNodeWorker_->storeParametersRequested(changedItems_, currentNodeID_);
+	changedItems_.clear();
+}
+
 void MorusMainWindow::workerFinished()
 {
 	qDebug() << "MorusMainWindow::workerFinished()";
@@ -372,24 +405,24 @@ void MorusMainWindow::generateMessageBox(std::string message)
 void MorusMainWindow::setupCanThreadConnections()
 {
 	// **** CanWorker / Thread connections ****
-	connect(canNodeWorker_, // Connect worker error()...
+	connect(canNodeWorker_, 		// Connect worker error()...
 			SIGNAL( error(QString) ),
-			this, 			// To morus_main_window errorString()
+			this, 					// To morus_main_window errorString()
 			SLOT( handleErrorMessage(QString) ));
 
-	connect(canWorkerThread_, 	// Connect thread started()...
+	connect(canWorkerThread_, 		// Connect thread started()...
 			SIGNAL( started() ),
-			canNodeWorker_, // to worker process()
+			canNodeWorker_, 		// to worker process()
 			SLOT( process() ));
 
-	connect(canNodeWorker_, // Connect worker finished()...
+	connect(canNodeWorker_, 		// Connect worker finished()...
 			SIGNAL( finished() ),
 			canWorkerThread_,		// to thread quit() - exits the thread
 			SLOT( quit() ));
 
-	connect(canNodeWorker_, // Connect worker finished()...
+	connect(canNodeWorker_, 		// Connect worker finished()...
 			SIGNAL( finished() ),
-			this,			// to morus_window workerFinished()
+			this,					// to morus_window workerFinished()
 			SLOT( workerFinished() ));
 
 	// Connect firmware update request
@@ -398,7 +431,7 @@ void MorusMainWindow::setupCanThreadConnections()
 			canNodeWorker_,
 			SLOT( firmwareUpdateRequested(std::string, int) ));
 
-	// Connect signal for updating parameters
+	// Connect signal for fetching parameters
 	connect(canNodeWorker_,
 			SIGNAL( nodeParametersFound(
 					std::vector
@@ -408,7 +441,12 @@ void MorusMainWindow::setupCanThreadConnections()
 					std::vector
 					<uavcan::protocol::param::GetSet::Response>) ));
 
-}
+	// Connect signal for storing parameters
+	connect(this,
+			SIGNAL( storeParametersRequest(std::vector<QTreeWidgetItem>,int) ),
+			canNodeWorker_,
+			SLOT( storeParametersRequested(std::vector<QTreeWidgetItem>,int) ));
+	}
 
 void MorusMainWindow::setupMonitorThreadConnections()
 {
@@ -584,8 +622,7 @@ void MorusMainWindow::onParamListItemDoubleClicked(
 				QSTRING_STRING,
 				Qt::CaseSensitive) == 0)
 	{
-		// TODO(lmark): Unable to check this functionlity
-		// Due to the lack of STRING parameters
+		// TODO(lmark): Unable to check this functionality due to the lack of STRING parameters
 		QString desired_text = QInputDialog::getText(
 				this,
 				tr(item->text(NAME_INDEX).toStdString().c_str()),
@@ -613,6 +650,9 @@ void MorusMainWindow::onParamListItemDoubleClicked(
 	{
 		throw runtime_error("Trying to change unknown parameter type...");
 	}
+
+	// Push items to changed list
+	changedItems_.push_back(*item);
 }
 
 void MorusMainWindow::updateNodeParameters(

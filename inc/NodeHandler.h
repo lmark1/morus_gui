@@ -3,6 +3,7 @@
 
 #include <QMessageBox>
 #include <QString>
+#include <QTreeWidgetItem>
 
 #include <uavcan/uavcan.hpp>
 #include <uavcan/protocol/firmware_update_trigger.hpp>
@@ -120,6 +121,16 @@ class NodeHandler {
 		 */
 		bool readParametersFlag_ = false;
 
+		/**
+		 * True if parameters will be read, false otherwise.
+		 */
+		bool storeParametersFlag_ = false;
+
+		/**
+		 * List of changed parameters.
+		 */
+		std::vector<QTreeWidgetItem> changedParams_;
+
     private:
 
 		/**
@@ -130,7 +141,15 @@ class NodeHandler {
 		 */
 		void setupNodeFileServer();
 
+		/**
+		 * Attempt to read all parameters from the node with the given ID.
+		 */
 		void readAllParameters();
+
+		/**
+		 * Attempt to store all changed parameters.
+		 */
+		void storeParameters();
 
         /**
          * Flag indicating if node is created.

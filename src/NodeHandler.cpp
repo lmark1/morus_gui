@@ -144,7 +144,12 @@ int NodeHandler::spinCurrentNode(int timeout_ms)
 	// Spin the node
 	const int res = canNode_->spin(
 			uavcan::MonotonicDuration::fromMSec(timeout_ms));
+
+	// Read all parameters if requested
 	if (readParametersFlag_) {readAllParameters();}
+
+	// Store parameters if requested
+	if (storeParametersFlag_) {storeParameters();}
 
 	return res;
 }
@@ -268,6 +273,12 @@ void NodeHandler::readAllParameters()
 
 	// Reset read parameter flags
 	paramNodeID_ = -1;
+}
+
+void NodeHandler::storeParameters()
+{
+	qDebug() << "NodeHandler::storeParameters() - " << changedParams_.size();
+
 }
 
 

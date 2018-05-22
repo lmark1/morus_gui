@@ -29,6 +29,9 @@
 
 QT_BEGIN_NAMESPACE
 
+// Forward declaration of QComboBox - for IDE syntax error processing
+class QComboBox;
+
 class Ui_MorusMainWindow
 {
 public:

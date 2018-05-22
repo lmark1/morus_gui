@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QMutex>
+#include <QTreeWidgetItem>
 
 #include <uavcan/protocol/param/GetSet.hpp>
 #include <uavcan/protocol/param/ExecuteOpcode.hpp>
@@ -84,6 +85,16 @@ class CanWorker : public QObject {
 				std::vector
 				<uavcan::protocol::param::GetSet::Response> params);
 
+		/**
+		 * This method is called when user requests to store parameters.
+		 *
+		 * @param changedItems - All parameters that changed
+		 * @param nodeId
+		 */
+		void storeParametersRequested(
+				std::vector<QTreeWidgetItem> changedItems,
+				int nodeId);
+
 	public slots:
 
 		/**
@@ -95,6 +106,9 @@ class CanWorker : public QObject {
 		/**
 		 * Firmware update is requested. Notify firmwareVersionChecker
 		 * in node handler to check if update is allowed.
+		 *
+		 * @param firmwareFilePath
+		 * @param nodeId
 		 */
 		void firmwareUpdateRequested(std::string firmwareFilePath, int nodeId);
 

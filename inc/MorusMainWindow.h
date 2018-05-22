@@ -66,9 +66,17 @@ class MorusMainWindow : public QMainWindow
 		void on_updateFirmwareButton_clicked();
 
 		/**
-		 * Method will execute when fetchParamButton is clicked.
+		 * Method will execute when fetchParamButton is clicked. It will
+		 * fetch all parameters from selected node and add them to the
+		 * parameter list.
 		 */
 		void on_fetchParamButton_clicked();
+
+		/**
+		 * Method will execute when storeParamButton is clicked. It will
+		 * store changed parameters on the selected node.
+		 */
+		void on_storeParamButton_clicked();
 
 	public slots:
 
@@ -113,10 +121,12 @@ class MorusMainWindow : public QMainWindow
 	signals:
 
 		/**
-		 * Signal that the user has requested a firmware update.
+		 * Signal emitted when user has requested a firmware update.
+		 *
+		 * @param firmwareFilePath - Path to the binary file
+		 * @param nodeId
 		 */
 		void requestFirmwareUpdate(std::string firmawareFilePath, int nodeId);
-
 
 	private:
 

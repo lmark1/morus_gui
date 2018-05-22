@@ -1,4 +1,5 @@
 #include <QDebug>
+
 #include "CanWorker.h"
 #include "NodeHandler.h"
 
@@ -78,7 +79,6 @@ void CanWorker::process()
 	qDebug() << "CanWorker::process() "
 			"- worker finished.";
 	stopWorker();
-
 	emit finished();
 }
 
@@ -149,6 +149,18 @@ void CanWorker::firmwareUpdateRequested(
 	// Enable version checker
 	canNodeHandler_->versionChecker_->enableFirmwareUpdate(
 			firmwareFilePath, nodeId);
+}
+
+void CanWorker::storeParametersRequested(
+		std::vector<QTreeWidgetItem> changedItems,
+		int nodeId)
+{
+	qDebug() << "CanWorker::storeParametersRequested() - "
+			<< changedItems.size();
+
+	canNodeHandler_->paramNodeID_ = nodeId;
+	canNodeHandler_->storeParametersFlag_ = true;
+	canNodeHandler_->changedParams_ = changedItems;
 }
 
 void CanWorker::stopWorker()
