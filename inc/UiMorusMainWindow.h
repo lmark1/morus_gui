@@ -27,7 +27,6 @@
 #include <QtWidgets/QTreeWidget>
 #include <QtWidgets/QWidget>
 
-
 QT_BEGIN_NAMESPACE
 
 class Ui_MorusMainWindow
@@ -57,14 +56,7 @@ public:
     QLabel *group_label_4;
     QComboBox *parameterGroupBox;
     QPushButton *calibrateButton;
-    QFrame *local_node_properties_frame_2;
-    QLabel *local_node_id_label_5;
-    QSpinBox *localNodeIDSpinBox1;
-    QLabel *can_iface_name_label_5;
-    QPlainTextEdit *canIfateNamePlainTextEdit1;
-    QPushButton *start_local_node_button_5;
     QLabel *InfoLabel_2;
-    QLabel *local_node_properties_label_2;
     QLabel *configuration_parameters_label;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
@@ -474,117 +466,18 @@ public:
         calibrateButton->setObjectName(QStringLiteral("calibrateButton"));
         calibrateButton->setGeometry(QRect(370, 43, 121, 21));
         calibrateButton->setFont(font5);
-        local_node_properties_frame_2 = new QFrame(centralWidget);
-        local_node_properties_frame_2->setObjectName(QStringLiteral("local_node_properties_frame_2"));
-        local_node_properties_frame_2->setGeometry(QRect(550, 340, 491, 61));
-        QPalette palette8;
-        palette8.setBrush(QPalette::Active, QPalette::WindowText, brush);
-        palette8.setBrush(QPalette::Active, QPalette::Button, brush2);
-        palette8.setBrush(QPalette::Active, QPalette::Light, brush3);
-        palette8.setBrush(QPalette::Active, QPalette::Midlight, brush4);
-        palette8.setBrush(QPalette::Active, QPalette::Dark, brush5);
-        palette8.setBrush(QPalette::Active, QPalette::Mid, brush6);
-        palette8.setBrush(QPalette::Active, QPalette::Text, brush);
-        palette8.setBrush(QPalette::Active, QPalette::BrightText, brush3);
-        palette8.setBrush(QPalette::Active, QPalette::ButtonText, brush);
-        palette8.setBrush(QPalette::Active, QPalette::Base, brush3);
-        palette8.setBrush(QPalette::Active, QPalette::Window, brush2);
-        palette8.setBrush(QPalette::Active, QPalette::Shadow, brush);
-        palette8.setBrush(QPalette::Active, QPalette::AlternateBase, brush4);
-        palette8.setBrush(QPalette::Active, QPalette::ToolTipBase, brush7);
-        palette8.setBrush(QPalette::Active, QPalette::ToolTipText, brush);
-        palette8.setBrush(QPalette::Inactive, QPalette::WindowText, brush);
-        palette8.setBrush(QPalette::Inactive, QPalette::Button, brush2);
-        palette8.setBrush(QPalette::Inactive, QPalette::Light, brush3);
-        palette8.setBrush(QPalette::Inactive, QPalette::Midlight, brush4);
-        palette8.setBrush(QPalette::Inactive, QPalette::Dark, brush5);
-        palette8.setBrush(QPalette::Inactive, QPalette::Mid, brush6);
-        palette8.setBrush(QPalette::Inactive, QPalette::Text, brush);
-        palette8.setBrush(QPalette::Inactive, QPalette::BrightText, brush3);
-        palette8.setBrush(QPalette::Inactive, QPalette::ButtonText, brush);
-        palette8.setBrush(QPalette::Inactive, QPalette::Base, brush3);
-        palette8.setBrush(QPalette::Inactive, QPalette::Window, brush2);
-        palette8.setBrush(QPalette::Inactive, QPalette::Shadow, brush);
-        palette8.setBrush(QPalette::Inactive, QPalette::AlternateBase, brush4);
-        palette8.setBrush(QPalette::Inactive, QPalette::ToolTipBase, brush7);
-        palette8.setBrush(QPalette::Inactive, QPalette::ToolTipText, brush);
-        palette8.setBrush(QPalette::Disabled, QPalette::WindowText, brush5);
-        palette8.setBrush(QPalette::Disabled, QPalette::Button, brush2);
-        palette8.setBrush(QPalette::Disabled, QPalette::Light, brush3);
-        palette8.setBrush(QPalette::Disabled, QPalette::Midlight, brush4);
-        palette8.setBrush(QPalette::Disabled, QPalette::Dark, brush5);
-        palette8.setBrush(QPalette::Disabled, QPalette::Mid, brush6);
-        palette8.setBrush(QPalette::Disabled, QPalette::Text, brush5);
-        palette8.setBrush(QPalette::Disabled, QPalette::BrightText, brush3);
-        palette8.setBrush(QPalette::Disabled, QPalette::ButtonText, brush5);
-        palette8.setBrush(QPalette::Disabled, QPalette::Base, brush2);
-        palette8.setBrush(QPalette::Disabled, QPalette::Window, brush2);
-        palette8.setBrush(QPalette::Disabled, QPalette::Shadow, brush);
-        palette8.setBrush(QPalette::Disabled, QPalette::AlternateBase, brush2);
-        palette8.setBrush(QPalette::Disabled, QPalette::ToolTipBase, brush7);
-        palette8.setBrush(QPalette::Disabled, QPalette::ToolTipText, brush);
-        local_node_properties_frame_2->setPalette(palette8);
-        local_node_properties_frame_2->setFont(font1);
-        local_node_properties_frame_2->setAutoFillBackground(true);
-        local_node_properties_frame_2->setFrameShape(QFrame::StyledPanel);
-        local_node_properties_frame_2->setFrameShadow(QFrame::Sunken);
-        local_node_properties_frame_2->setLineWidth(1);
-        local_node_id_label_5 = new QLabel(local_node_properties_frame_2);
-        local_node_id_label_5->setObjectName(QStringLiteral("local_node_id_label_5"));
-        local_node_id_label_5->setGeometry(QRect(20, 10, 101, 31));
-        local_node_id_label_5->setFont(font2);
-        localNodeIDSpinBox1 = new QSpinBox(local_node_properties_frame_2);
-        localNodeIDSpinBox1->setObjectName(QStringLiteral("localNodeIDSpinBox1"));
-        localNodeIDSpinBox1->setGeometry(QRect(120, 10, 51, 31));
-        QPalette palette9;
-        palette9.setBrush(QPalette::Active, QPalette::Highlight, brush8);
-        palette9.setBrush(QPalette::Active, QPalette::HighlightedText, brush);
-        palette9.setBrush(QPalette::Inactive, QPalette::Highlight, brush8);
-        palette9.setBrush(QPalette::Inactive, QPalette::HighlightedText, brush);
-        palette9.setBrush(QPalette::Disabled, QPalette::Highlight, brush4);
-        palette9.setBrush(QPalette::Disabled, QPalette::HighlightedText, brush);
-        localNodeIDSpinBox1->setPalette(palette9);
-        localNodeIDSpinBox1->setCursor(QCursor(Qt::ArrowCursor));
-        localNodeIDSpinBox1->setContextMenuPolicy(Qt::DefaultContextMenu);
-        localNodeIDSpinBox1->setMaximum(255);
-        can_iface_name_label_5 = new QLabel(local_node_properties_frame_2);
-        can_iface_name_label_5->setObjectName(QStringLiteral("can_iface_name_label_5"));
-        can_iface_name_label_5->setGeometry(QRect(280, 10, 111, 31));
-        can_iface_name_label_5->setFont(font2);
-        canIfateNamePlainTextEdit1 = new QPlainTextEdit(local_node_properties_frame_2);
-        canIfateNamePlainTextEdit1->setObjectName(QStringLiteral("canIfateNamePlainTextEdit1"));
-        canIfateNamePlainTextEdit1->setGeometry(QRect(400, 10, 71, 31));
-        canIfateNamePlainTextEdit1->setFont(font3);
-        canIfateNamePlainTextEdit1->setMouseTracking(false);
-        canIfateNamePlainTextEdit1->setContextMenuPolicy(Qt::DefaultContextMenu);
-        canIfateNamePlainTextEdit1->setFrameShape(QFrame::StyledPanel);
-        canIfateNamePlainTextEdit1->setFrameShadow(QFrame::Sunken);
-        canIfateNamePlainTextEdit1->setReadOnly(false);
-        canIfateNamePlainTextEdit1->setBackgroundVisible(false);
-        start_local_node_button_5 = new QPushButton(local_node_properties_frame_2);
-        start_local_node_button_5->setObjectName(QStringLiteral("start_local_node_button_5"));
-        start_local_node_button_5->setGeometry(QRect(210, 40, 81, 21));
         InfoLabel_2 = new QLabel(centralWidget);
         InfoLabel_2->setObjectName(QStringLiteral("InfoLabel_2"));
         InfoLabel_2->setGeometry(QRect(540, 400, 491, 17));
         InfoLabel_2->setFont(font5);
-        local_node_properties_label_2 = new QLabel(centralWidget);
-        local_node_properties_label_2->setObjectName(QStringLiteral("local_node_properties_label_2"));
-        local_node_properties_label_2->setGeometry(QRect(550, 320, 461, 17));
-        QPalette palette10;
-        palette10.setBrush(QPalette::Active, QPalette::WindowText, brush);
-        palette10.setBrush(QPalette::Inactive, QPalette::WindowText, brush);
-        palette10.setBrush(QPalette::Disabled, QPalette::WindowText, brush1);
-        local_node_properties_label_2->setPalette(palette10);
-        local_node_properties_label_2->setFont(font);
         configuration_parameters_label = new QLabel(centralWidget);
         configuration_parameters_label->setObjectName(QStringLiteral("configuration_parameters_label"));
         configuration_parameters_label->setGeometry(QRect(540, 40, 461, 17));
-        QPalette palette11;
-        palette11.setBrush(QPalette::Active, QPalette::WindowText, brush);
-        palette11.setBrush(QPalette::Inactive, QPalette::WindowText, brush);
-        palette11.setBrush(QPalette::Disabled, QPalette::WindowText, brush1);
-        configuration_parameters_label->setPalette(palette11);
+        QPalette palette8;
+        palette8.setBrush(QPalette::Active, QPalette::WindowText, brush);
+        palette8.setBrush(QPalette::Inactive, QPalette::WindowText, brush);
+        palette8.setBrush(QPalette::Disabled, QPalette::WindowText, brush1);
+        configuration_parameters_label->setPalette(palette8);
         configuration_parameters_label->setFont(font);
         morus_main_window->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(morus_main_window);
@@ -635,18 +528,14 @@ public:
         updateButton->setText(QApplication::translate("morus_main_window", "Update All", 0));
         group_label_4->setText(QApplication::translate("morus_main_window", "Group:", 0));
         calibrateButton->setText(QApplication::translate("morus_main_window", "Calibrate sensors", 0));
-        local_node_id_label_5->setText(QApplication::translate("morus_main_window", "Local node ID:", 0));
-        can_iface_name_label_5->setText(QApplication::translate("morus_main_window", "CAN iface name:", 0));
-        start_local_node_button_5->setText(QApplication::translate("morus_main_window", "Start", 0));
         InfoLabel_2->setText(QString());
-        local_node_properties_label_2->setText(QApplication::translate("morus_main_window", "Local node properties", 0));
         configuration_parameters_label->setText(QApplication::translate("morus_main_window", "Configuration parameters", 0));
     } // retranslateUi
 
 };
 
 namespace Ui {
-    class MorusMainWindow : public Ui_MorusMainWindow {};
+    class MorusMainWindow: public Ui_MorusMainWindow {};
 } // namespace Ui
 
 QT_END_NAMESPACE
