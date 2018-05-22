@@ -94,6 +94,12 @@ class MorusMainWindow : public QMainWindow
 		void onCanMonitorItemClicked(QTreeWidgetItem *item, int column);
 
 		/**
+		 * This slot will be activated when user double clicks on a parameter
+		 * in the list. User will be prompted to edit that parameter.
+		 */
+		void onParamListItemDoubleClicked(QTreeWidgetItem *item, int column);
+
+		/**
 		 *	Update node parameter list with the given set of parameters.
 		 *
 		 *	@param params

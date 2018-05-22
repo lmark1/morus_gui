@@ -1,7 +1,7 @@
 #include <QDebug>
-
 #include <string>
 #include <unordered_map>
+#include <QInputDialog>
 
 #include "MorusMainWindow.h"
 #include "CanWorker.h"
@@ -11,6 +11,20 @@
 
 const QString DEFAULT_IFACE_NAME = "can0";
 const int DEFAULT_NODE_ID = 127;
+
+// Define parameter type string constants
+const QString QSTRING_INT("int");
+const QString QSTRING_UINT8("uint8");
+const QString QSTRING_STRING("string");
+const QString QSTRING_FLOAT("float");
+
+// Define parameter list column index constants
+const uint8_t NAME_INDEX = 0;
+const uint8_t TYPE_INDEX = 1;
+const uint8_t VALUE_INDEX = 2;
+const uint8_t DEFAULT_VALUE_INDEX = 4;
+const uint8_t MIN_VALUE_INDEX = 5;
+const uint8_t MAX_VALUE_INDEX = 6;
 
 /**
  * Returns string representation of node health.
@@ -65,6 +79,12 @@ MorusMainWindow::MorusMainWindow(QWidget *parent) :
 			SIGNAL( itemClicked(QTreeWidgetItem*, int) ),
 			this,
 			SLOT ( onCanMonitorItemClicked(QTreeWidgetItem*, int) ));
+
+	// Connect parameter list double - click signal
+	connect(ui_->parameterTreeWidget,
+			SIGNAL( itemDoubleClicked(QTreeWidgetItem*, int) ),
+			this,
+			SLOT( onParamListItemDoubleClicked(QTreeWidgetItem*, int) ));
 }
 
 MorusMainWindow::~MorusMainWindow()
@@ -136,10 +156,10 @@ void MorusMainWindow::on_updateFirmwareButton_clicked()
 		return;
 	}
 
-	// Check if user selected the default node (the one performing the update)
-	if (currentNodeID_ == DEFAULT_NODE_ID)
+	// Check if user selected the local node (the one performing the update)
+	if (currentNodeID_ == ui_->localNodeIDSpinBox->value())
 	{
-		generateMessageBox("Node with ID performs "
+		generateMessageBox("Node with selected ID performs "
 				"firmware update. Please select another node");
 		return;
 	}
@@ -180,6 +200,14 @@ void MorusMainWindow::on_fetchParamButton_clicked()
 	if (currentNodeID_ == -1)
 	{
 		generateMessageBox("Please select a node first.");
+		return;
+	}
+
+	// Check if current ID selected is the same as the local node
+	if (currentNodeID_ == ui_->localNodeIDSpinBox->value())
+	{
+		generateMessageBox("Node with selected ID performs parameter "
+				"upload / download. Please select another node.");
 		return;
 	}
 
@@ -411,6 +439,36 @@ void MorusMainWindow::onCanMonitorItemClicked(
 			<< item->text(0).toStdString().c_str();
 }
 
+void MorusMainWindow::onParamListItemDoubleClicked(
+		QTreeWidgetItem *item, int column)
+{
+	qDebug() << "MorusMainWindow::onParamListItemDoubleClicked()";
+
+	// Check which type user clicked
+
+	bool ok_pressed = false;
+	// INTEGER
+	if (QString::compare(
+			item->text(TYPE_INDEX),
+			QSTRING_INT,
+			Qt::CaseSensitive) == 0)
+	{
+		int result = QInputDialog::getInt(
+				this,
+				tr(item->text(NAME_INDEX).toStdString().c_str()),
+				tr("Value:"),
+				item->text(VALUE_INDEX).toInt(),
+				item->text(MIN_VALUE_INDEX).toInt(),
+				item->text(MAX_VALUE_INDEX).toInt(),
+				1, &ok_pressed);
+
+		if (ok_pressed)
+		{
+
+		}
+	}
+}
+
 void MorusMainWindow::updateNodeParameters(
 				std::vector
 				<uavcan::protocol::param::GetSet::Response> params)
@@ -432,7 +490,7 @@ void MorusMainWindow::updateNodeParameters(
 		QTreeWidgetItem *paramItem = new QTreeWidgetItem();
 
 		std::string paramName(params[index].name.c_str());
-		paramItem->setText(0, QString::fromStdString(paramName));
+		paramItem->setText(NAME_INDEX, QString::fromStdString(paramName));
 
 		// Color columns differently
 		if (index % 2 == 0)
@@ -441,17 +499,18 @@ void MorusMainWindow::updateNodeParameters(
 		{ for (int k=0; k<7; k++) paramItem->setBackground(k, white); }
 
 		// Check parameter type and set fields accordingly
+		// INTEGER
 		if (params[index].value.is(param_ns::Value::Tag::integer_value))
 		{
 			// Set int type and value
-			paramItem->setText(1, QString("int"));
-			paramItem->setText(2,
+			paramItem->setText(TYPE_INDEX, QSTRING_INT);
+			paramItem->setText(VALUE_INDEX,
 					QString::fromStdString(std::to_string
 					(
 						params[index].value.to
 						<param_ns::Value::Tag::integer_value>()
 					).c_str()));
-			paramItem->setText(4,
+			paramItem->setText(DEFAULT_VALUE_INDEX,
 					QString::fromStdString(std::to_string
 					(
 						params[index].default_value.to
@@ -460,9 +519,9 @@ void MorusMainWindow::updateNodeParameters(
 
 			// Initialize min values
 			if (params[index].min_value.is(param_ns::NumericValue::Tag::empty))
-				paramItem->setText(5, QString("-"));
+				paramItem->setText(MIN_VALUE_INDEX, QString("-"));
 			else
-				paramItem->setText(5,
+				paramItem->setText(MIN_VALUE_INDEX,
 						QString::fromStdString(std::to_string
 						(
 							params[index].min_value.to
@@ -471,25 +530,26 @@ void MorusMainWindow::updateNodeParameters(
 
 			// Initialize max values
 			if (params[index].max_value.is(param_ns::NumericValue::Tag::empty))
-				paramItem->setText(6, QString("-"));
+				paramItem->setText(MAX_VALUE_INDEX, QString("-"));
 			else
-				paramItem->setText(6,
+				paramItem->setText(MAX_VALUE_INDEX,
 						QString::fromStdString(std::to_string
 						(
 							params[index].max_value.to
 							<param_ns::NumericValue::Tag::integer_value>()
 						).c_str()));
 		}
+		// REAL
 		else if (params[index].value.is(param_ns::Value::Tag::real_value))
 		{
-			paramItem->setText(1, QString("float"));
-			paramItem->setText(2,
+			paramItem->setText(TYPE_INDEX, QSTRING_FLOAT);
+			paramItem->setText(VALUE_INDEX,
 					QString::fromStdString(std::to_string
 					(
 						params[index].value.to
 						<param_ns::Value::Tag::real_value>()
 					).c_str()));
-			paramItem->setText(4,
+			paramItem->setText(DEFAULT_VALUE_INDEX,
 					QString::fromStdString(std::to_string
 					(
 						params[index].default_value.to
@@ -498,9 +558,9 @@ void MorusMainWindow::updateNodeParameters(
 
 			// Set minimum value
 			if (params[index].min_value.is(param_ns::NumericValue::Tag::empty))
-				paramItem->setText(5, "-");
+				paramItem->setText(MIN_VALUE_INDEX, "-");
 			else
-				paramItem->setText(5,
+				paramItem->setText(MIN_VALUE_INDEX,
 						std::to_string
 						(
 							params[index].min_value.to
@@ -509,52 +569,54 @@ void MorusMainWindow::updateNodeParameters(
 
 			// Set maximum value
 			if (params[index].max_value.is(param_ns::NumericValue::Tag::empty))
-				paramItem->setText(6, "-");
+				paramItem->setText(MAX_VALUE_INDEX, "-");
 			else
-				paramItem->setText(6,
+				paramItem->setText(MAX_VALUE_INDEX,
 						std::to_string
 						(
 							params[index].max_value.to
 							<param_ns::NumericValue::Tag::real_value>()
 						).c_str());
 		}
+		// STRING
 		else if (params[index].value.is(param_ns::Value::Tag::string_value))
 		{
-			paramItem->setText(1, QString("string"));
-			paramItem->setText(2,
+			paramItem->setText(TYPE_INDEX, QSTRING_STRING);
+			paramItem->setText(VALUE_INDEX,
 					QString::fromStdString(std::string
 					(
 						params[index].value.to
 						<param_ns::Value::Tag::string_value>().c_str()
 					)));
-			paramItem->setText(4,
+			paramItem->setText(DEFAULT_VALUE_INDEX,
 					QString::fromStdString
 					(
 						std::string(params[index].default_value.to
 						<param_ns::Value::Tag::string_value>().c_str()
 					)));
-			paramItem->setText(5, "-");
-			paramItem->setText(6, "-");
+			paramItem->setText(MIN_VALUE_INDEX, "-");
+			paramItem->setText(MAX_VALUE_INDEX, "-");
 		}
+		// BOOLEAN
 		else if (params[index].value.is(param_ns::Value::Tag::boolean_value))
 		{
-			paramItem->setText(1, QString("uint8"));
-			paramItem->setText(2,
+			paramItem->setText(TYPE_INDEX, QSTRING_UINT8);
+			paramItem->setText(VALUE_INDEX,
 					QString::fromStdString(std::to_string
 					(
 						params[index].value.to
 						<param_ns::Value::Tag::boolean_value>()
 					).c_str()));
-			paramItem->setText(4,
+			paramItem->setText(DEFAULT_VALUE_INDEX,
 					QString::fromStdString(std::to_string(
 						params[index].default_value.to
 						<param_ns::Value::Tag::boolean_value>()
 					).c_str()));
 
 			if (params[index].min_value.is(param_ns::NumericValue::Tag::empty))
-				paramItem->setText(5, "-");
+				paramItem->setText(MIN_VALUE_INDEX, "-");
 			else
-				paramItem->setText(5,
+				paramItem->setText(MIN_VALUE_INDEX,
 						std::to_string
 						(
 							params[index].min_value.to
@@ -562,9 +624,9 @@ void MorusMainWindow::updateNodeParameters(
 						).c_str());
 
 			if (params[index].max_value.is(param_ns::NumericValue::Tag::empty))
-				paramItem->setText(6, "-");
+				paramItem->setText(MAX_VALUE_INDEX, "-");
 			else
-				paramItem->setText(6,
+				paramItem->setText(MAX_VALUE_INDEX,
 						std::to_string
 						(
 							params[index].max_value.to
