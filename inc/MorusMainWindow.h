@@ -96,6 +96,8 @@ class MorusMainWindow : public QMainWindow
 		/**
 		 * This slot will be activated when user double clicks on a parameter
 		 * in the list. User will be prompted to edit that parameter.
+		 * If user decides to change that parameter, the value in the list
+		 * will change and parameter will be marked for upload.
 		 */
 		void onParamListItemDoubleClicked(QTreeWidgetItem *item, int column);
 

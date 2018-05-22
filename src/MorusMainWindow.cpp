@@ -1,7 +1,9 @@
 #include <QDebug>
 #include <string>
 #include <unordered_map>
+#include <QtGui>
 #include <QInputDialog>
+#include <QLineEdit>
 
 #include "MorusMainWindow.h"
 #include "CanWorker.h"
@@ -25,6 +27,20 @@ const uint8_t VALUE_INDEX = 2;
 const uint8_t DEFAULT_VALUE_INDEX = 4;
 const uint8_t MIN_VALUE_INDEX = 5;
 const uint8_t MAX_VALUE_INDEX = 6;
+
+// Total number of columns
+const uint8_t PARAM_COLUMN_COUNT = 7;
+
+// Comparison delta for detecting parameter change
+const double COMP_EPS = 1e-6;
+
+// Initialize color constants
+QBrush GRAY_COLOR(QColor(230, 230, 230, 255));
+QBrush WHITE_COLOR(QColor(255, 255, 255, 255));
+QBrush RED_COLOR(QColor(255, 0, 0, 200));
+
+// Forward declaration of QLineEdit - needed for IDE syntax errors
+class QLineEdit;
 
 /**
  * Returns string representation of node health.
@@ -443,29 +459,138 @@ void MorusMainWindow::onParamListItemDoubleClicked(
 		QTreeWidgetItem *item, int column)
 {
 	qDebug() << "MorusMainWindow::onParamListItemDoubleClicked()";
-
-	// Check which type user clicked
-
 	bool ok_pressed = false;
+
+	// TODO(lmark): Add index or name list for parameters that were changed
+	// TODO(lmark): Make a row - coloring function
+
+	// Check which type user pressed
 	// INTEGER
 	if (QString::compare(
 			item->text(TYPE_INDEX),
 			QSTRING_INT,
 			Qt::CaseSensitive) == 0)
 	{
-		int result = QInputDialog::getInt(
+		// Find out what minimum value to use
+		int min_value = item->text(MIN_VALUE_INDEX).toInt();
+		if (QString::compare(item->text(MIN_VALUE_INDEX), "-") == 0)
+			min_value = -INT32_MAX;
+
+		// Find out what maximum value to use
+		int max_value = item->text(MAX_VALUE_INDEX).toInt();
+		if (QString::compare(item->text(MAX_VALUE_INDEX), "-") == 0)
+			max_value = INT32_MAX;
+
+		// Display dialog
+		int desired_value = QInputDialog::getInt(
 				this,
 				tr(item->text(NAME_INDEX).toStdString().c_str()),
 				tr("Value:"),
 				item->text(VALUE_INDEX).toInt(),
-				item->text(MIN_VALUE_INDEX).toInt(),
-				item->text(MAX_VALUE_INDEX).toInt(),
+				min_value,
+				max_value,
 				1, &ok_pressed);
 
-		if (ok_pressed)
+		// Check if value is different
+		if (ok_pressed &&
+			desired_value != item->text(VALUE_INDEX).toInt())
 		{
-
+			item->setText(
+					VALUE_INDEX,
+					QString::fromStdString(std::to_string(desired_value)));
+			for (int k = 0; k < PARAM_COLUMN_COUNT; k++)
+				item->setBackground(k, RED_COLOR);
 		}
+	}
+	// FLOAT
+	else if (QString::compare(
+				item->text(TYPE_INDEX),
+				QSTRING_FLOAT,
+				Qt::CaseSensitive) == 0)
+	{
+		// Find out what minimum value to use
+		double min_value = item->text(MIN_VALUE_INDEX).toDouble();
+		if (QString::compare(item->text(MIN_VALUE_INDEX), "-") == 0)
+			min_value = -DBL_MAX;
+
+		// Find out what maximum value to use
+		double max_value = item->text(MAX_VALUE_INDEX).toDouble();
+		if (QString::compare(item->text(MAX_VALUE_INDEX), "-") == 0)
+			max_value = DBL_MAX;
+
+		// Display dialog
+		double desired_value = QInputDialog::getDouble(
+				this,
+				tr(item->text(NAME_INDEX).toStdString().c_str()),
+				tr("Value:"),
+				item->text(VALUE_INDEX).replace(",", ".").toDouble(),
+				min_value,
+				max_value,
+				5, &ok_pressed);
+
+		// Check if value is different
+		if (ok_pressed &&
+			fabs(desired_value - item->text(VALUE_INDEX).toDouble()) > COMP_EPS)
+		{
+			item->setText(
+					VALUE_INDEX,
+					QString::fromStdString(std::to_string(desired_value)));
+			for (int k = 0; k < PARAM_COLUMN_COUNT; k++)
+				item->setBackground(k, RED_COLOR);
+		}
+	}
+	// UINT8
+	else if (QString::compare(
+				item->text(TYPE_INDEX),
+				QSTRING_UINT8,
+				Qt::CaseSensitive) == 0)
+	{
+		// Find out what minimum value to use
+		int min_value = item->text(MIN_VALUE_INDEX).toInt();
+		if (QString::compare(item->text(MIN_VALUE_INDEX), "-") == 0)
+			min_value = -INT8_MAX;
+
+		// Find out what maximum value to use
+		int max_value = item->text(MAX_VALUE_INDEX).toInt();
+		if (QString::compare(item->text(MAX_VALUE_INDEX), "-") == 0)
+			max_value = INT8_MAX;
+
+		// Display dialog
+		int desired_value = QInputDialog::getInt(
+				this,
+				tr(item->text(NAME_INDEX).toStdString().c_str()),
+				tr("Value:"),
+				item->text(VALUE_INDEX).toInt(),
+				min_value,
+				max_value,
+				1, &ok_pressed);
+
+		// Check if value is different
+		if (ok_pressed &&
+			desired_value != item->text(VALUE_INDEX).toInt())
+		{
+			item->setText(
+					VALUE_INDEX,
+					QString::fromStdString(std::to_string(desired_value)));
+			for (int k = 0; k < PARAM_COLUMN_COUNT; k++)
+				item->setBackground(k, RED_COLOR);
+		}
+	}
+	// STRING
+	else if (QString::compare(
+				item->text(TYPE_INDEX),
+				QSTRING_STRING,
+				Qt::CaseSensitive) == 0)
+	{
+		// TODO(lmark): Unable to check this functionlity
+		// Due to the lack of STRING parameters
+		QString desired_text = QInputDialog::getText(
+				this,
+				tr(item->text(NAME_INDEX).toStdString().c_str()),
+                tr("Value:"),
+				QLineEdit::Normal,
+                item->text(VALUE_INDEX),
+				&ok_pressed);
 	}
 }
 
@@ -477,10 +602,6 @@ void MorusMainWindow::updateNodeParameters(
 			<< params.size();
 
 	QTreeWidget *paramTree = ui_->parameterTreeWidget;
-
-	// Initialize some colors
-	QBrush grey(QColor(230, 230, 230, 255));
-	QBrush white(QColor(255, 255, 255, 255));
 
 	// Clear current parameter configuration
 	paramTree->clear();
@@ -494,9 +615,9 @@ void MorusMainWindow::updateNodeParameters(
 
 		// Color columns differently
 		if (index % 2 == 0)
-		{ for (int k=0; k<7; k++) paramItem->setBackground(k, grey); }
+		{ for (int k=0; k<7; k++) paramItem->setBackground(k, GRAY_COLOR); }
 		else
-		{ for (int k=0; k<7; k++) paramItem->setBackground(k, white); }
+		{ for (int k=0; k<7; k++) paramItem->setBackground(k, WHITE_COLOR); }
 
 		// Check parameter type and set fields accordingly
 		// INTEGER
