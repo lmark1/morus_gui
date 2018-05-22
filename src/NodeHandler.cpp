@@ -279,6 +279,70 @@ void NodeHandler::storeParameters()
 {
 	qDebug() << "NodeHandler::storeParameters() - " << changedParams_.size();
 
+	for (uint32_t index = 0; index < changedParams_.size(); index++)
+	{
+		uavcan::protocol::param::GetSet::Request storeRequest;
+
+		// Set name
+		storeRequest.name.operator +=(
+				changedParams_[index].text(NAME_INDEX).toStdString().c_str());
+
+		// Check type
+		// INTEGER
+		if (QString::compare(
+				changedParams_[index].text(TYPE_INDEX),
+				QSTRING_INT) == 0)
+		{
+			storeRequest.
+			value.to<uavcan::protocol::param::Value::Tag::integer_value>() =
+					changedParams_[index].text(VALUE_INDEX).toInt();
+		}
+		// FLOAT
+		else if (QString::compare(
+					changedParams_[index].text(TYPE_INDEX),
+					QSTRING_FLOAT) == 0)
+		{
+			storeRequest.
+			value.to<uavcan::protocol::param::Value::Tag::real_value>() =
+					changedParams_[index].text(VALUE_INDEX).toDouble();
+		}
+		// STRING
+		else if (QString::compare(
+				changedParams_[index].text(TYPE_INDEX),
+				QSTRING_STRING) == 0)
+		{
+			storeRequest.
+			value.to<uavcan::protocol::param::Value::Tag::string_value>() =
+					changedParams_[index].text(VALUE_INDEX).
+					toStdString().
+					c_str();
+		}
+		// UINT8
+		else if (QString::compare(
+				changedParams_[index].text(TYPE_INDEX),
+				QSTRING_UINT8) == 0)
+		{
+			storeRequest.
+			value.to<uavcan::protocol::param::Value::Tag::boolean_value>() =
+					changedParams_[index].text(VALUE_INDEX).toUInt();
+		}
+
+		// Print store request
+		cout << storeRequest << endl;
+		auto res = performBlockingServiceCall
+				<uavcan::protocol::param::GetSet>(
+						*canNode_,
+						paramNodeID_,
+						storeRequest);
+		if (res.first < 0)
+		{
+			throw std::runtime_error("Failed to set param: "
+					+ std::to_string(res.first));
+		}
+	}
+
+	storeParametersFlag_ = false;
+	paramNodeID_ = -1;
 }
 
 

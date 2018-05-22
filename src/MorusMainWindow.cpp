@@ -645,7 +645,7 @@ void MorusMainWindow::onParamListItemDoubleClicked(
 				item->setBackground(k, RED_COLOR);
 		}
 	}
-	// ... unknown type
+	// ... unknown type - throw exception
 	else
 	{
 		throw runtime_error("Trying to change unknown parameter type...");

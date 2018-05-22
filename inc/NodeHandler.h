@@ -44,6 +44,19 @@ typedef uavcan::Node<NodeMemoryPoolSize> CustomNode_t;
  */
 extern const uavcan::NodeStatusProvider::NodeName DEFAULT_NODE_NAME; 
 
+// Some parameter constants
+extern const QString QSTRING_INT;
+extern const QString QSTRING_UINT8;
+extern const QString QSTRING_STRING;
+extern const QString QSTRING_FLOAT;
+
+extern const uint8_t NAME_INDEX;
+extern const uint8_t TYPE_INDEX;
+extern const uint8_t VALUE_INDEX;
+extern const uint8_t DEFAULT_VALUE_INDEX;
+extern const uint8_t MIN_VALUE_INDEX;
+extern const uint8_t MAX_VALUE_INDEX;
+
 /*
  * This class is used for handling CAN nodes.
  */
