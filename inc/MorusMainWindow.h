@@ -165,6 +165,16 @@ class MorusMainWindow : public QMainWindow
 		void resumeLocalNodes();
 
 		/**
+		 * Check if parameter is valid.
+		 */
+		bool isParamValid(QTreeWidgetItem param);
+
+		/**
+		 * Add parameter to parameter list.
+		 */
+		void addParamToList(QTreeWidgetItem *param);
+
+		/**
 		 * Pointer to morus_main_window UI.
 		 */
 		Ui::MorusMainWindow *ui_;

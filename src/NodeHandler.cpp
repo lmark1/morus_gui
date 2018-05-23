@@ -142,7 +142,7 @@ int NodeHandler::spinCurrentNode(int timeout_ms)
 	//qDebug() << "NodeHandler::spinCurrentNode() "
 	//			"- spin node.\n";
 	// Spin the node
-	const int res = canNode_->spin(
+	int res = canNode_->spin(
 			uavcan::MonotonicDuration::fromMSec(timeout_ms));
 
 	// Read all parameters if requested
@@ -250,7 +250,6 @@ void NodeHandler::readAllParameters()
 		cout << res.first << endl;
 		if (res.first < 0)
 		{
-			// TODO(lmark): Do not throw an error here !
 			throw std::runtime_error(
 					"Failed to get param: " + std::to_string(res.first));
 		}
@@ -338,9 +337,12 @@ void NodeHandler::storeParameters()
 						storeRequest);
 		if (res.first < 0)
 		{
-			throw std::runtime_error("Failed to set param: "
-					+ std::to_string(res.first));
+			qDebug() << "NodeHandler::storeParameters() - "
+					"Not able to set param: "
+					<< changedParams_[index].text(NAME_INDEX)
+					<< " ... skipping.";
 		}
+
 	}
 
 	storeParametersFlag_ = false;

@@ -31,8 +31,9 @@ SOURCES_USER += $(SOURCES_DIR)/main.cpp \
 				$(SOURCES_DIR)/CanWorker.cpp \
 				$(SOURCES_DIR)/NodeInfoCollector.cpp \
 				$(SOURCES_DIR)/MonitorWorker.cpp \
-				$(SOURCES_DIR)/CanFirmwareVersionChecker.cpp
+				$(SOURCES_DIR)/CanFirmwareVersionChecker.cpp \
 
+SOURCES_USER += $(wildcard yaml-cpp/src/*.cpp)
 
 # Include libuavcan .mk file - Initialize libuavcan sources / directories / includes
 include libuavcan/libuavcan/include.mk
@@ -58,6 +59,7 @@ INCLUDES_ALL += -I$(INCLUDE_DIR) \
 				-I$(QT5GUI_INC) \
 				-I$(QT5CORE_INC) \
 				-Ilibuavcan/libuavcan_drivers/linux/include \
+				-I/usr/include/yaml-cpp \
 				-I.
 
 CC = gcc
@@ -101,7 +103,7 @@ OUT_EXEC = $(BUILD_DIR)/$(PROJECT_NAME)
 
 # Output executable recipe
 $(OUT_EXEC): $(OBJECTS_LIBUAVCAN) $(OBJECTS_USER)
-			 @$(LDPP) -o $@ $(OBJECTS_USER) $(OBJECTS_LIBUAVCAN) $(QT_LIBS)
+			 @$(LDPP) -o $@ $(OBJECTS_USER) $(OBJECTS_LIBUAVCAN) $(QT_LIBS) -lyaml-cpp
 			 @$(BUILD_CMD)
 
 # Generic user object file recipes 
@@ -144,7 +146,11 @@ can_test: /build/src/node.o /build/src/platform_linux.o $(OBJECTS_LIBUAVCAN)
 			$(LDPP) -o $@ /build/src/node.o /build/src/platform_linux.o $(OBJECTS_LIBUAVCAN)
 			$(BUILD_CMD)
 
-
+build/yaml-cpp/src/%.o: CMD = $(CPP) -c $(CPPFLAGS) $(UAVCANDEFS) $< -o $@
+build/yaml-cpp/src/%.o: yaml-cpp/src/%.cpp
+			@mkdir -p $(dir $@)
+			@$(BUILD_CMD)
+			
 /build/src/node.o: CMD = $(CPP) -c $(CPPFLAGS) $(UAVCANDEFS) $< -o $@
 /build/src/node.o: $(SOURCES_DIR)/test/node.cpp
 			mkdir -p $(dir $@)

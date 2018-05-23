@@ -161,6 +161,7 @@ class NodeHandler {
 
 		/**
 		 * Attempt to store all changed parameters.
+		 *
 		 */
 		void storeParameters();
 

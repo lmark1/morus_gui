@@ -5,6 +5,7 @@
 #include <QInputDialog>
 #include <QLineEdit>
 #include <QFileDialog>
+#include "yaml-cpp/yaml.h"
 
 #include "MorusMainWindow.h"
 #include "CanWorker.h"
@@ -34,6 +35,15 @@ const uint8_t PARAM_COLUMN_COUNT = 7;
 
 // Comparison delta for detecting parameter change
 const double COMP_EPS = 1e-6;
+
+// YAML configuration file constants
+const std::string YAML_PARAMETER_KEY = "parameters";
+const std::string YAML_NAME_KEY = "name";
+const std::string YAML_TYPE_KEY = "type";
+const std::string YAML_VALUE_KEY = "value";
+const std::string YAML_DEFAULT_KEY = "default";
+const std::string YAML_MIN_KEY = "min";
+const std::string YAML_MAX_KEY = "max";
 
 // Initialize color constants
 QBrush GRAY_COLOR(QColor(230, 230, 230, 255));
@@ -242,7 +252,131 @@ void MorusMainWindow::on_loadParametersButton_clicked()
 		return;
 	}
 
+	// Load parameters
+	YAML::Node parameterList;
+	try
+	{
+		parameterList = YAML::LoadFile(yamlFilePath.toStdString());
+	} catch (std::runtime_error& e)
+	{
+		generateMessageBox(e.what());
+		return;
+	}
 
+	// Return if no parameters found
+	if (!parameterList[YAML_PARAMETER_KEY])
+	{
+		qDebug() << "MorusMainWindow::on_loadParametersButton_clicked() - "
+				"unable to find parameters";
+		generateMessageBox("Unable to find parameters with key-tag: "
+				+ YAML_PARAMETER_KEY);
+		return;
+	}
+
+	// How many parameters ?
+	YAML::Node parameters = parameterList[YAML_PARAMETER_KEY];
+	qDebug() << "MorusMainWindow::on_loadParametersButton_clicked() - "
+			<< "found parameters: "
+			<< parameters.size();
+
+	for (int i = 0; i < parameters.size(); i++)
+	{
+		QTreeWidgetItem *newParam = new QTreeWidgetItem;
+		YAML::Node parameter = parameters[i];
+
+		// TODO(lmark): Check if entry has all fields available
+		// TODO(lmark): Extract this to a seperate method
+		newParam->setText(
+				NAME_INDEX,
+				QString::fromStdString
+				(
+					parameter[YAML_NAME_KEY].as<std::string>()
+				));
+		newParam->setText(
+				TYPE_INDEX,
+				QString::fromStdString
+				(
+					parameter[YAML_TYPE_KEY].as<std::string>()
+				));
+		newParam->setText(
+				VALUE_INDEX,
+				QString::fromStdString
+				(
+					parameter[YAML_VALUE_KEY].as<std::string>()
+				));
+		newParam->setText(
+				DEFAULT_VALUE_INDEX,
+				QString::fromStdString
+				(
+					parameter[YAML_DEFAULT_KEY].as<std::string>()
+				));
+		newParam->setText(
+				MIN_VALUE_INDEX,
+				QString::fromStdString
+				(
+					parameter[YAML_MIN_KEY].as<std::string>()
+				));
+		newParam->setText(
+				MAX_VALUE_INDEX,
+				QString::fromStdString
+				(
+					parameter[YAML_MAX_KEY].as<std::string>()
+				));
+
+		// Check for validity
+		if (!isParamValid(*newParam))
+		{
+			qDebug() << "MorusMainWind 	ow::on_loadParametersButton_clicked() - "
+					"invalid parameter found: "
+					<< newParam->text(NAME_INDEX)
+					<< " ...skipping.";
+			continue;
+		}
+
+		addParamToList(newParam);
+	}
+}
+
+void MorusMainWindow::addParamToList(QTreeWidgetItem *item)
+{
+	if (ui_->parameterTreeWidget->findItems(
+			item->text(NAME_INDEX), Qt::MatchExactly, NAME_INDEX).isEmpty())
+	{
+		// If parameter doesn't exists set it to top
+		ui_->parameterTreeWidget->addTopLevelItem(item);
+
+	} else {
+		// If parameter already exists just set new value
+		// Go through all parameter value and find the correct reference
+		for (int j = 0; j < ui_->canNodeMonitor->topLevelItemCount(); j++)
+		{
+			// Check for the same name
+			if (QString::compare(
+					ui_->parameterTreeWidget->topLevelItem(j)->text(NAME_INDEX),
+					item->text(NAME_INDEX),
+					Qt::CaseSensitive) == 0)
+			{
+				ui_->parameterTreeWidget->topLevelItem(j)->setText(
+						VALUE_INDEX,
+						item->text(VALUE_INDEX));
+				for (int k = 0; k < PARAM_COLUMN_COUNT; k++)
+								ui_->
+								parameterTreeWidget->
+								topLevelItem(j)->
+								setBackground(k, RED_COLOR);
+				// Parameter is found break out of the loop
+				break;
+			}
+		}
+	}
+
+	changedItems_.push_back(*item);
+}
+
+bool MorusMainWindow::isParamValid(QTreeWidgetItem item)
+{
+	// TODO: Check for valid parameters
+	return true;
 }
 
 void MorusMainWindow::on_fetchParamButton_clicked()
@@ -302,6 +436,8 @@ void MorusMainWindow::on_storeParamButton_clicked()
 	}
 
 	canNodeWorker_->storeParametersRequested(changedItems_, currentNodeID_);
+
+	// TODO(lmark): Adding changed items in separate method
 	changedItems_.clear();
 }
 
@@ -902,4 +1038,3 @@ static std::string modeToString(const std::uint8_t mode)
 		return std::to_string(mode);
 	}
 }
-
