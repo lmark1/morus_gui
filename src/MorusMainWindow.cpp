@@ -101,8 +101,6 @@ MorusMainWindow::MorusMainWindow(QWidget *parent) :
 	monitorWorker_->initializeWorker(iface, 1);
 	monitorWorkerThread_->start();
 
-	// TODO(lmark): disable update / restart buttons until user selects a node
-
 	// Connect canMonitor click signal
 	connect(ui_->canNodeMonitor,
 			SIGNAL( itemClicked(QTreeWidgetItem*, int) ),
@@ -284,8 +282,8 @@ void MorusMainWindow::on_loadParametersButton_clicked()
 		QTreeWidgetItem *newParam = new QTreeWidgetItem;
 		YAML::Node parameter = parameters[i];
 
-		// TODO(lmark): Check if entry has all fields available
-		// TODO(lmark): Extract this to a seperate method
+		try
+		{
 		newParam->setText(
 				NAME_INDEX,
 				QString::fromStdString
@@ -304,46 +302,38 @@ void MorusMainWindow::on_loadParametersButton_clicked()
 				(
 					parameter[YAML_VALUE_KEY].as<std::string>()
 				));
-		newParam->setText(
-				DEFAULT_VALUE_INDEX,
-				QString::fromStdString
-				(
-					parameter[YAML_DEFAULT_KEY].as<std::string>()
-				));
-		newParam->setText(
-				MIN_VALUE_INDEX,
-				QString::fromStdString
-				(
-					parameter[YAML_MIN_KEY].as<std::string>()
-				));
-		newParam->setText(
-				MAX_VALUE_INDEX,
-				QString::fromStdString
-				(
-					parameter[YAML_MAX_KEY].as<std::string>()
-				));
-
+		} catch (std::runtime_error &e)
+		{
+			qDebug() << "MorusMainWindow::on_loadParametersButton_clicked() - "
+					"error while reading parameters.";
+			qDebug() << "Error on parameter number: "
+					<< i+1;
+			qDebug() << e.what();
+			continue;
+		}
 		// Check for validity
 		if (!isParamValid(*newParam))
 		{
-			qDebug() << "MorusMainWind 	ow::on_loadParametersButton_clicked() - "
+			qDebug() << "MorusMainWindow::on_loadParametersButton_clicked() - "
 					"invalid parameter found: "
 					<< newParam->text(NAME_INDEX)
 					<< " ...skipping.";
 			continue;
 		}
 
-		addParamToList(newParam);
+		addParamToTree(newParam);
 	}
 }
 
-void MorusMainWindow::addParamToList(QTreeWidgetItem *item)
+void MorusMainWindow::addParamToTree(QTreeWidgetItem *item)
 {
+	int changedIndex = -1;
 	if (ui_->parameterTreeWidget->findItems(
 			item->text(NAME_INDEX), Qt::MatchExactly, NAME_INDEX).isEmpty())
 	{
 		// If parameter doesn't exists set it to top
 		ui_->parameterTreeWidget->addTopLevelItem(item);
+		changedIndex = 0;
 
 	} else {
 		// If parameter already exists just set new value
@@ -359,17 +349,19 @@ void MorusMainWindow::addParamToList(QTreeWidgetItem *item)
 				ui_->parameterTreeWidget->topLevelItem(j)->setText(
 						VALUE_INDEX,
 						item->text(VALUE_INDEX));
-				for (int k = 0; k < PARAM_COLUMN_COUNT; k++)
-								ui_->
-								parameterTreeWidget->
-								topLevelItem(j)->
-								setBackground(k, RED_COLOR);
+				changedIndex = j;
 				// Parameter is found break out of the loop
 				break;
 			}
 		}
 	}
 
+	// Color item
+	for (int k = 0; k < PARAM_COLUMN_COUNT; k++)
+				ui_->
+				parameterTreeWidget->
+				topLevelItem(changedIndex)->
+				setBackground(k, RED_COLOR);
 	changedItems_.push_back(*item);
 }
 
@@ -439,6 +431,30 @@ void MorusMainWindow::on_storeParamButton_clicked()
 
 	// TODO(lmark): Adding changed items in separate method
 	changedItems_.clear();
+}
+
+void MorusMainWindow::addToChangedParams(QTreeWidgetItem param)
+{
+	bool added = false;
+	for (int i = 0; i < changedItems_.size(); i++)
+	{
+		if (QString::compare(
+				param.text(NAME_INDEX),
+				changedItems_[i].text(NAME_INDEX),
+				Qt::CaseSensitive) != 0)
+			continue;
+
+		// TODO(lmark): Perform validity check here
+		// Replace with new value
+		changedItems_[i].setText(
+				VALUE_INDEX,
+				param.text(VALUE_INDEX));
+		added = true;
+		break;
+	}
+
+	if (!added)
+		changedItems_.push_back(param);
 }
 
 void MorusMainWindow::workerFinished()

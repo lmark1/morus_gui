@@ -172,7 +172,13 @@ class MorusMainWindow : public QMainWindow
 		/**
 		 * Add parameter to parameter list.
 		 */
-		void addParamToList(QTreeWidgetItem *param);
+		void addParamToTree(QTreeWidgetItem *param);
+
+		/**
+		 * Add parameter to changed items. It will be marked for storage
+		 * Also check if it is already added, and just change value.
+		 */
+		void addToChangedParams(QTreeWidgetItem param);
 
 		/**
 		 * Pointer to morus_main_window UI.

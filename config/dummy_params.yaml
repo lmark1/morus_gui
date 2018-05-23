@@ -2,13 +2,6 @@ parameters:
     - name: DYN_THROTTLE_SERVO_ID
       type: int
       value: 1
-      default: 3
-      min: 0
-      max: 253
     
     - name: DYN_CHOKE_SERVO_ID
       type: int
-      value: 2
-      default: 9
-      min: 0
-      max: 253
