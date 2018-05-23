@@ -4,3 +4,6 @@
 [submodule "morus_uavcan_msgs"]
 	path = morus_uavcan_msgs
 	url = git@github.com:larics/morus_uavcan_msgs.git
+[submodule "yaml-cpp"]
+	path = yaml-cpp
+	url = https://github.com/jbeder/yaml-cpp
