@@ -281,8 +281,8 @@ void MorusMainWindow::handleErrorMessage(QString error)
 void MorusMainWindow::updateCanMonitor(
 		std::vector<NodeInfo_t> *activeNodesInfo)
 {
-	qDebug() << "MorusMainWindow::updateCanMonitor() "
-			"- found nodes " << activeNodesInfo->size();
+	//qDebug() << "MorusMainWindow::updateCanMonitor() "
+	//		"- found nodes " << activeNodesInfo->size();
 	// Check all the recieved nodes
 	for (uint8_t i = 0; i < activeNodesInfo->size(); i++)
 	{
@@ -298,8 +298,8 @@ void MorusMainWindow::updateCanMonitor(
 			{
 				alreadyExists = true;
 
-				qDebug() << "MorusMainWindow::updateCanMonitor() "
-						"- updating existing node";
+				//qDebug() << "MorusMainWindow::updateCanMonitor() "
+				//		"- updating existing node";
 				// Update existing canMonitor text
 				ui_->canNodeMonitor->topLevelItem(j)->setText(
 						0,
@@ -330,8 +330,8 @@ void MorusMainWindow::updateCanMonitor(
 		// If there is no such nodes add a new node
 		if (!alreadyExists)
 		{
-			qDebug() << "MorusMainWindow::updateCanMonitor() "
-					"- Adding new node";
+			//qDebug() << "MorusMainWindow::updateCanMonitor() "
+			//		"- Adding new node";
 			QTreeWidgetItem *newItem = new QTreeWidgetItem();
 			newItem->setText(
 					0,
@@ -549,12 +549,16 @@ void MorusMainWindow::onParamListItemDoubleClicked(
 				Qt::CaseSensitive) == 0)
 	{
 		// Find out what minimum value to use
-		double min_value = item->text(MIN_VALUE_INDEX).toDouble();
+		double min_value = item->text(MIN_VALUE_INDEX)
+				.replace(",", ".")
+				.toDouble();
 		if (QString::compare(item->text(MIN_VALUE_INDEX), "-") == 0)
 			min_value = -DBL_MAX;
 
 		// Find out what maximum value to use
-		double max_value = item->text(MAX_VALUE_INDEX).toDouble();
+		double max_value = item->text(MAX_VALUE_INDEX)
+				.replace(",", ".")
+				.toDouble();
 		if (QString::compare(item->text(MAX_VALUE_INDEX), "-") == 0)
 			max_value = DBL_MAX;
 

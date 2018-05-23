@@ -62,8 +62,8 @@ void CanWorker::process()
 		if (paused_) { continue; }
 
 		mutex_.lock();
-		qDebug() << "CanWorker::process() "
-				"- Doing work.";
+		//qDebug() << "CanWorker::process() "
+		//		"- Doing work.";
 		const int res_id = runNodeHandler();
 
 		// If something went wrong stop doing work.

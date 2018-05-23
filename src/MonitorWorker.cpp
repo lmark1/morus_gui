@@ -55,8 +55,8 @@ class CanNodeMonitor : public uavcan::NodeStatusMonitor
 	 */
 	void handleNodeStatusChange(const NodeStatusChangeEvent& event) override
 	{
-		qDebug() << "CanNodeMonitor::NodeStatusChangeEvent() "
-						"- Found a node!";
+		//qDebug() << "CanNodeMonitor::NodeStatusChangeEvent() "
+		//				"- Found a node!";
 	}
 
 	/**
@@ -68,8 +68,8 @@ class CanNodeMonitor : public uavcan::NodeStatusMonitor
 			const uavcan::ReceivedDataStructure<uavcan::protocol::NodeStatus>&
 				msg) override
 	{
-		qDebug() << "CanNodeMonitor::handleNodeStatusMessage() "
-				"- Found a node!";
+		//qDebug() << "CanNodeMonitor::handleNodeStatusMessage() "
+		//		"- Found a node!";
 		status_registry_[msg.getSrcNodeID().get()] = msg;
 	}
 
@@ -84,8 +84,8 @@ public:
     void checkForNodes()
 	{
 
-    	qDebug() << "CanNodeMonitor::checkForNodes() "
-    			"- Checking for nodes.";
+    	//qDebug() << "CanNodeMonitor::checkForNodes() "
+    	//		"- Checking for nodes.";
 		activeNodesInfo.clear();
 		NodeInfo_t tempNodeInfo;
 

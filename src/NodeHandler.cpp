@@ -139,8 +139,8 @@ int NodeHandler::spinCurrentNode(int timeout_ms)
 	 * nodes.
 	 */
 
-	qDebug() << "NodeHandler::spinCurrentNode() "
-				"- spin node.\n";
+	//qDebug() << "NodeHandler::spinCurrentNode() "
+	//			"- spin node.\n";
 	// Spin the node
 	const int res = canNode_->spin(
 			uavcan::MonotonicDuration::fromMSec(timeout_ms));
@@ -304,7 +304,9 @@ void NodeHandler::storeParameters()
 		{
 			storeRequest.
 			value.to<uavcan::protocol::param::Value::Tag::real_value>() =
-					changedParams_[index].text(VALUE_INDEX).toDouble();
+					changedParams_[index].text(VALUE_INDEX)
+					.replace(",", ".")
+					.toDouble();
 		}
 		// STRING
 		else if (QString::compare(
