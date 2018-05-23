@@ -34,6 +34,16 @@ Right click on the project -> C/C++ symbols -> Source Location(tab) and add foll
 
 // TODO remove include redundancies
 
+#### Install YAML parser
+yaml-cpp module is assinged as a submodule to this project. To install it type the following
+commands (navigate to yaml-cpp folder):  
+
+*mkdir build*  
+*cd build*  
+*cmake ..*  
+*make*  
+*make install*  
+
 #### Build 
 
 Build with:  

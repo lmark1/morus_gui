@@ -4,6 +4,7 @@
 #include <QtGui>
 #include <QInputDialog>
 #include <QLineEdit>
+#include <QFileDialog>
 
 #include "MorusMainWindow.h"
 #include "CanWorker.h"
@@ -203,6 +204,45 @@ void MorusMainWindow::on_updateFirmwareButton_clicked()
 	emit requestFirmwareUpdate(
 			updaterDialog.getFirmwarePath(),
 			currentNodeID_);
+}
+
+void MorusMainWindow::on_loadParametersButton_clicked()
+{
+	qDebug() << "MorusMainWindow::on_loadParametersButton_clicked()";
+
+	// IMPORTANT: Pause all local nodes before
+	pauseLocalNodes();
+
+	/**
+	 * When we pause all nodes, because of spin time they will still
+	 * perform the next action (monitoring nodes etc.)
+	 * If a node is emitting some signals to the main window and
+	 * we attempt to open user prompt dialog Segmentation fault will occur
+	 * because GUI will remain unchangeble while prompt is active.
+	 * The following sleep command will ensure that node activities will
+	 * be paused after 1 second and no interference can occur.
+	 */
+	// TODO(lmark): Probably implement similar thing in updateFirmwareButton cb.
+	sleep(1);
+
+	QString yamlFilePath = QFileDialog::getOpenFileName(
+				this,
+				tr("Open YAML file."),
+				QDir::currentPath(),
+				tr("Yaml files (*.yaml);;All files (*.*)"));
+
+	// Resume all node activities affter prompt is finished
+	resumeLocalNodes();
+
+	// Check if user selected a file
+	if (yamlFilePath.isEmpty())
+	{
+		qDebug() << "MorusMainWindow::on_loadParametersButton_clicked() - "
+				"No file selected.";
+		return;
+	}
+
+
 }
 
 void MorusMainWindow::on_fetchParamButton_clicked()
@@ -440,12 +480,6 @@ void MorusMainWindow::setupCanThreadConnections()
 			SLOT( updateNodeParameters(
 					std::vector
 					<uavcan::protocol::param::GetSet::Response>) ));
-
-	// Connect signal for storing parameters
-	connect(this,
-			SIGNAL( storeParametersRequest(std::vector<QTreeWidgetItem>,int) ),
-			canNodeWorker_,
-			SLOT( storeParametersRequested(std::vector<QTreeWidgetItem>,int) ));
 	}
 
 void MorusMainWindow::setupMonitorThreadConnections()

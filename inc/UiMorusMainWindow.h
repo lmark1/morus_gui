@@ -59,6 +59,7 @@ public:
     QLabel *group_label_4;
     QComboBox *parameterGroupBox;
     QPushButton *calibrateButton;
+    QPushButton *loadParametersButton;
     QLabel *InfoLabel_2;
     QLabel *configuration_parameters_label;
     QMenuBar *menuBar;
@@ -69,7 +70,7 @@ public:
     {
         if (morus_main_window->objectName().isEmpty())
             morus_main_window->setObjectName(QStringLiteral("morus_main_window"));
-        morus_main_window->resize(1092, 466);
+        morus_main_window->resize(1092, 553);
         centralWidget = new QWidget(morus_main_window);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         local_node_properties_label = new QLabel(centralWidget);
@@ -380,7 +381,7 @@ public:
         restartHardwareButton->setFont(font5);
         configuration_parameters_frame = new QFrame(centralWidget);
         configuration_parameters_frame->setObjectName(QStringLiteral("configuration_parameters_frame"));
-        configuration_parameters_frame->setGeometry(QRect(540, 70, 501, 331));
+        configuration_parameters_frame->setGeometry(QRect(540, 70, 501, 401));
         QPalette palette7;
         palette7.setBrush(QPalette::Active, QPalette::WindowText, brush);
         palette7.setBrush(QPalette::Active, QPalette::Button, brush2);
@@ -435,19 +436,19 @@ public:
         configuration_parameters_frame->setLineWidth(1);
         fetchParamButton = new QPushButton(configuration_parameters_frame);
         fetchParamButton->setObjectName(QStringLiteral("fetchParamButton"));
-        fetchParamButton->setGeometry(QRect(10, 10, 101, 21));
+        fetchParamButton->setGeometry(QRect(10, 10, 101, 31));
         fetchParamButton->setFont(font5);
         storeParamButton = new QPushButton(configuration_parameters_frame);
         storeParamButton->setObjectName(QStringLiteral("storeParamButton"));
-        storeParamButton->setGeometry(QRect(280, 10, 101, 21));
+        storeParamButton->setGeometry(QRect(280, 10, 101, 31));
         storeParamButton->setFont(font5);
         eraseParamButton = new QPushButton(configuration_parameters_frame);
         eraseParamButton->setObjectName(QStringLiteral("eraseParamButton"));
-        eraseParamButton->setGeometry(QRect(390, 10, 101, 21));
+        eraseParamButton->setGeometry(QRect(390, 10, 101, 31));
         eraseParamButton->setFont(font5);
         parameterTreeWidget = new QTreeWidget(configuration_parameters_frame);
         parameterTreeWidget->setObjectName(QStringLiteral("parameterTreeWidget"));
-        parameterTreeWidget->setGeometry(QRect(10, 80, 481, 241));
+        parameterTreeWidget->setGeometry(QRect(10, 130, 481, 261));
         QFont font6;
         font6.setPointSize(9);
         parameterTreeWidget->setFont(font6);
@@ -455,23 +456,27 @@ public:
         parameterTreeWidget->header()->setDefaultSectionSize(50);
         updateButton = new QPushButton(configuration_parameters_frame);
         updateButton->setObjectName(QStringLiteral("updateButton"));
-        updateButton->setGeometry(QRect(120, 10, 101, 21));
+        updateButton->setGeometry(QRect(120, 10, 101, 31));
         updateButton->setFont(font5);
         group_label_4 = new QLabel(configuration_parameters_frame);
         group_label_4->setObjectName(QStringLiteral("group_label_4"));
-        group_label_4->setGeometry(QRect(20, 40, 51, 27));
+        group_label_4->setGeometry(QRect(10, 90, 51, 27));
         group_label_4->setFont(font5);
         parameterGroupBox = new QComboBox(configuration_parameters_frame);
         parameterGroupBox->setObjectName(QStringLiteral("parameterGroupBox"));
-        parameterGroupBox->setGeometry(QRect(70, 40, 251, 27));
+        parameterGroupBox->setGeometry(QRect(60, 90, 251, 27));
         parameterGroupBox->setFont(font5);
         calibrateButton = new QPushButton(configuration_parameters_frame);
         calibrateButton->setObjectName(QStringLiteral("calibrateButton"));
-        calibrateButton->setGeometry(QRect(370, 43, 121, 21));
+        calibrateButton->setGeometry(QRect(280, 40, 211, 41));
         calibrateButton->setFont(font5);
+        loadParametersButton = new QPushButton(configuration_parameters_frame);
+        loadParametersButton->setObjectName(QStringLiteral("loadParametersButton"));
+        loadParametersButton->setGeometry(QRect(10, 40, 211, 41));
+        loadParametersButton->setFont(font5);
         InfoLabel_2 = new QLabel(centralWidget);
         InfoLabel_2->setObjectName(QStringLiteral("InfoLabel_2"));
-        InfoLabel_2->setGeometry(QRect(540, 400, 491, 17));
+        InfoLabel_2->setGeometry(QRect(540, 397, 491, 20));
         InfoLabel_2->setFont(font5);
         configuration_parameters_label = new QLabel(centralWidget);
         configuration_parameters_label->setObjectName(QStringLiteral("configuration_parameters_label"));
@@ -531,6 +536,7 @@ public:
         updateButton->setText(QApplication::translate("morus_main_window", "Update All", 0));
         group_label_4->setText(QApplication::translate("morus_main_window", "Group:", 0));
         calibrateButton->setText(QApplication::translate("morus_main_window", "Calibrate sensors", 0));
+        loadParametersButton->setText(QApplication::translate("morus_main_window", "Load Parameters", 0));
         InfoLabel_2->setText(QString());
         configuration_parameters_label->setText(QApplication::translate("morus_main_window", "Configuration parameters", 0));
     } // retranslateUi

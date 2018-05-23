@@ -78,6 +78,16 @@ class MorusMainWindow : public QMainWindow
 		 */
 		void on_storeParamButton_clicked();
 
+		/**
+		 * Method will execute when loadParametersButton is clicked. It will
+		 * prompt user to select an appropriate YAML parameter configuration
+		 * file.
+		 * Parameters found in the configuration file will be updated
+		 * to the local parameters or appended to the list as new
+		 * parameters.
+		 */
+		void on_loadParametersButton_clicked();
+
 	public slots:
 
 		/**

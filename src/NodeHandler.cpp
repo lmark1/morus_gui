@@ -146,10 +146,10 @@ int NodeHandler::spinCurrentNode(int timeout_ms)
 			uavcan::MonotonicDuration::fromMSec(timeout_ms));
 
 	// Read all parameters if requested
-	if (readParametersFlag_) {readAllParameters();}
+	if (readParametersFlag_) { readAllParameters(); }
 
 	// Store parameters if requested
-	if (storeParametersFlag_) {storeParameters();}
+	if (storeParametersFlag_) { storeParameters(); }
 
 	return res;
 }
