@@ -49,6 +49,7 @@ bool CanFirmwareVersionChecker::shouldRequestFirmwareUpdate(
 	qDebug() << "CanFirmwareVersionChecker::"
 			"shouldRequestFirmwareUpdate() - "
 			"Firmware update accepted.";
+
 	return true;
 }
 

@@ -325,13 +325,16 @@ void MorusMainWindow::on_loadParametersButton_clicked()
 
 void MorusMainWindow::addParamToTree(QTreeWidgetItem *item)
 {
-	int changedIndex = -1;
 	if (ui_->parameterTreeWidget->findItems(
 			item->text(NAME_INDEX), Qt::MatchExactly, NAME_INDEX).isEmpty())
 	{
 		// If parameter doesn't exists set it to top
 		ui_->parameterTreeWidget->addTopLevelItem(item);
-		changedIndex = 0;
+		// Color item
+		for (int k = 0; k < PARAM_COLUMN_COUNT; k++)
+					item->
+					setBackground(k, RED_COLOR);
+
 
 	} else {
 		// If parameter already exists just set new value
@@ -347,17 +350,19 @@ void MorusMainWindow::addParamToTree(QTreeWidgetItem *item)
 				ui_->parameterTreeWidget->topLevelItem(j)->setText(
 						VALUE_INDEX,
 						item->text(VALUE_INDEX));
-				changedIndex = j;
+
+				for (int k = 0; k < PARAM_COLUMN_COUNT; k++)
+					ui_->
+					parameterTreeWidget->
+					topLevelItem(j)->
+					setBackground(k, RED_COLOR);
+
 				// Parameter is found break out of the loop
 				break;
 			}
 		}
 	}
 
-	// Color item
-	for (int k = 0; k < PARAM_COLUMN_COUNT; k++)
-				item->
-				setBackground(k, RED_COLOR);
 	addToChangedParams(*item);
 }
 
