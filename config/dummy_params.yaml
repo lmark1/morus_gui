@@ -5,3 +5,4 @@ parameters:
     
     - name: DYN_CHOKE_SERVO_ID
       type: int
+      value: 2

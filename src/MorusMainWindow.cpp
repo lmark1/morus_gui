@@ -41,9 +41,6 @@ const std::string YAML_PARAMETER_KEY = "parameters";
 const std::string YAML_NAME_KEY = "name";
 const std::string YAML_TYPE_KEY = "type";
 const std::string YAML_VALUE_KEY = "value";
-const std::string YAML_DEFAULT_KEY = "default";
-const std::string YAML_MIN_KEY = "min";
-const std::string YAML_MAX_KEY = "max";
 
 // Initialize color constants
 QBrush GRAY_COLOR(QColor(230, 230, 230, 255));
@@ -302,6 +299,7 @@ void MorusMainWindow::on_loadParametersButton_clicked()
 				(
 					parameter[YAML_VALUE_KEY].as<std::string>()
 				));
+
 		} catch (std::runtime_error &e)
 		{
 			qDebug() << "MorusMainWindow::on_loadParametersButton_clicked() - "
@@ -358,11 +356,9 @@ void MorusMainWindow::addParamToTree(QTreeWidgetItem *item)
 
 	// Color item
 	for (int k = 0; k < PARAM_COLUMN_COUNT; k++)
-				ui_->
-				parameterTreeWidget->
-				topLevelItem(changedIndex)->
+				item->
 				setBackground(k, RED_COLOR);
-	changedItems_.push_back(*item);
+	addToChangedParams(*item);
 }
 
 bool MorusMainWindow::isParamValid(QTreeWidgetItem item)
@@ -687,7 +683,6 @@ void MorusMainWindow::onParamListItemDoubleClicked(
 	qDebug() << "MorusMainWindow::onParamListItemDoubleClicked()";
 	bool ok_pressed = false;
 
-	// TODO(lmark): Add index or name list for parameters that were changed
 	// TODO(lmark): Make a row - coloring function
 
 	// Check which type user pressed
@@ -699,12 +694,14 @@ void MorusMainWindow::onParamListItemDoubleClicked(
 	{
 		// Find out what minimum value to use
 		int min_value = item->text(MIN_VALUE_INDEX).toInt();
-		if (QString::compare(item->text(MIN_VALUE_INDEX), "-") == 0)
+		if (QString::compare(item->text(MIN_VALUE_INDEX), "-") == 0 ||
+				item->text(MIN_VALUE_INDEX).isEmpty())
 			min_value = -INT32_MAX;
 
 		// Find out what maximum value to use
 		int max_value = item->text(MAX_VALUE_INDEX).toInt();
-		if (QString::compare(item->text(MAX_VALUE_INDEX), "-") == 0)
+		if (QString::compare(item->text(MAX_VALUE_INDEX), "-") == 0 ||
+				item->text(MAX_VALUE_INDEX).isEmpty())
 			max_value = INT32_MAX;
 
 		// Display dialog
@@ -738,14 +735,16 @@ void MorusMainWindow::onParamListItemDoubleClicked(
 		double min_value = item->text(MIN_VALUE_INDEX)
 				.replace(",", ".")
 				.toDouble();
-		if (QString::compare(item->text(MIN_VALUE_INDEX), "-") == 0)
+		if (QString::compare(item->text(MIN_VALUE_INDEX), "-") == 0 ||
+				item->text(MIN_VALUE_INDEX).isEmpty())
 			min_value = -DBL_MAX;
 
 		// Find out what maximum value to use
 		double max_value = item->text(MAX_VALUE_INDEX)
 				.replace(",", ".")
 				.toDouble();
-		if (QString::compare(item->text(MAX_VALUE_INDEX), "-") == 0)
+		if (QString::compare(item->text(MAX_VALUE_INDEX), "-") == 0 ||
+				item->text(MAX_VALUE_INDEX).isEmpty())
 			max_value = DBL_MAX;
 
 		// Display dialog
@@ -777,12 +776,14 @@ void MorusMainWindow::onParamListItemDoubleClicked(
 	{
 		// Find out what minimum value to use
 		int min_value = item->text(MIN_VALUE_INDEX).toInt();
-		if (QString::compare(item->text(MIN_VALUE_INDEX), "-") == 0)
+		if (QString::compare(item->text(MIN_VALUE_INDEX), "-") == 0 ||
+				item->text(MIN_VALUE_INDEX).isEmpty())
 			min_value = -INT8_MAX;
 
 		// Find out what maximum value to use
 		int max_value = item->text(MAX_VALUE_INDEX).toInt();
-		if (QString::compare(item->text(MAX_VALUE_INDEX), "-") == 0)
+		if (QString::compare(item->text(MAX_VALUE_INDEX), "-") == 0 ||
+				item->text(MAX_VALUE_INDEX).isEmpty())
 			max_value = INT8_MAX;
 
 		// Display dialog
@@ -842,7 +843,7 @@ void MorusMainWindow::onParamListItemDoubleClicked(
 	}
 
 	// Push items to changed list
-	changedItems_.push_back(*item);
+	addToChangedParams(*item);
 }
 
 void MorusMainWindow::updateNodeParameters(
