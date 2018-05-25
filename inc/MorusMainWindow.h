@@ -88,6 +88,15 @@ class MorusMainWindow : public QMainWindow
 		 */
 		void on_loadParametersButton_clicked();
 
+		/**
+		 * Method will execute when exportParametersButton is clicked. If there
+		 * are any parameters in the parameter list it will attempt to export
+		 * them.
+		 * User will be prompted to select where the parameters will be
+		 * stored.
+		 */
+		void on_exportParametersButton_clicked();
+
 	public slots:
 
 		/**

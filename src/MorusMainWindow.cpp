@@ -323,6 +323,306 @@ void MorusMainWindow::on_loadParametersButton_clicked()
 	}
 }
 
+void MorusMainWindow::on_fetchParamButton_clicked()
+{
+	qDebug() << "MorusMainWindow::on_fetchParamButton_clicked()";
+	if (canNodeWorker_ == NULL)
+	{
+		generateMessageBox("Please initialize the local node worker first");
+		return;
+	}
+
+	// Check if a node is selected for firmware update
+	if (currentNodeID_ == -1)
+	{
+		generateMessageBox("Please select a node first.");
+		return;
+	}
+
+	// Check if current ID selected is the same as the local node
+	if (currentNodeID_ == ui_->localNodeIDSpinBox->value())
+	{
+		generateMessageBox("Node with selected ID performs parameter "
+				"upload / download. Please select another node.");
+		return;
+	}
+
+	// Clear local changed item list
+	changedItems_.clear();
+	canNodeWorker_->readParameterSignal(currentNodeID_);
+}
+
+void MorusMainWindow::on_exportParametersButton_clicked()
+{
+	// Check if any parameter is available for exporting
+	cout << ui_->parameterTreeWidget->size().isEmpty() << endl;
+
+	if (!ui_->parameterTreeWidget->size().isEmpty())
+	{
+		generateMessageBox("No parameters found for exporting.");
+		return;
+	}
+
+	// IMPORTANT: Pause all local nodes before
+	pauseLocalNodes();
+
+	// TODO(lmark): Probably implement similar thing in updateFirmwareButton cb.
+	sleep(1);
+
+	QString yamlFilePath = QFileDialog::getSaveFileName(
+				this,
+				tr("Export current parameters."),
+				QDir::currentPath(),
+				tr("Yaml files (*.yaml);;All files (*.*)"));
+
+	// Resume all node activities affter prompt is finished
+	resumeLocalNodes();
+
+	// Check if user selected a file
+	if (yamlFilePath.isEmpty())
+	{
+		qDebug() << "MorusMainWindow::on_exportParametersButton_clicked() - "
+				"No file selected.";
+		return;
+	}
+
+
+}
+
+void MorusMainWindow::on_storeParamButton_clicked()
+{
+	qDebug() << "MorusMainWindow::on_storeParamButton_clicked() - "
+			<< changedItems_.size();
+
+	// Check if a node is selected for firmware update
+	if (currentNodeID_ == -1)
+	{
+		generateMessageBox("Please select a node first.");
+		return;
+	}
+
+	// Check if current ID selected is the same as the local node
+	if (currentNodeID_ == ui_->localNodeIDSpinBox->value())
+	{
+		generateMessageBox("Node with selected ID performs parameter "
+				"upload / download. Please select another node.");
+		return;
+	}
+
+	// Check if changed param list is empty
+	if (changedItems_.size() == 0)
+	{
+		generateMessageBox("No parameters changed.");
+		return;
+	}
+
+	canNodeWorker_->storeParametersRequested(changedItems_, currentNodeID_);
+
+	// TODO(lmark): Adding changed items in separate method
+	changedItems_.clear();
+}
+
+void MorusMainWindow::onCanMonitorItemClicked(
+		QTreeWidgetItem *item, int column)
+{
+	currentNodeID_ = item->text(0).toInt();
+	qDebug() << "MorusMainWindow::onCanMonitorItemClicked() - "
+			<< item->text(0).toStdString().c_str();
+}
+
+void MorusMainWindow::onParamListItemDoubleClicked(
+		QTreeWidgetItem *item, int column)
+{
+	qDebug() << "MorusMainWindow::onParamListItemDoubleClicked()";
+	bool ok_pressed = false;
+
+	// TODO(lmark): Make a row - coloring function
+
+	// Check which type user pressed
+	// INTEGER
+	if (QString::compare(
+			item->text(TYPE_INDEX),
+			QSTRING_INT,
+			Qt::CaseSensitive) == 0)
+	{
+		// Find out what minimum value to use
+		int min_value = item->text(MIN_VALUE_INDEX).toInt();
+		if (QString::compare(item->text(MIN_VALUE_INDEX), "-") == 0 ||
+				item->text(MIN_VALUE_INDEX).isEmpty())
+			min_value = -INT32_MAX;
+
+		// Find out what maximum value to use
+		int max_value = item->text(MAX_VALUE_INDEX).toInt();
+		if (QString::compare(item->text(MAX_VALUE_INDEX), "-") == 0 ||
+				item->text(MAX_VALUE_INDEX).isEmpty())
+			max_value = INT32_MAX;
+
+		// Display dialog
+		int desired_value = QInputDialog::getInt(
+				this,
+				tr(item->text(NAME_INDEX).toStdString().c_str()),
+				tr("Value:"),
+				item->text(VALUE_INDEX).toInt(),
+				min_value,
+				max_value,
+				1, &ok_pressed);
+
+		// Check if value is different
+		if (ok_pressed &&
+			desired_value != item->text(VALUE_INDEX).toInt())
+		{
+			item->setText(
+					VALUE_INDEX,
+					QString::fromStdString(std::to_string(desired_value)));
+			for (int k = 0; k < PARAM_COLUMN_COUNT; k++)
+				item->setBackground(k, RED_COLOR);
+		}
+	}
+	// FLOAT
+	else if (QString::compare(
+				item->text(TYPE_INDEX),
+				QSTRING_FLOAT,
+				Qt::CaseSensitive) == 0)
+	{
+		// Find out what minimum value to use
+		double min_value = item->text(MIN_VALUE_INDEX)
+				.replace(",", ".")
+				.toDouble();
+		if (QString::compare(item->text(MIN_VALUE_INDEX), "-") == 0 ||
+				item->text(MIN_VALUE_INDEX).isEmpty())
+			min_value = -DBL_MAX;
+
+		// Find out what maximum value to use
+		double max_value = item->text(MAX_VALUE_INDEX)
+				.replace(",", ".")
+				.toDouble();
+		if (QString::compare(item->text(MAX_VALUE_INDEX), "-") == 0 ||
+				item->text(MAX_VALUE_INDEX).isEmpty())
+			max_value = DBL_MAX;
+
+		// Display dialog
+		double desired_value = QInputDialog::getDouble(
+				this,
+				tr(item->text(NAME_INDEX).toStdString().c_str()),
+				tr("Value:"),
+				item->text(VALUE_INDEX).replace(",", ".").toDouble(),
+				min_value,
+				max_value,
+				5, &ok_pressed);
+
+		// Check if value is different
+		if (ok_pressed &&
+			fabs(desired_value - item->text(VALUE_INDEX).toDouble()) > COMP_EPS)
+		{
+			item->setText(
+					VALUE_INDEX,
+					QString::fromStdString(std::to_string(desired_value)));
+			for (int k = 0; k < PARAM_COLUMN_COUNT; k++)
+				item->setBackground(k, RED_COLOR);
+		}
+	}
+	// UINT8
+	else if (QString::compare(
+				item->text(TYPE_INDEX),
+				QSTRING_UINT8,
+				Qt::CaseSensitive) == 0)
+	{
+		// Find out what minimum value to use
+		int min_value = item->text(MIN_VALUE_INDEX).toInt();
+		if (QString::compare(item->text(MIN_VALUE_INDEX), "-") == 0 ||
+				item->text(MIN_VALUE_INDEX).isEmpty())
+			min_value = -INT8_MAX;
+
+		// Find out what maximum value to use
+		int max_value = item->text(MAX_VALUE_INDEX).toInt();
+		if (QString::compare(item->text(MAX_VALUE_INDEX), "-") == 0 ||
+				item->text(MAX_VALUE_INDEX).isEmpty())
+			max_value = INT8_MAX;
+
+		// Display dialog
+		int desired_value = QInputDialog::getInt(
+				this,
+				tr(item->text(NAME_INDEX).toStdString().c_str()),
+				tr("Value:"),
+				item->text(VALUE_INDEX).toInt(),
+				min_value,
+				max_value,
+				1, &ok_pressed);
+
+		// Check if value is different
+		if (ok_pressed &&
+			desired_value != item->text(VALUE_INDEX).toInt())
+		{
+			item->setText(
+					VALUE_INDEX,
+					QString::fromStdString(std::to_string(desired_value)));
+			for (int k = 0; k < PARAM_COLUMN_COUNT; k++)
+				item->setBackground(k, RED_COLOR);
+		}
+	}
+	// STRING
+	else if (QString::compare(
+				item->text(TYPE_INDEX),
+				QSTRING_STRING,
+				Qt::CaseSensitive) == 0)
+	{
+		// TODO(lmark): Unable to check this functionality due to the lack of STRING parameters
+		QString desired_text = QInputDialog::getText(
+				this,
+				tr(item->text(NAME_INDEX).toStdString().c_str()),
+                tr("Value:"),
+				QLineEdit::Normal,
+                item->text(VALUE_INDEX),
+				&ok_pressed);
+
+		// Check if value is different
+		if (ok_pressed &&
+			QString::compare(
+					desired_text,
+					item->text(VALUE_INDEX),
+					Qt::CaseSensitive) != 0)
+		{
+			item->setText(
+					VALUE_INDEX,
+					desired_text);
+			for (int k = 0; k < PARAM_COLUMN_COUNT; k++)
+				item->setBackground(k, RED_COLOR);
+		}
+	}
+	// ... unknown type - throw exception
+	else
+	{
+		throw runtime_error("Trying to change unknown parameter type...");
+	}
+
+	// Push items to changed list
+	addToChangedParams(*item);
+}
+
+void MorusMainWindow::addToChangedParams(QTreeWidgetItem param)
+{
+	bool added = false;
+	for (int i = 0; i < changedItems_.size(); i++)
+	{
+		if (QString::compare(
+				param.text(NAME_INDEX),
+				changedItems_[i].text(NAME_INDEX),
+				Qt::CaseSensitive) != 0)
+			continue;
+
+		// TODO(lmark): Perform validity check here
+		// Replace with new value
+		changedItems_[i].setText(
+				VALUE_INDEX,
+				param.text(VALUE_INDEX));
+		added = true;
+		break;
+	}
+
+	if (!added)
+		changedItems_.push_back(param);
+}
+
 void MorusMainWindow::addParamToTree(QTreeWidgetItem *item)
 {
 	if (ui_->parameterTreeWidget->findItems(
@@ -370,92 +670,6 @@ bool MorusMainWindow::isParamValid(QTreeWidgetItem item)
 {
 	// TODO: Check for valid parameters
 	return true;
-}
-
-void MorusMainWindow::on_fetchParamButton_clicked()
-{
-	qDebug() << "MorusMainWindow::on_fetchParamButton_clicked()";
-	if (canNodeWorker_ == NULL)
-	{
-		generateMessageBox("Please initialize the local node worker first");
-		return;
-	}
-
-	// Check if a node is selected for firmware update
-	if (currentNodeID_ == -1)
-	{
-		generateMessageBox("Please select a node first.");
-		return;
-	}
-
-	// Check if current ID selected is the same as the local node
-	if (currentNodeID_ == ui_->localNodeIDSpinBox->value())
-	{
-		generateMessageBox("Node with selected ID performs parameter "
-				"upload / download. Please select another node.");
-		return;
-	}
-
-	// Clear local changed item list
-	changedItems_.clear();
-	canNodeWorker_->readParameterSignal(currentNodeID_);
-}
-
-void MorusMainWindow::on_storeParamButton_clicked()
-{
-	qDebug() << "MorusMainWindow::on_storeParamButton_clicked() - "
-			<< changedItems_.size();
-
-	// Check if a node is selected for firmware update
-	if (currentNodeID_ == -1)
-	{
-		generateMessageBox("Please select a node first.");
-		return;
-	}
-
-	// Check if current ID selected is the same as the local node
-	if (currentNodeID_ == ui_->localNodeIDSpinBox->value())
-	{
-		generateMessageBox("Node with selected ID performs parameter "
-				"upload / download. Please select another node.");
-		return;
-	}
-
-	// Check if changed param list is empty
-	if (changedItems_.size() == 0)
-	{
-		generateMessageBox("No parameters changed.");
-		return;
-	}
-
-	canNodeWorker_->storeParametersRequested(changedItems_, currentNodeID_);
-
-	// TODO(lmark): Adding changed items in separate method
-	changedItems_.clear();
-}
-
-void MorusMainWindow::addToChangedParams(QTreeWidgetItem param)
-{
-	bool added = false;
-	for (int i = 0; i < changedItems_.size(); i++)
-	{
-		if (QString::compare(
-				param.text(NAME_INDEX),
-				changedItems_[i].text(NAME_INDEX),
-				Qt::CaseSensitive) != 0)
-			continue;
-
-		// TODO(lmark): Perform validity check here
-		// Replace with new value
-		changedItems_[i].setText(
-				VALUE_INDEX,
-				param.text(VALUE_INDEX));
-		added = true;
-		break;
-	}
-
-	if (!added)
-		changedItems_.push_back(param);
 }
 
 void MorusMainWindow::workerFinished()
@@ -674,182 +888,7 @@ void MorusMainWindow::resumeLocalNodes()
 	if (canNodeWorker_ != NULL) { canNodeWorker_->resumeWorker(); }
 }
 
-void MorusMainWindow::onCanMonitorItemClicked(
-		QTreeWidgetItem *item, int column)
-{
-	currentNodeID_ = item->text(0).toInt();
-	qDebug() << "MorusMainWindow::onCanMonitorItemClicked() - "
-			<< item->text(0).toStdString().c_str();
-}
 
-void MorusMainWindow::onParamListItemDoubleClicked(
-		QTreeWidgetItem *item, int column)
-{
-	qDebug() << "MorusMainWindow::onParamListItemDoubleClicked()";
-	bool ok_pressed = false;
-
-	// TODO(lmark): Make a row - coloring function
-
-	// Check which type user pressed
-	// INTEGER
-	if (QString::compare(
-			item->text(TYPE_INDEX),
-			QSTRING_INT,
-			Qt::CaseSensitive) == 0)
-	{
-		// Find out what minimum value to use
-		int min_value = item->text(MIN_VALUE_INDEX).toInt();
-		if (QString::compare(item->text(MIN_VALUE_INDEX), "-") == 0 ||
-				item->text(MIN_VALUE_INDEX).isEmpty())
-			min_value = -INT32_MAX;
-
-		// Find out what maximum value to use
-		int max_value = item->text(MAX_VALUE_INDEX).toInt();
-		if (QString::compare(item->text(MAX_VALUE_INDEX), "-") == 0 ||
-				item->text(MAX_VALUE_INDEX).isEmpty())
-			max_value = INT32_MAX;
-
-		// Display dialog
-		int desired_value = QInputDialog::getInt(
-				this,
-				tr(item->text(NAME_INDEX).toStdString().c_str()),
-				tr("Value:"),
-				item->text(VALUE_INDEX).toInt(),
-				min_value,
-				max_value,
-				1, &ok_pressed);
-
-		// Check if value is different
-		if (ok_pressed &&
-			desired_value != item->text(VALUE_INDEX).toInt())
-		{
-			item->setText(
-					VALUE_INDEX,
-					QString::fromStdString(std::to_string(desired_value)));
-			for (int k = 0; k < PARAM_COLUMN_COUNT; k++)
-				item->setBackground(k, RED_COLOR);
-		}
-	}
-	// FLOAT
-	else if (QString::compare(
-				item->text(TYPE_INDEX),
-				QSTRING_FLOAT,
-				Qt::CaseSensitive) == 0)
-	{
-		// Find out what minimum value to use
-		double min_value = item->text(MIN_VALUE_INDEX)
-				.replace(",", ".")
-				.toDouble();
-		if (QString::compare(item->text(MIN_VALUE_INDEX), "-") == 0 ||
-				item->text(MIN_VALUE_INDEX).isEmpty())
-			min_value = -DBL_MAX;
-
-		// Find out what maximum value to use
-		double max_value = item->text(MAX_VALUE_INDEX)
-				.replace(",", ".")
-				.toDouble();
-		if (QString::compare(item->text(MAX_VALUE_INDEX), "-") == 0 ||
-				item->text(MAX_VALUE_INDEX).isEmpty())
-			max_value = DBL_MAX;
-
-		// Display dialog
-		double desired_value = QInputDialog::getDouble(
-				this,
-				tr(item->text(NAME_INDEX).toStdString().c_str()),
-				tr("Value:"),
-				item->text(VALUE_INDEX).replace(",", ".").toDouble(),
-				min_value,
-				max_value,
-				5, &ok_pressed);
-
-		// Check if value is different
-		if (ok_pressed &&
-			fabs(desired_value - item->text(VALUE_INDEX).toDouble()) > COMP_EPS)
-		{
-			item->setText(
-					VALUE_INDEX,
-					QString::fromStdString(std::to_string(desired_value)));
-			for (int k = 0; k < PARAM_COLUMN_COUNT; k++)
-				item->setBackground(k, RED_COLOR);
-		}
-	}
-	// UINT8
-	else if (QString::compare(
-				item->text(TYPE_INDEX),
-				QSTRING_UINT8,
-				Qt::CaseSensitive) == 0)
-	{
-		// Find out what minimum value to use
-		int min_value = item->text(MIN_VALUE_INDEX).toInt();
-		if (QString::compare(item->text(MIN_VALUE_INDEX), "-") == 0 ||
-				item->text(MIN_VALUE_INDEX).isEmpty())
-			min_value = -INT8_MAX;
-
-		// Find out what maximum value to use
-		int max_value = item->text(MAX_VALUE_INDEX).toInt();
-		if (QString::compare(item->text(MAX_VALUE_INDEX), "-") == 0 ||
-				item->text(MAX_VALUE_INDEX).isEmpty())
-			max_value = INT8_MAX;
-
-		// Display dialog
-		int desired_value = QInputDialog::getInt(
-				this,
-				tr(item->text(NAME_INDEX).toStdString().c_str()),
-				tr("Value:"),
-				item->text(VALUE_INDEX).toInt(),
-				min_value,
-				max_value,
-				1, &ok_pressed);
-
-		// Check if value is different
-		if (ok_pressed &&
-			desired_value != item->text(VALUE_INDEX).toInt())
-		{
-			item->setText(
-					VALUE_INDEX,
-					QString::fromStdString(std::to_string(desired_value)));
-			for (int k = 0; k < PARAM_COLUMN_COUNT; k++)
-				item->setBackground(k, RED_COLOR);
-		}
-	}
-	// STRING
-	else if (QString::compare(
-				item->text(TYPE_INDEX),
-				QSTRING_STRING,
-				Qt::CaseSensitive) == 0)
-	{
-		// TODO(lmark): Unable to check this functionality due to the lack of STRING parameters
-		QString desired_text = QInputDialog::getText(
-				this,
-				tr(item->text(NAME_INDEX).toStdString().c_str()),
-                tr("Value:"),
-				QLineEdit::Normal,
-                item->text(VALUE_INDEX),
-				&ok_pressed);
-
-		// Check if value is different
-		if (ok_pressed &&
-			QString::compare(
-					desired_text,
-					item->text(VALUE_INDEX),
-					Qt::CaseSensitive) != 0)
-		{
-			item->setText(
-					VALUE_INDEX,
-					desired_text);
-			for (int k = 0; k < PARAM_COLUMN_COUNT; k++)
-				item->setBackground(k, RED_COLOR);
-		}
-	}
-	// ... unknown type - throw exception
-	else
-	{
-		throw runtime_error("Trying to change unknown parameter type...");
-	}
-
-	// Push items to changed list
-	addToChangedParams(*item);
-}
 
 void MorusMainWindow::updateNodeParameters(
 				std::vector
