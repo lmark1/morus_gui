@@ -174,7 +174,8 @@ class MorusMainWindow : public QMainWindow
 		void resumeLocalNodes();
 
 		/**
-		 * Check if parameter is valid.
+		 * Check if parameter is valid. Checks if type matches the found
+		 * value.
 		 */
 		bool isParamValid(QTreeWidgetItem param);
 

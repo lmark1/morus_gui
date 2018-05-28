@@ -6,6 +6,7 @@
 #include <QLineEdit>
 #include <QFileDialog>
 #include "yaml-cpp/yaml.h"
+#include <fstream>
 
 #include "MorusMainWindow.h"
 #include "CanWorker.h"
@@ -274,7 +275,7 @@ void MorusMainWindow::on_loadParametersButton_clicked()
 			<< "found parameters: "
 			<< parameters.size();
 
-	for (int i = 0; i < parameters.size(); i++)
+	for (uint8_t i = 0; i < parameters.size(); i++)
 	{
 		QTreeWidgetItem *newParam = new QTreeWidgetItem;
 		YAML::Node parameter = parameters[i];
@@ -355,9 +356,11 @@ void MorusMainWindow::on_fetchParamButton_clicked()
 void MorusMainWindow::on_exportParametersButton_clicked()
 {
 	// Check if any parameter is available for exporting
-	cout << ui_->parameterTreeWidget->size().isEmpty() << endl;
+	int paramCount = ui_->parameterTreeWidget->topLevelItemCount();
+	qDebug() << "MorusMainWindow::on_exportParametersButton_clicked() - "
+			<< paramCount;
 
-	if (!ui_->parameterTreeWidget->size().isEmpty())
+	if (paramCount == 0)
 	{
 		generateMessageBox("No parameters found for exporting.");
 		return;
@@ -373,7 +376,7 @@ void MorusMainWindow::on_exportParametersButton_clicked()
 				this,
 				tr("Export current parameters."),
 				QDir::currentPath(),
-				tr("Yaml files (*.yaml);;All files (*.*)"));
+				tr("Yaml files (*.yaml)"));
 
 	// Resume all node activities affter prompt is finished
 	resumeLocalNodes();
@@ -386,7 +389,27 @@ void MorusMainWindow::on_exportParametersButton_clicked()
 		return;
 	}
 
+	// Make a YAML node
+	YAML::Node newNode;
+	for (int i = 0; i < paramCount; i++)
+	{
+		newNode[YAML_PARAMETER_KEY][i][YAML_NAME_KEY] =
+				ui_->
+				parameterTreeWidget->
+				topLevelItem(i)->
+				text(NAME_INDEX).toStdString();
+		newNode[YAML_PARAMETER_KEY][i][YAML_VALUE_KEY] =
+				ui_->
+				parameterTreeWidget->
+				topLevelItem(i)->
+				text(VALUE_INDEX).toStdString();
+	}
 
+	// Save to file
+	std::ofstream fout(yamlFilePath.toStdString());
+	fout << newNode;
+	fout.flush();
+	fout.close();
 }
 
 void MorusMainWindow::on_storeParamButton_clicked()
@@ -602,7 +625,7 @@ void MorusMainWindow::onParamListItemDoubleClicked(
 void MorusMainWindow::addToChangedParams(QTreeWidgetItem param)
 {
 	bool added = false;
-	for (int i = 0; i < changedItems_.size(); i++)
+	for (uint8_t i = 0; i < changedItems_.size(); i++)
 	{
 		if (QString::compare(
 				param.text(NAME_INDEX),
