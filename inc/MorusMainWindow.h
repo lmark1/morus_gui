@@ -72,11 +72,14 @@ class MorusMainWindow : public QMainWindow
 		 */
 		void on_fetchParamButton_clicked();
 
+		// TODO(lmark): Store parameters on flash with Execute opcode
+		void on_storeParamButton_clicked();
+
 		/**
-		 * Method will execute when storeParamButton is clicked. It will
+		 * Method will execute when Update All button is clicked. It will
 		 * store changed parameters on the selected node.
 		 */
-		void on_storeParamButton_clicked();
+		void on_updateButton_clicked();
 
 		/**
 		 * Method will execute when loadParametersButton is clicked. It will

@@ -416,11 +416,13 @@ void MorusMainWindow::on_exportParametersButton_clicked()
 		generateMessageBox(e.what());
 		return;
 	}
+
+	generateMessageBox("Parameters exported successfully.");
 }
 
-void MorusMainWindow::on_storeParamButton_clicked()
+void MorusMainWindow::on_updateButton_clicked()
 {
-	qDebug() << "MorusMainWindow::on_storeParamButton_clicked() - "
+	qDebug() << "MorusMainWindow::on_updateButton_clicked() - "
 			<< changedItems_.size();
 
 	// Check if a node is selected for firmware update
@@ -449,6 +451,12 @@ void MorusMainWindow::on_storeParamButton_clicked()
 
 	// TODO(lmark): Adding changed items in separate method
 	changedItems_.clear();
+}
+
+void MorusMainWindow::on_storeParamButton_clicked()
+{
+	qDebug() << "MorusMainWindow::on_storeParamButton_clicked()";
+	// TODO(lmark): Store parameters on flash
 }
 
 void MorusMainWindow::onCanMonitorItemClicked(
