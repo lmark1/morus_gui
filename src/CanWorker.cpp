@@ -79,7 +79,7 @@ void CanWorker::process()
 	qDebug() << "CanWorker::process() "
 			"- worker finished.";
 	stopWorker();
-	emit finished();
+	emit finishedSignal();
 }
 
 int CanWorker::initializeNodeHandler()
@@ -102,7 +102,7 @@ int CanWorker::initializeNodeHandler()
 				"- Failed to initialized node handler.";
 		// Emit error message
 		std::string error_message(ex.what());
-        emit error(
+        emit errorSignal(
             QString::fromStdString(
            		 "Error occurred while creating a new node.\n" +
 				 error_message
@@ -129,7 +129,7 @@ int CanWorker::runNodeHandler() {
 
 		// Emit error message
 		std::string error_message(ex.what());
-		emit error(
+		emit errorSignal(
 			QString::fromStdString(
 				 "Error occurred while spinning node.\n" +
 				 error_message
@@ -151,16 +151,25 @@ void CanWorker::firmwareUpdateRequested(
 			firmwareFilePath, nodeId);
 }
 
-void CanWorker::storeParametersRequested(
+void CanWorker::updateParametersRequest(
 		std::vector<QTreeWidgetItem> changedItems,
 		int nodeId)
 {
-	qDebug() << "CanWorker::storeParametersRequested() - "
+	qDebug() << "CanWorker::updateParametersRequested() - "
 			<< changedItems.size();
 
 	canNodeHandler_->paramNodeID_ = nodeId;
 	canNodeHandler_->storeParametersFlag_ = true;
-	canNodeHandler_->changedParams_ = changedItems;
+	canNodeHandler_->updateParameters_ = changedItems;
+}
+
+void CanWorker::storeParametersRequest(
+				std::vector<QTreeWidgetItem> parameters,
+				int nodeId)
+{
+	qDebug() << "CanWorker::storeParametersRequest() - "
+			<< parameters.size();
+
 }
 
 void CanWorker::stopWorker()
@@ -208,11 +217,11 @@ void CanWorker::readParameterSignal(int nodeID)
 	canNodeHandler_->paramNodeID_ = nodeID;
 }
 
-void CanWorker::updateNodeParameters(
+void CanWorker::updateParametersCallback(
 		std::vector<uavcan::protocol::param::GetSet::Response> params)
 {
 	qDebug() << "CanWorker::parameterList() - " << params.size();
 
 	// Emit found parameters towards MorusMainWindow
-	emit nodeParametersFound(params);
+	emit updateParametersSignal(params);
 }

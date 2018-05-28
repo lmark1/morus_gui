@@ -81,18 +81,29 @@ class CanWorker : public QObject {
 		 *
 		 * @param params
 		 */
-		void updateNodeParameters(
+		void updateParametersCallback(
 				std::vector
 				<uavcan::protocol::param::GetSet::Response> params);
 
 		/**
-		 * This method is called when user requests to store parameters.
+		 * This method is called when user requests to update parameters.
 		 *
 		 * @param changedItems - All parameters that changed
 		 * @param nodeId
 		 */
-		void storeParametersRequested(
+		void updateParametersRequest(
 				std::vector<QTreeWidgetItem> changedItems,
+				int nodeId);
+
+		/**
+		 * This method is called when user requests to store parameters
+		 * to the flash memory.
+		 *
+		 * @param parameters - All available parameters
+		 * @param nodeId
+		 */
+		void storeParametersRequest(
+				std::vector<QTreeWidgetItem> parameters,
 				int nodeId);
 
 	public slots:
@@ -110,6 +121,7 @@ class CanWorker : public QObject {
 		 * @param firmwareFilePath
 		 * @param nodeId
 		 */
+		//TODO(lmark): Change this slot to a method when doing Firmware update
 		void firmwareUpdateRequested(std::string firmwareFilePath, int nodeId);
 
 	signals:
@@ -117,19 +129,19 @@ class CanWorker : public QObject {
 		/**
 		 * Emit this signal when worker is done.
 		 */
-		void finished();
+		void finishedSignal();
 
 		/**
 		 * Emit this signal when something goes wrong.
 		 */
-		void error(QString err);
+		void errorSignal(QString err);
 
 		/**
 		 * Emit this signal when new node information is found.
 		 * In current implementation this will be emitted from inside the
 		 * NodeHandler object where the NodeInfoCollector is found.
 		 */
-		void nodeInformationFound(std::vector<NodeInfo_t> *activeNodeInfo);
+		void nodeInfoFoundSignal(std::vector<NodeInfo_t> *activeNodeInfo);
 
 		/**
 		 * This signal will be emitted when node handler has found
@@ -137,7 +149,7 @@ class CanWorker : public QObject {
 		 *
 		 * @param params
 		 */
-		void nodeParametersFound(
+		void updateParametersSignal(
 				std::vector
 				<uavcan::protocol::param::GetSet::Response> params);
 

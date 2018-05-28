@@ -68,6 +68,10 @@ NodeHandler::~NodeHandler()
 			"- destructor called.";
 
 	delete canNode_;
+	delete fileServer_;
+	delete fileServerBackend_;
+	delete updateNodeInfoRetriever_;
+	delete updateTrigger_;
 }
 
 int NodeHandler::createNewNode(std::string ifaceName, int nodeID)
@@ -149,7 +153,7 @@ int NodeHandler::spinCurrentNode(int timeout_ms)
 	if (readParametersFlag_) { readAllParameters(); }
 
 	// Store parameters if requested
-	if (storeParametersFlag_) { storeParameters(); }
+	if (storeParametersFlag_) { updateParameters(); }
 
 	return res;
 }
@@ -268,64 +272,64 @@ void NodeHandler::readAllParameters()
 				"finished reading parameters.";
 
 	// Start propagating parameters towards CanWorker -> MorusMainWindow
-	canWorker_->updateNodeParameters(remoteParams);
+	canWorker_->updateParametersCallback(remoteParams);
 
 	// Reset read parameter flags
 	paramNodeID_ = -1;
 }
 
-void NodeHandler::storeParameters()
+void NodeHandler::updateParameters()
 {
-	qDebug() << "NodeHandler::storeParameters() - " << changedParams_.size();
+	qDebug() << "NodeHandler::storeParameters() - " << updateParameters_.size();
 
-	for (uint32_t index = 0; index < changedParams_.size(); index++)
+	for (uint32_t index = 0; index < updateParameters_.size(); index++)
 	{
 		uavcan::protocol::param::GetSet::Request storeRequest;
 
 		// Set name
 		storeRequest.name.operator +=(
-				changedParams_[index].text(NAME_INDEX).toStdString().c_str());
+				updateParameters_[index].text(NAME_INDEX).toStdString().c_str());
 
 		// Check type
 		// INTEGER
 		if (QString::compare(
-				changedParams_[index].text(TYPE_INDEX),
+				updateParameters_[index].text(TYPE_INDEX),
 				QSTRING_INT) == 0)
 		{
 			storeRequest.
 			value.to<uavcan::protocol::param::Value::Tag::integer_value>() =
-					changedParams_[index].text(VALUE_INDEX).toInt();
+					updateParameters_[index].text(VALUE_INDEX).toInt();
 		}
 		// FLOAT
 		else if (QString::compare(
-					changedParams_[index].text(TYPE_INDEX),
+					updateParameters_[index].text(TYPE_INDEX),
 					QSTRING_FLOAT) == 0)
 		{
 			storeRequest.
 			value.to<uavcan::protocol::param::Value::Tag::real_value>() =
-					changedParams_[index].text(VALUE_INDEX)
+					updateParameters_[index].text(VALUE_INDEX)
 					.replace(",", ".")
 					.toDouble();
 		}
 		// STRING
 		else if (QString::compare(
-				changedParams_[index].text(TYPE_INDEX),
+				updateParameters_[index].text(TYPE_INDEX),
 				QSTRING_STRING) == 0)
 		{
 			storeRequest.
 			value.to<uavcan::protocol::param::Value::Tag::string_value>() =
-					changedParams_[index].text(VALUE_INDEX).
+					updateParameters_[index].text(VALUE_INDEX).
 					toStdString().
 					c_str();
 		}
 		// UINT8
 		else if (QString::compare(
-				changedParams_[index].text(TYPE_INDEX),
+				updateParameters_[index].text(TYPE_INDEX),
 				QSTRING_UINT8) == 0)
 		{
 			storeRequest.
 			value.to<uavcan::protocol::param::Value::Tag::boolean_value>() =
-					changedParams_[index].text(VALUE_INDEX).toUInt();
+					updateParameters_[index].text(VALUE_INDEX).toUInt();
 		}
 
 		// Print store request
@@ -339,7 +343,7 @@ void NodeHandler::storeParameters()
 		{
 			qDebug() << "NodeHandler::storeParameters() - "
 					"Not able to set param: "
-					<< changedParams_[index].text(NAME_INDEX)
+					<< updateParameters_[index].text(NAME_INDEX)
 					<< " ... skipping.";
 		}
 

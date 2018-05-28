@@ -125,7 +125,7 @@ class NodeHandler {
 		CustomNode_t *canNode_ = NULL;
 
 		/**
-		 * ID of the node whose parameters are being read.
+		 * ID of the node whose parameters are being read / stored etc.
 		 */
 		int paramNodeID_ = -1;
 
@@ -140,9 +140,9 @@ class NodeHandler {
 		bool storeParametersFlag_ = false;
 
 		/**
-		 * List of changed parameters.
+		 * List of parameters designated for update / storing etc.
 		 */
-		std::vector<QTreeWidgetItem> changedParams_;
+		std::vector<QTreeWidgetItem> updateParameters_;
 
     private:
 
@@ -155,15 +155,17 @@ class NodeHandler {
 		void setupNodeFileServer();
 
 		/**
-		 * Attempt to read all parameters from the node with the given ID.
+		 * Attempt to read all parameters from the node with the given ID -
+		 * paramNodeID_.
 		 */
 		void readAllParameters();
 
 		/**
-		 * Attempt to store all changed parameters.
+		 * Attempt to update all changed parameters. Parameters
+		 * updateParameters_ will be updated on the node with paramNodeID_.
 		 *
 		 */
-		void storeParameters();
+		void updateParameters();
 
         /**
          * Flag indicating if node is created.

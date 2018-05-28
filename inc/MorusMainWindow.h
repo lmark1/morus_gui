@@ -72,7 +72,11 @@ class MorusMainWindow : public QMainWindow
 		 */
 		void on_fetchParamButton_clicked();
 
-		// TODO(lmark): Store parameters on flash with Execute opcode
+		/**
+		 * Method will execute when Store Parameters button is clicked. It will
+		 * store all parameters in the Parameter tree widget in the flash
+		 * memory.
+		 */
 		void on_storeParamButton_clicked();
 
 		/**
@@ -132,6 +136,12 @@ class MorusMainWindow : public QMainWindow
 		void onParamListItemDoubleClicked(QTreeWidgetItem *item, int column);
 
 		/**
+		 * This slot will be activated when item contents changed. When
+		 * value changes color the whole item red.
+		 */
+		void onParamListItemChanged(QTreeWidgetItem *item, int column);
+
+		/**
 		 *	Update node parameter list with the given set of parameters.
 		 *
 		 *	@param params
@@ -185,7 +195,7 @@ class MorusMainWindow : public QMainWindow
 		/**
 		 * Add parameter to parameter list.
 		 */
-		void addParamToTree(QTreeWidgetItem *param);
+		void addItemToTreeWidget(QTreeWidgetItem *param);
 
 		/**
 		 * Add parameter to changed items. It will be marked for storage

@@ -7,6 +7,7 @@
 #include <QFileDialog>
 #include "yaml-cpp/yaml.h"
 #include <fstream>
+#include <QTreeWidgetItemIterator>
 
 #include "MorusMainWindow.h"
 #include "CanWorker.h"
@@ -110,6 +111,12 @@ MorusMainWindow::MorusMainWindow(QWidget *parent) :
 			SIGNAL( itemDoubleClicked(QTreeWidgetItem*, int) ),
 			this,
 			SLOT( onParamListItemDoubleClicked(QTreeWidgetItem*, int) ));
+
+	// Connect changed callback
+	connect(ui_->parameterTreeWidget,
+			SIGNAL( itemChanged(QTreeWidgetItem*, int) ),
+			this,
+			SLOT( onParamListItemChanged(QTreeWidgetItem*, int)));
 }
 
 MorusMainWindow::~MorusMainWindow()
@@ -168,6 +175,7 @@ void MorusMainWindow::on_startLocalNodeButton_clicked()
 
     // Disable start button after generating a node
     ui_->startLocalNodeButton->setEnabled(false);
+    ui_->localNodeIDSpinBox->setEnabled(false);
 }
 
 void MorusMainWindow::on_updateFirmwareButton_clicked()
@@ -282,6 +290,7 @@ void MorusMainWindow::on_loadParametersButton_clicked()
 
 		try
 		{
+		// Valid parameters need to have following fields: name, type, value
 		newParam->setText(
 				NAME_INDEX,
 				QString::fromStdString
@@ -320,7 +329,7 @@ void MorusMainWindow::on_loadParametersButton_clicked()
 			continue;
 		}
 
-		addParamToTree(newParam);
+		addItemToTreeWidget(newParam);
 	}
 }
 
@@ -425,7 +434,7 @@ void MorusMainWindow::on_updateButton_clicked()
 	qDebug() << "MorusMainWindow::on_updateButton_clicked() - "
 			<< changedItems_.size();
 
-	// Check if a node is selected for firmware update
+	// Check if a node is selected for update
 	if (currentNodeID_ == -1)
 	{
 		generateMessageBox("Please select a node first.");
@@ -447,7 +456,7 @@ void MorusMainWindow::on_updateButton_clicked()
 		return;
 	}
 
-	canNodeWorker_->storeParametersRequested(changedItems_, currentNodeID_);
+	canNodeWorker_->updateParametersRequest(changedItems_, currentNodeID_);
 
 	// TODO(lmark): Adding changed items in separate method
 	changedItems_.clear();
@@ -456,7 +465,31 @@ void MorusMainWindow::on_updateButton_clicked()
 void MorusMainWindow::on_storeParamButton_clicked()
 {
 	qDebug() << "MorusMainWindow::on_storeParamButton_clicked()";
-	// TODO(lmark): Store parameters on flash
+
+	// Check if a node is selected for update
+	if (currentNodeID_ == -1)
+	{
+		generateMessageBox("Please select a node first.");
+		return;
+	}
+
+	// Check if current ID selected is the same as the local node
+	if (currentNodeID_ == ui_->localNodeIDSpinBox->value())
+	{
+		generateMessageBox("Node with selected ID performs parameter "
+				"upload / download. Please select another node.");
+		return;
+	}
+
+	// Check if current parameter tree is empty
+	if (ui_->parameterTreeWidget->topLevelItemCount() == 0)
+	{
+		generateMessageBox("No parameters found in the "
+				"parameter list window.");
+		return;
+	}
+
+	//TODO(lmark): Tell can worker to update parameters
 }
 
 void MorusMainWindow::onCanMonitorItemClicked(
@@ -465,6 +498,15 @@ void MorusMainWindow::onCanMonitorItemClicked(
 	currentNodeID_ = item->text(0).toInt();
 	qDebug() << "MorusMainWindow::onCanMonitorItemClicked() - "
 			<< item->text(0).toStdString().c_str();
+}
+
+void MorusMainWindow::onParamListItemChanged(QTreeWidgetItem *item, int column)
+{
+	qDebug() << "MorusMainWindow::onParamListItemChanged()";
+	// If value didn't change don't do anything
+	if (column != VALUE_INDEX) { return; }
+	for (int i = 0; i < PARAM_COLUMN_COUNT; i++)
+		item->setBackground(i, RED_COLOR);
 }
 
 void MorusMainWindow::onParamListItemDoubleClicked(
@@ -511,8 +553,6 @@ void MorusMainWindow::onParamListItemDoubleClicked(
 			item->setText(
 					VALUE_INDEX,
 					QString::fromStdString(std::to_string(desired_value)));
-			for (int k = 0; k < PARAM_COLUMN_COUNT; k++)
-				item->setBackground(k, RED_COLOR);
 		}
 	}
 	// FLOAT
@@ -554,8 +594,6 @@ void MorusMainWindow::onParamListItemDoubleClicked(
 			item->setText(
 					VALUE_INDEX,
 					QString::fromStdString(std::to_string(desired_value)));
-			for (int k = 0; k < PARAM_COLUMN_COUNT; k++)
-				item->setBackground(k, RED_COLOR);
 		}
 	}
 	// UINT8
@@ -593,8 +631,6 @@ void MorusMainWindow::onParamListItemDoubleClicked(
 			item->setText(
 					VALUE_INDEX,
 					QString::fromStdString(std::to_string(desired_value)));
-			for (int k = 0; k < PARAM_COLUMN_COUNT; k++)
-				item->setBackground(k, RED_COLOR);
 		}
 	}
 	// STRING
@@ -622,8 +658,6 @@ void MorusMainWindow::onParamListItemDoubleClicked(
 			item->setText(
 					VALUE_INDEX,
 					desired_text);
-			for (int k = 0; k < PARAM_COLUMN_COUNT; k++)
-				item->setBackground(k, RED_COLOR);
 		}
 	}
 	// ... unknown type - throw exception
@@ -660,47 +694,59 @@ void MorusMainWindow::addToChangedParams(QTreeWidgetItem param)
 		changedItems_.push_back(param);
 }
 
-void MorusMainWindow::addParamToTree(QTreeWidgetItem *item)
+void MorusMainWindow::addItemToTreeWidget(QTreeWidgetItem *item)
 {
+	// If there are no new same params add new
 	if (ui_->parameterTreeWidget->findItems(
 			item->text(NAME_INDEX), Qt::MatchExactly, NAME_INDEX).isEmpty())
 	{
 		// If parameter doesn't exists set it to top
 		ui_->parameterTreeWidget->addTopLevelItem(item);
-		// Color item
-		for (int k = 0; k < PARAM_COLUMN_COUNT; k++)
-					item->
-					setBackground(k, RED_COLOR);
+		this->onParamListItemChanged(
+				ui_->parameterTreeWidget->topLevelItem(0),
+				VALUE_INDEX);
 
+		// Add it as changed
+		addToChangedParams(*item);
 
 	} else {
 		// If parameter already exists just set new value
 		// Go through all parameter value and find the correct reference
-		for (int j = 0; j < ui_->canNodeMonitor->topLevelItemCount(); j++)
+		QTreeWidgetItemIterator currItem(ui_->parameterTreeWidget);
+		while (*currItem)
 		{
 			// Check for the same name
 			if (QString::compare(
-					ui_->parameterTreeWidget->topLevelItem(j)->text(NAME_INDEX),
+					(*currItem)->text(NAME_INDEX),
 					item->text(NAME_INDEX),
 					Qt::CaseSensitive) == 0)
 			{
-				ui_->parameterTreeWidget->topLevelItem(j)->setText(
+
+				// Color it if item changed
+				if (QString::compare(
+					(*currItem)->text(VALUE_INDEX),
+					item->text(VALUE_INDEX),
+					Qt::CaseSensitive) != 0)
+				{
+					for (int i = 0; i < PARAM_COLUMN_COUNT; i++)
+						(*currItem)->setBackground(i, RED_COLOR);
+
+					// Update current item
+					(*currItem)->setText(
 						VALUE_INDEX,
 						item->text(VALUE_INDEX));
 
-				for (int k = 0; k < PARAM_COLUMN_COUNT; k++)
-					ui_->
-					parameterTreeWidget->
-					topLevelItem(j)->
-					setBackground(k, RED_COLOR);
+					// Add it as changed
+					addToChangedParams(*item);
+					break;
+				}
 
 				// Parameter is found break out of the loop
 				break;
 			}
+			++currItem;
 		}
 	}
-
-	addToChangedParams(*item);
 }
 
 bool MorusMainWindow::isParamValid(QTreeWidgetItem item)
@@ -714,6 +760,7 @@ void MorusMainWindow::workerFinished()
 	qDebug() << "MorusMainWindow::workerFinished()";
 	// Re-enable the start button when current current CAN thread is finished
 	ui_->startLocalNodeButton->setEnabled(true);
+	ui_->localNodeIDSpinBox->setEnabled(true);
 }
 
 void MorusMainWindow::handleErrorMessage(QString error)
@@ -850,7 +897,7 @@ void MorusMainWindow::setupCanThreadConnections()
 {
 	// **** CanWorker / Thread connections ****
 	connect(canNodeWorker_, 		// Connect worker error()...
-			SIGNAL( error(QString) ),
+			SIGNAL( errorSignal(QString) ),
 			this, 					// To morus_main_window errorString()
 			SLOT( handleErrorMessage(QString) ));
 
@@ -860,16 +907,17 @@ void MorusMainWindow::setupCanThreadConnections()
 			SLOT( process() ));
 
 	connect(canNodeWorker_, 		// Connect worker finished()...
-			SIGNAL( finished() ),
+			SIGNAL( finishedSignal() ),
 			canWorkerThread_,		// to thread quit() - exits the thread
 			SLOT( quit() ));
 
 	connect(canNodeWorker_, 		// Connect worker finished()...
-			SIGNAL( finished() ),
+			SIGNAL( finishedSignal() ),
 			this,					// to morus_window workerFinished()
 			SLOT( workerFinished() ));
 
 	// Connect firmware update request
+	// TODO(lmark): This does not work
 	connect(this,
 			SIGNAL( requestFirmwareUpdate(std::string, int) ),
 			canNodeWorker_,
@@ -877,7 +925,7 @@ void MorusMainWindow::setupCanThreadConnections()
 
 	// Connect signal for fetching parameters
 	connect(canNodeWorker_,
-			SIGNAL( nodeParametersFound(
+			SIGNAL( updateParametersSignal(
 					std::vector
 					<uavcan::protocol::param::GetSet::Response>) ),
 			this,
