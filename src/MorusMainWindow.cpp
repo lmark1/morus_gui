@@ -310,6 +310,14 @@ void MorusMainWindow::on_loadParametersButton_clicked()
 					parameter[YAML_VALUE_KEY].as<std::string>()
 				));
 
+		QBrush color;
+		if (i%2)
+			color = WHITE_COLOR;
+		else
+			color = GRAY_COLOR;
+		for (int k = 0; k < PARAM_COLUMN_COUNT; k++)
+			newParam->setBackground(k, color);
+
 		} catch (std::runtime_error &e)
 		{
 			qDebug() << "MorusMainWindow::on_loadParametersButton_clicked() - "
@@ -407,6 +415,11 @@ void MorusMainWindow::on_exportParametersButton_clicked()
 				parameterTreeWidget->
 				topLevelItem(i)->
 				text(NAME_INDEX).toStdString();
+		newNode[YAML_PARAMETER_KEY][i][YAML_TYPE_KEY] =
+						ui_->
+						parameterTreeWidget->
+						topLevelItem(i)->
+						text(TYPE_INDEX).toStdString();
 		newNode[YAML_PARAMETER_KEY][i][YAML_VALUE_KEY] =
 				ui_->
 				parameterTreeWidget->
@@ -696,56 +709,54 @@ void MorusMainWindow::addToChangedParams(QTreeWidgetItem param)
 
 void MorusMainWindow::addItemToTreeWidget(QTreeWidgetItem *item)
 {
-	// If there are no new same params add new
-	if (ui_->parameterTreeWidget->findItems(
-			item->text(NAME_INDEX), Qt::MatchExactly, NAME_INDEX).isEmpty())
+	bool found = false;
+	// If parameter already exists just set new value
+	// Go through all parameter value and find the correct reference
+	QTreeWidgetItemIterator currItem(ui_->parameterTreeWidget);
+	while (*currItem)
+	{
+		// Check for the same name
+		if (QString::compare(
+				(*currItem)->text(NAME_INDEX),
+				item->text(NAME_INDEX),
+				Qt::CaseSensitive) == 0)
+		{
+
+			// Color it if item changed
+			if (QString::compare(
+				(*currItem)->text(VALUE_INDEX),
+				item->text(VALUE_INDEX),
+				Qt::CaseSensitive) != 0)
+			{
+				for (int i = 0; i < PARAM_COLUMN_COUNT; i++)
+					(*currItem)->setBackground(i, RED_COLOR);
+
+				// Update current item
+				(*currItem)->setText(
+					VALUE_INDEX,
+					item->text(VALUE_INDEX));
+
+				// Add it as changed
+				addToChangedParams(*item);
+			}
+
+			found = true;
+			// Parameter is found break out of the loop
+			break;
+		}
+		++currItem;
+	}
+
+	// If there are no same params add new
+	if (!found)
 	{
 		// If parameter doesn't exists set it to top
-		ui_->parameterTreeWidget->addTopLevelItem(item);
+		ui_->parameterTreeWidget->insertTopLevelItem(0, item);
 		this->onParamListItemChanged(
 				ui_->parameterTreeWidget->topLevelItem(0),
 				VALUE_INDEX);
-
 		// Add it as changed
 		addToChangedParams(*item);
-
-	} else {
-		// If parameter already exists just set new value
-		// Go through all parameter value and find the correct reference
-		QTreeWidgetItemIterator currItem(ui_->parameterTreeWidget);
-		while (*currItem)
-		{
-			// Check for the same name
-			if (QString::compare(
-					(*currItem)->text(NAME_INDEX),
-					item->text(NAME_INDEX),
-					Qt::CaseSensitive) == 0)
-			{
-
-				// Color it if item changed
-				if (QString::compare(
-					(*currItem)->text(VALUE_INDEX),
-					item->text(VALUE_INDEX),
-					Qt::CaseSensitive) != 0)
-				{
-					for (int i = 0; i < PARAM_COLUMN_COUNT; i++)
-						(*currItem)->setBackground(i, RED_COLOR);
-
-					// Update current item
-					(*currItem)->setText(
-						VALUE_INDEX,
-						item->text(VALUE_INDEX));
-
-					// Add it as changed
-					addToChangedParams(*item);
-					break;
-				}
-
-				// Parameter is found break out of the loop
-				break;
-			}
-			++currItem;
-		}
 	}
 }
 
