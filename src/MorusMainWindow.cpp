@@ -406,10 +406,16 @@ void MorusMainWindow::on_exportParametersButton_clicked()
 	}
 
 	// Save to file
-	std::ofstream fout(yamlFilePath.toStdString());
-	fout << newNode;
-	fout.flush();
-	fout.close();
+	try
+	{
+		std::ofstream fout(yamlFilePath.toStdString());
+		fout << newNode;
+		fout.flush();
+		fout.close();
+	} catch (std::runtime_error& e) {
+		generateMessageBox(e.what());
+		return;
+	}
 }
 
 void MorusMainWindow::on_storeParamButton_clicked()

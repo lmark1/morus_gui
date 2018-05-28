@@ -218,6 +218,7 @@ void MonitorWorker::process()
 					 error_message
 					 )
 				);
+			working_ = false;
 		}
 		mutex_.unlock();
 	}
