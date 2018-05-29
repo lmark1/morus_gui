@@ -159,17 +159,23 @@ void CanWorker::updateParametersRequest(
 			<< changedItems.size();
 
 	canNodeHandler_->paramNodeID_ = nodeId;
-	canNodeHandler_->storeParametersFlag_ = true;
-	canNodeHandler_->updateParameters_ = changedItems;
+	canNodeHandler_->updateParametersFlag_ = true;
+	canNodeHandler_->nodeParameters_.clear();
+	canNodeHandler_->nodeParameters_ = changedItems;
 }
 
-void CanWorker::storeParametersRequest(
-				std::vector<QTreeWidgetItem> parameters,
-				int nodeId)
+void CanWorker::storeParametersRequest(int nodeId)
 {
-	qDebug() << "CanWorker::storeParametersRequest() - "
-			<< parameters.size();
+	qDebug() << "CanWorker::storeParametersRequest()";
+	canNodeHandler_->paramNodeID_ = nodeId;
+	canNodeHandler_->storeParametersFlag_ = true;
+}
 
+void CanWorker::eraseParametersRequest(int nodeId)
+{
+	qDebug() << "CanWorker::eraseParametersRequest()";
+	canNodeHandler_->paramNodeID_ = nodeId;
+	canNodeHandler_->storeParametersFlag_ = true;
 }
 
 void CanWorker::stopWorker()

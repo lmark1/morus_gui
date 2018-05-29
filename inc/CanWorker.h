@@ -97,14 +97,19 @@ class CanWorker : public QObject {
 
 		/**
 		 * This method is called when user requests to store parameters
-		 * to the flash memory.
+		 * to the flash memory. The parameters that will be stored are the
+		 * ones currently in the firmware.
 		 *
-		 * @param parameters - All available parameters
 		 * @param nodeId
 		 */
-		void storeParametersRequest(
-				std::vector<QTreeWidgetItem> parameters,
-				int nodeId);
+		void storeParametersRequest(int nodeId);
+
+		/**
+		 * This method is called when user requests to erase parameters
+		 * from the flash memory. The parameters will be returned to their
+		 * default values.
+		 */
+		void eraseParametersRequest(int nodeId);
 
 	public slots:
 

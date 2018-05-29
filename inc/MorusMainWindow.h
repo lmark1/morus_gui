@@ -104,6 +104,13 @@ class MorusMainWindow : public QMainWindow
 		 */
 		void on_exportParametersButton_clicked();
 
+		/**
+		 * Method will execute when eraseParamButton is clicked.
+		 * It will erase current parameter configuration and set it to
+		 * default values.
+		 */
+		void on_eraseParamButton_clicked();
+
 	public slots:
 
 		/**

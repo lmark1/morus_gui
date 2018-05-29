@@ -60,6 +60,7 @@ std::pair<int, typename T::Response> performBlockingServiceCall(
 NodeHandler::NodeHandler(CanWorker& worker)
 {
 	this->canWorker_ = &worker;
+	this->opcodeClient_ = NULL;
 }
 
 NodeHandler::~NodeHandler()
@@ -109,6 +110,19 @@ int NodeHandler::createNewNode(std::string ifaceName, int nodeID)
 	 */
 	setupNodeFileServer();
 
+	// Initialize opcode client
+	opcodeClient_ = new uavcan::ServiceClient
+			<param_ns::ExecuteOpcode>(*canNode_);
+	const int opcodeRes = opcodeClient_->init();
+	if (opcodeRes < 0)
+	{
+		qDebug() << "NodeHandler::createNewNode() - Failed to initialize "
+				"opcode client";
+		return opcodeRes;
+	}
+
+	// TODO (lmark): Setup callback and tmeout
+
     /*
      * Informing other nodes that we're ready to work.
      * Default mode is INITIALIZING.
@@ -152,8 +166,14 @@ int NodeHandler::spinCurrentNode(int timeout_ms)
 	// Read all parameters if requested
 	if (readParametersFlag_) { readAllParameters(); }
 
+	// Update parameters if requested
+	if (updateParametersFlag_) { updateParameters(); }
+
 	// Store parameters if requested
-	if (storeParametersFlag_) { updateParameters(); }
+	if (storeParametersFlag_) { storeParameters(); }
+
+	// Erase parameters if requested
+	if (eraseParametersFlag_) { eraseParameters(); }
 
 	return res;
 }
@@ -234,7 +254,7 @@ void NodeHandler::readAllParameters()
 	 * not to get or set them.
 	 */
 	readParametersFlag_ = false;
-	std::vector<uavcan::protocol::param::GetSet::Response> remoteParams;
+	std::vector<param_ns::GetSet::Response> remoteParams;
 
 	qDebug() << "NodeHandler::readAllParameters() - "
 				"start reading parameters.";
@@ -242,12 +262,12 @@ void NodeHandler::readAllParameters()
 	{
 		qDebug() << "NodeHandler::readAllParameters() - "
 				"do request.";
-		uavcan::protocol::param::GetSet::Request paramRequest;
+		param_ns::GetSet::Request paramRequest;
 		paramRequest.index = remoteParams.size();
 		std::cout << "Param GET request:\n" << paramRequest
 				<< std::endl << std::endl;
 		auto res = performBlockingServiceCall
-				<uavcan::protocol::param::GetSet>(
+				<param_ns::GetSet>(
 						*canNode_,
 						paramNodeID_,
 						paramRequest);
@@ -278,64 +298,99 @@ void NodeHandler::readAllParameters()
 	paramNodeID_ = -1;
 }
 
+void NodeHandler::storeParameters()
+{
+	storeParametersFlag_ = false;
+
+	// Store parameters
+	param_ns::ExecuteOpcode::Request storeRequest;
+	storeRequest.opcode = param_ns::ExecuteOpcode::Request::OPCODE_SAVE;
+
+	int callRes = opcodeClient_->call(paramNodeID_, storeRequest);
+	if (callRes < 0)
+	{
+		qDebug() << "NodeHandler::storeParameters() - Request call failed.";
+		return;
+	}
+
+	qDebug() << "NodeHandler::storeParameters() - Parameters stored.";
+}
+
+void NodeHandler::eraseParameters()
+{
+	eraseParametersFlag_ = false;
+
+	param_ns::ExecuteOpcode::Request eraseRequest;
+	eraseRequest.opcode = param_ns::ExecuteOpcode::Request::OPCODE_ERASE;
+
+	int callRes = opcodeClient_->call(paramNodeID_, eraseRequest);
+	if (callRes < 0)
+	{
+		qDebug() << "NodeHandler::eraseParameters() - Erase call failed.";
+		return;
+	}
+
+	qDebug() << "NodeHandler::eraseParameters() - Parameters erased.";
+}
+
 void NodeHandler::updateParameters()
 {
-	qDebug() << "NodeHandler::storeParameters() - " << updateParameters_.size();
+	qDebug() << "NodeHandler::storeParameters() - " << nodeParameters_.size();
 
-	for (uint32_t index = 0; index < updateParameters_.size(); index++)
+	for (uint32_t index = 0; index < nodeParameters_.size(); index++)
 	{
-		uavcan::protocol::param::GetSet::Request storeRequest;
+		param_ns::GetSet::Request storeRequest;
 
 		// Set name
 		storeRequest.name.operator +=(
-				updateParameters_[index].text(NAME_INDEX).toStdString().c_str());
+				nodeParameters_[index].text(NAME_INDEX).toStdString().c_str());
 
 		// Check type
 		// INTEGER
 		if (QString::compare(
-				updateParameters_[index].text(TYPE_INDEX),
+				nodeParameters_[index].text(TYPE_INDEX),
 				QSTRING_INT) == 0)
 		{
 			storeRequest.
-			value.to<uavcan::protocol::param::Value::Tag::integer_value>() =
-					updateParameters_[index].text(VALUE_INDEX).toInt();
+			value.to<param_ns::Value::Tag::integer_value>() =
+					nodeParameters_[index].text(VALUE_INDEX).toInt();
 		}
 		// FLOAT
 		else if (QString::compare(
-					updateParameters_[index].text(TYPE_INDEX),
+					nodeParameters_[index].text(TYPE_INDEX),
 					QSTRING_FLOAT) == 0)
 		{
 			storeRequest.
-			value.to<uavcan::protocol::param::Value::Tag::real_value>() =
-					updateParameters_[index].text(VALUE_INDEX)
+			value.to<param_ns::Value::Tag::real_value>() =
+					nodeParameters_[index].text(VALUE_INDEX)
 					.replace(",", ".")
 					.toDouble();
 		}
 		// STRING
 		else if (QString::compare(
-				updateParameters_[index].text(TYPE_INDEX),
+				nodeParameters_[index].text(TYPE_INDEX),
 				QSTRING_STRING) == 0)
 		{
 			storeRequest.
-			value.to<uavcan::protocol::param::Value::Tag::string_value>() =
-					updateParameters_[index].text(VALUE_INDEX).
+			value.to<param_ns::Value::Tag::string_value>() =
+					nodeParameters_[index].text(VALUE_INDEX).
 					toStdString().
 					c_str();
 		}
 		// UINT8
 		else if (QString::compare(
-				updateParameters_[index].text(TYPE_INDEX),
+				nodeParameters_[index].text(TYPE_INDEX),
 				QSTRING_UINT8) == 0)
 		{
 			storeRequest.
-			value.to<uavcan::protocol::param::Value::Tag::boolean_value>() =
-					updateParameters_[index].text(VALUE_INDEX).toUInt();
+			value.to<param_ns::Value::Tag::boolean_value>() =
+					nodeParameters_[index].text(VALUE_INDEX).toUInt();
 		}
 
 		// Print store request
 		cout << storeRequest << endl;
 		auto res = performBlockingServiceCall
-				<uavcan::protocol::param::GetSet>(
+				<param_ns::GetSet>(
 						*canNode_,
 						paramNodeID_,
 						storeRequest);
@@ -343,13 +398,13 @@ void NodeHandler::updateParameters()
 		{
 			qDebug() << "NodeHandler::storeParameters() - "
 					"Not able to set param: "
-					<< updateParameters_[index].text(NAME_INDEX)
+					<< nodeParameters_[index].text(NAME_INDEX)
 					<< " ... skipping.";
 		}
 
 	}
 
-	storeParametersFlag_ = false;
+	updateParametersFlag_ = false;
 	paramNodeID_ = -1;
 }
 

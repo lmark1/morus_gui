@@ -66,6 +66,7 @@ static std::string healthToString(const std::uint8_t health);
  */
 static std::string modeToString(const std::uint8_t mode);
 
+
 MorusMainWindow::MorusMainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui_(new Ui::MorusMainWindow)
@@ -494,15 +495,29 @@ void MorusMainWindow::on_storeParamButton_clicked()
 		return;
 	}
 
-	// Check if current parameter tree is empty
-	if (ui_->parameterTreeWidget->topLevelItemCount() == 0)
+	canNodeWorker_->storeParametersRequest(currentNodeID_);
+}
+
+void MorusMainWindow::on_eraseParamButton_clicked()
+{
+	qDebug() << "MorusMainWindow::on_storeParamButton_clicked()";
+
+	// Check if a node is selected for update
+	if (currentNodeID_ == -1)
 	{
-		generateMessageBox("No parameters found in the "
-				"parameter list window.");
+		generateMessageBox("Please select a node first.");
 		return;
 	}
 
-	//TODO(lmark): Tell can worker to update parameters
+	// Check if current ID selected is the same as the local node
+	if (currentNodeID_ == ui_->localNodeIDSpinBox->value())
+	{
+		generateMessageBox("Node with selected ID performs parameter "
+				"upload / download. Please select another node.");
+		return;
+	}
+
+	canNodeWorker_->eraseParametersRequest(currentNodeID_);
 }
 
 void MorusMainWindow::onCanMonitorItemClicked(

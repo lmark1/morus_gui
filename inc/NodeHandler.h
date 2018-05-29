@@ -40,6 +40,11 @@ constexpr unsigned NodeMemoryPoolSize = 16384;
 typedef uavcan::Node<NodeMemoryPoolSize> CustomNode_t;
 
 /**
+ * Define parameter namespace.
+ */
+namespace param_ns = uavcan::protocol::param;
+
+/**
  * Default node name used by node handler.
  */
 extern const uavcan::NodeStatusProvider::NodeName DEFAULT_NODE_NAME; 
@@ -135,14 +140,24 @@ class NodeHandler {
 		bool readParametersFlag_ = false;
 
 		/**
-		 * True if parameters will be read, false otherwise.
+		 * True if parameters will be updated, false otherwise.
+		 */
+		bool updateParametersFlag_ = false;
+
+		/**
+		 * True if parameters will be stored to flash, false otherwise.
 		 */
 		bool storeParametersFlag_ = false;
 
 		/**
+		 * True if parameters will be erased, otherwise false.
+		 */
+		bool eraseParametersFlag_ = false;
+
+		/**
 		 * List of parameters designated for update / storing etc.
 		 */
-		std::vector<QTreeWidgetItem> updateParameters_;
+		std::vector<QTreeWidgetItem> nodeParameters_;
 
     private:
 
@@ -166,6 +181,17 @@ class NodeHandler {
 		 *
 		 */
 		void updateParameters();
+
+		/**
+		 * Attempt to store all given parameters to flash memory.
+		 */
+		void storeParameters();
+
+		/**
+		 * Attempt to erase all given parameters, set all parameters
+		 * to their default values.
+		 */
+		void eraseParameters();
 
         /**
          * Flag indicating if node is created.
@@ -193,6 +219,13 @@ class NodeHandler {
 		 */
 		uavcan_posix::BasicFileServerBackend *fileServerBackend_ = NULL;
 		uavcan::FileServer *fileServer_ = NULL;
+
+		/**
+		 * Client used for executing OPCODE requests for
+		 * storing and erasing parameters.
+		 */
+		uavcan::ServiceClient
+			<uavcan::protocol::param::ExecuteOpcode> *opcodeClient_;
 };
 
 
