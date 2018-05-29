@@ -121,6 +121,15 @@ int NodeHandler::createNewNode(std::string ifaceName, int nodeID)
 		return opcodeRes;
 	}
 
+	// Initialize hardware reset client
+	restartClient_ = new uavcan::ServiceClient
+			<uavcan::protocol::RestartNode>(*canNode_);
+	const int res = restartClient_->init();
+	if (res < 0)
+	{
+		qDebug() << "NodeHandler::createNewNode() - Failed to initialize "
+				"restart client.";
+	}
 	// TODO (lmark): Setup callback and tmeout
 
     /*
@@ -174,6 +183,9 @@ int NodeHandler::spinCurrentNode(int timeout_ms)
 
 	// Erase parameters if requested
 	if (eraseParametersFlag_) { eraseParameters(); }
+
+	// Restart node request
+	if (restarNodeFlag_) { restartNode(); }
 
 	return res;
 }
@@ -269,7 +281,7 @@ void NodeHandler::readAllParameters()
 		auto res = performBlockingServiceCall
 				<param_ns::GetSet>(
 						*canNode_,
-						paramNodeID_,
+						externalNodeId_,
 						paramRequest);
 		cout << res.first << endl;
 		if (res.first < 0)
@@ -295,7 +307,7 @@ void NodeHandler::readAllParameters()
 	canWorker_->updateParametersCallback(remoteParams);
 
 	// Reset read parameter flags
-	paramNodeID_ = -1;
+	externalNodeId_ = -1;
 }
 
 void NodeHandler::storeParameters()
@@ -306,7 +318,7 @@ void NodeHandler::storeParameters()
 	param_ns::ExecuteOpcode::Request storeRequest;
 	storeRequest.opcode = param_ns::ExecuteOpcode::Request::OPCODE_SAVE;
 
-	int callRes = opcodeClient_->call(paramNodeID_, storeRequest);
+	int callRes = opcodeClient_->call(externalNodeId_, storeRequest);
 	if (callRes < 0)
 	{
 		qDebug() << "NodeHandler::storeParameters() - Request call failed.";
@@ -323,7 +335,7 @@ void NodeHandler::eraseParameters()
 	param_ns::ExecuteOpcode::Request eraseRequest;
 	eraseRequest.opcode = param_ns::ExecuteOpcode::Request::OPCODE_ERASE;
 
-	int callRes = opcodeClient_->call(paramNodeID_, eraseRequest);
+	int callRes = opcodeClient_->call(externalNodeId_, eraseRequest);
 	if (callRes < 0)
 	{
 		qDebug() << "NodeHandler::eraseParameters() - Erase call failed.";
@@ -331,6 +343,24 @@ void NodeHandler::eraseParameters()
 	}
 
 	qDebug() << "NodeHandler::eraseParameters() - Parameters erased.";
+}
+
+void NodeHandler::restartNode()
+{
+	restarNodeFlag_ = false;
+
+	 uavcan::protocol::RestartNode::Request restartRequest;
+	 restartRequest.magic_number = restartRequest.MAGIC_NUMBER;
+	 const int restartRes = restartClient_->
+			 call(externalNodeId_, restartRequest);
+	 if (restartRes < 0)
+	 {
+		 qDebug() << "NodeHandler::restartNode() - "
+				 "failed.";
+		 return;
+	 }
+
+	 qDebug() << "NodeHandler::restartNode() - successful.";
 }
 
 void NodeHandler::updateParameters()
@@ -392,7 +422,7 @@ void NodeHandler::updateParameters()
 		auto res = performBlockingServiceCall
 				<param_ns::GetSet>(
 						*canNode_,
-						paramNodeID_,
+						externalNodeId_,
 						storeRequest);
 		if (res.first < 0)
 		{
@@ -405,7 +435,7 @@ void NodeHandler::updateParameters()
 	}
 
 	updateParametersFlag_ = false;
-	paramNodeID_ = -1;
+	externalNodeId_ = -1;
 }
 
 

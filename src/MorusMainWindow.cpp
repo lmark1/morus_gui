@@ -528,6 +528,27 @@ void MorusMainWindow::onCanMonitorItemClicked(
 			<< item->text(0).toStdString().c_str();
 }
 
+void MorusMainWindow::on_restartHardwareButton_clicked()
+{
+	qDebug() << "MorusMainWindow::on_restartParamButton_clicked()";
+
+	// Check if a node is selected for update
+	if (currentNodeID_ == -1)
+	{
+		generateMessageBox("Please select a node first.");
+		return;
+	}
+
+	// Check if current ID selected is the same as the local node
+	if (currentNodeID_ == ui_->localNodeIDSpinBox->value())
+	{
+		generateMessageBox("Node with selected ID performs parameter "
+				"upload / download. Please select another node.");
+		return;
+	}
+	canNodeWorker_->restartNodeRequest(currentNodeID_);
+}
+
 void MorusMainWindow::onParamListItemChanged(QTreeWidgetItem *item, int column)
 {
 	qDebug() << "MorusMainWindow::onParamListItemChanged()";

@@ -158,7 +158,7 @@ void CanWorker::updateParametersRequest(
 	qDebug() << "CanWorker::updateParametersRequested() - "
 			<< changedItems.size();
 
-	canNodeHandler_->paramNodeID_ = nodeId;
+	canNodeHandler_->externalNodeId_ = nodeId;
 	canNodeHandler_->updateParametersFlag_ = true;
 	canNodeHandler_->nodeParameters_.clear();
 	canNodeHandler_->nodeParameters_ = changedItems;
@@ -167,14 +167,14 @@ void CanWorker::updateParametersRequest(
 void CanWorker::storeParametersRequest(int nodeId)
 {
 	qDebug() << "CanWorker::storeParametersRequest()";
-	canNodeHandler_->paramNodeID_ = nodeId;
+	canNodeHandler_->externalNodeId_ = nodeId;
 	canNodeHandler_->storeParametersFlag_ = true;
 }
 
 void CanWorker::eraseParametersRequest(int nodeId)
 {
 	qDebug() << "CanWorker::eraseParametersRequest()";
-	canNodeHandler_->paramNodeID_ = nodeId;
+	canNodeHandler_->externalNodeId_ = nodeId;
 	canNodeHandler_->storeParametersFlag_ = true;
 }
 
@@ -220,7 +220,13 @@ void CanWorker::resumeWorker()
 void CanWorker::readParameterSignal(int nodeID)
 {
 	canNodeHandler_->readParametersFlag_ = true;
-	canNodeHandler_->paramNodeID_ = nodeID;
+	canNodeHandler_->externalNodeId_ = nodeID;
+}
+
+void CanWorker::restartNodeRequest(int nodeId)
+{
+	canNodeHandler_->restarNodeFlag_ = true;
+	canNodeHandler_->externalNodeId_ = nodeId;
 }
 
 void CanWorker::updateParametersCallback(

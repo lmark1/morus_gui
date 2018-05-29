@@ -111,6 +111,9 @@ class MorusMainWindow : public QMainWindow
 		 */
 		void on_eraseParamButton_clicked();
 
+		void on_restartHardwareButton_clicked();
+
+
 	public slots:
 
 		/**

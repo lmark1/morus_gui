@@ -132,7 +132,7 @@ class NodeHandler {
 		/**
 		 * ID of the node whose parameters are being read / stored etc.
 		 */
-		int paramNodeID_ = -1;
+		int externalNodeId_ = -1;
 
 		/**
 		 * True if parameters will be read, false otherwise.
@@ -153,6 +153,11 @@ class NodeHandler {
 		 * True if parameters will be erased, otherwise false.
 		 */
 		bool eraseParametersFlag_ = false;
+
+		/**
+		 * True if node will be restarted, otherwise false.
+		 */
+		bool restarNodeFlag_ = false;
 
 		/**
 		 * List of parameters designated for update / storing etc.
@@ -193,6 +198,11 @@ class NodeHandler {
 		 */
 		void eraseParameters();
 
+		/**
+		 * Attempt to restart node with given paramNodeID_.
+		 */
+		void restartNode();
+
         /**
          * Flag indicating if node is created.
          */
@@ -226,6 +236,13 @@ class NodeHandler {
 		 */
 		uavcan::ServiceClient
 			<uavcan::protocol::param::ExecuteOpcode> *opcodeClient_;
+
+		/**
+		 * Client used for executing restart requests.
+		 */
+		uavcan::ServiceClient
+			<uavcan::protocol::RestartNode> *restartClient_;
+
 };
 
 

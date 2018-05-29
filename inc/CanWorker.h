@@ -111,6 +111,11 @@ class CanWorker : public QObject {
 		 */
 		void eraseParametersRequest(int nodeId);
 
+		/**
+		 * This method is called when user attempts to restart a node.
+		 */
+		void restartNodeRequest(int nodeId);
+
 	public slots:
 
 		/**
