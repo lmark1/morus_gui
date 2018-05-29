@@ -175,7 +175,7 @@ void CanWorker::eraseParametersRequest(int nodeId)
 {
 	qDebug() << "CanWorker::eraseParametersRequest()";
 	canNodeHandler_->externalNodeId_ = nodeId;
-	canNodeHandler_->storeParametersFlag_ = true;
+	canNodeHandler_->eraseParametersFlag_ = true;
 }
 
 void CanWorker::stopWorker()

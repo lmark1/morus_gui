@@ -448,6 +448,12 @@ void MorusMainWindow::on_updateButton_clicked()
 	qDebug() << "MorusMainWindow::on_updateButton_clicked() - "
 			<< changedItems_.size();
 
+	if (canNodeWorker_ == NULL)
+	{
+		generateMessageBox("Please initialize the local node worker first");
+		return;
+	}
+
 	// Check if a node is selected for update
 	if (currentNodeID_ == -1)
 	{
@@ -480,6 +486,12 @@ void MorusMainWindow::on_storeParamButton_clicked()
 {
 	qDebug() << "MorusMainWindow::on_storeParamButton_clicked()";
 
+	if (canNodeWorker_ == NULL)
+	{
+		generateMessageBox("Please initialize the local node worker first");
+		return;
+	}
+
 	// Check if a node is selected for update
 	if (currentNodeID_ == -1)
 	{
@@ -509,6 +521,12 @@ void MorusMainWindow::on_eraseParamButton_clicked()
 		return;
 	}
 
+	if (canNodeWorker_ == NULL)
+	{
+		generateMessageBox("Please initialize the local node worker first");
+		return;
+	}
+
 	// Check if current ID selected is the same as the local node
 	if (currentNodeID_ == ui_->localNodeIDSpinBox->value())
 	{
@@ -530,7 +548,13 @@ void MorusMainWindow::onCanMonitorItemClicked(
 
 void MorusMainWindow::on_restartHardwareButton_clicked()
 {
-	qDebug() << "MorusMainWindow::on_restartParamButton_clicked()";
+	qDebug() << "MorusMainWindow::on_restartwParamButton_clicked()";
+
+	if (canNodeWorker_ == NULL)
+	{
+		generateMessageBox("Please initialize the local node worker first");
+		return;
+	}
 
 	// Check if a node is selected for update
 	if (currentNodeID_ == -1)
